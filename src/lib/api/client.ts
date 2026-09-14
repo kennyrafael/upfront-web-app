@@ -54,8 +54,21 @@ async function extractMessage(response: Response): Promise<string> {
   return `Request failed with status ${response.status}`;
 }
 
+async function requestText(path: string): Promise<string> {
+  const token = readToken();
+  const response = await fetch(`/api${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new ApiError(await extractMessage(response), response.status);
+  }
+  return response.text();
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
+  /** For endpoints that answer with CSV or plain text rather than JSON. */
+  text: (path: string) => requestText(path),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
   patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),

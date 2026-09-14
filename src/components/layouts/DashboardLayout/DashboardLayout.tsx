@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { to: '/services', label: 'Services' },
   { to: '/bookings', label: 'Bookings' },
   { to: '/clients', label: 'Clients' },
+  { to: '/compliance', label: 'Compliance' },
   { to: '/settings', label: 'Settings' },
 ];
 

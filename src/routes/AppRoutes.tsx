@@ -3,6 +3,7 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import {
   BookingsPage,
   ClientsPage,
+  CompliancePage,
   DashboardPage,
   LoginPage,
   OnboardingPage,
@@ -92,6 +93,14 @@ export function AppRoutes() {
           element={
             <AppPage>
               <ClientsPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/compliance"
+          element={
+            <AppPage>
+              <CompliancePage />
             </AppPage>
           }
         />

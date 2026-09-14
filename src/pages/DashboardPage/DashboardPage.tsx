@@ -12,10 +12,7 @@ import {
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
 import { useBookingStore, useClientStore, useProviderStore, useServiceStore } from '@/stores';
 
-const UPCOMING = [
-  { label: 'Recibos verdes', detail: 'Sprint 4' },
-  { label: 'Payments', detail: 'Sprint 5' },
-];
+const UPCOMING = [{ label: 'Payments', detail: 'Sprint 5' }];
 
 export function DashboardPage() {
   const profile = useProviderStore((state) => state.profile);

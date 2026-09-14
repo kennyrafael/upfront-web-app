@@ -1,0 +1,151 @@
+import { useEffect, useState } from 'react';
+import {
+  Button,
+  Card,
+  ComplianceOverview,
+  DashboardLayout,
+  InvoiceFormDialog,
+  InvoiceTable,
+  ReciboPreview,
+  Select,
+  Spinner,
+} from '@/components';
+import type { Invoice } from '@/lib/api';
+import { formatDate } from '@/lib/utils';
+import { useComplianceStore, useProviderStore } from '@/stores';
+
+/** The current year and the four before it — enough for any open fiscal question. */
+function yearOptions(): { value: string; label: string }[] {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 5 }, (_, index) => {
+    const year = current - index;
+    return { value: String(year), label: String(year) };
+  });
+}
+
+export function CompliancePage() {
+  const load = useComplianceStore((state) => state.load);
+  const year = useComplianceStore((state) => state.year);
+  const setYear = useComplianceStore((state) => state.setYear);
+  const summary = useComplianceStore((state) => state.summary);
+  const status = useComplianceStore((state) => state.status);
+  const error = useComplianceStore((state) => state.error);
+  const exportCsv = useComplianceStore((state) => state.exportCsv);
+  const loadProfile = useProviderStore((state) => state.load);
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Invoice>();
+  const [previewing, setPreviewing] = useState<Invoice>();
+  const [csv, setCsv] = useState<string>();
+
+  useEffect(() => {
+    void load();
+    // The recibo preview prints the provider's own name and NIF.
+    void loadProfile();
+  }, [load, loadProfile]);
+
+  return (
+    <DashboardLayout
+      title="Compliance"
+      description="Recibos verdes, your IVA position and what is due next."
+      actions={
+        <>
+          <Button
+            variant="secondary"
+            onClick={async () => setCsv((await exportCsv()) ?? undefined)}
+          >
+            Export CSV
+          </Button>
+          <Button
+            onClick={() => {
+              setEditing(undefined);
+              setFormOpen(true);
+            }}
+          >
+            New recibo
+          </Button>
+        </>
+      }
+    >
+      <div className="mb-4 flex w-36 flex-col gap-1.5">
+        <Select
+          aria-label="Fiscal year"
+          options={yearOptions()}
+          value={String(year)}
+          onValueChange={(value) => void setYear(Number(value))}
+        />
+      </div>
+
+      {error ? (
+        <p role="alert" className="mb-4 rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+          {error}
+        </p>
+      ) : null}
+
+      {summary ? (
+        <ComplianceOverview summary={summary} />
+      ) : status === 'loading' ? (
+        <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
+          <Spinner className="text-brand-700" /> Loading your compliance position…
+        </Card>
+      ) : null}
+
+      <h2 className="mt-8 mb-3 font-medium text-brand-900">Recibos for {year}</h2>
+
+      <InvoiceTable
+        onView={(invoice) => {
+          if (invoice.status === 'draft') {
+            setEditing(invoice);
+            setFormOpen(true);
+          } else {
+            setPreviewing(invoice);
+          }
+        }}
+      />
+
+      {summary ? (
+        <p className="mt-4 text-xs text-ink-muted">
+          Thresholds and deadlines are a planning aid, not tax advice. Figures last checked{' '}
+          {formatDate(summary.reference.lastVerified)} against{' '}
+          {summary.reference.sources.join(' and ')}. Confirm before you file — Upfront never files
+          anything for you.
+        </p>
+      ) : null}
+
+      {csv ? (
+        <Card className="mt-4">
+          <div className="flex items-center justify-between gap-4 border-b border-hairline px-5 py-3">
+            <h3 className="font-medium text-brand-900">recibos-{year}.csv</h3>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => void navigator.clipboard?.writeText(csv)}
+              >
+                Copy
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setCsv(undefined)}>
+                Dismiss
+              </Button>
+            </div>
+          </div>
+          {/* Shown inline rather than downloaded: the preview sandbox blocks
+              script-driven downloads, and copy-paste into a sheet works everywhere. */}
+          <pre className="max-h-64 overflow-auto px-5 py-4 text-xs tabular-nums text-ink">
+            {csv}
+          </pre>
+        </Card>
+      ) : null}
+
+      <InvoiceFormDialog open={formOpen} onOpenChange={setFormOpen} invoice={editing} />
+
+      {previewing ? (
+        <ReciboPreview
+          open={Boolean(previewing)}
+          onOpenChange={(open) => !open && setPreviewing(undefined)}
+          invoice={previewing}
+        />
+      ) : null}
+    </DashboardLayout>
+  );
+}

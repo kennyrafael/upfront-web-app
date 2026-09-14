@@ -11,7 +11,8 @@ src/
     molecules/    FormField, SelectField, TextareaField, FieldMessage, ConfirmDialog
     organisms/    LoginForm, SignupForm, ProviderProfileForm, ProviderOnboardingForm,
                   WorkingHoursEditor, ServiceCatalogTable, ServiceFormDialog,
-                  ClientTable, ClientFormDialog, BookingCalendar, BookingFormDialog
+                  ClientTable, ClientFormDialog, BookingCalendar, BookingFormDialog,
+                  ComplianceOverview, InvoiceTable, InvoiceFormDialog, ReciboPreview
     layouts/      AuthLayout, DashboardLayout
   lib/
     api/          fetch client + typed endpoint wrappers per domain

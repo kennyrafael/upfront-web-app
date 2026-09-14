@@ -42,6 +42,9 @@ export interface BookingRange {
 export const bookingsApi = {
   list: ({ from, to }: BookingRange) =>
     api.get<Booking[]>(`/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+  /** Every booking for one client, for building a recibo from past work. */
+  listByClient: (clientId: string) =>
+    api.get<Booking[]>(`/bookings?clientId=${encodeURIComponent(clientId)}`),
   create: (payload: CreateBookingPayload) => api.post<Booking>('/bookings', payload),
   update: (id: string, payload: UpdateBookingPayload) =>
     api.patch<Booking>(`/bookings/${id}`, payload),

@@ -1,5 +1,6 @@
 export * from './BookingsPage';
 export * from './ClientsPage';
+export * from './CompliancePage';
 export * from './DashboardPage';
 export * from './LoginPage';
 export * from './OnboardingPage';

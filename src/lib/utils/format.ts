@@ -40,3 +40,17 @@ export const WEEKDAY_OPTIONS = WEEKDAY_LABELS.map((label, index) => ({
   value: String(index),
   label,
 }));
+
+/** "31 Mar 2026" from an ISO instant — recibo dates are read, not computed with. */
+export function formatDate(value: string | Date): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+export function formatPercent(ratio: number): string {
+  return `${Math.round(ratio * 100)}%`;
+}
