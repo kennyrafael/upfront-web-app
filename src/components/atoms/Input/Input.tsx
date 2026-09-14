@@ -14,6 +14,17 @@ const SIZES: Record<InputSize, string> = {
   lg: 'h-12 px-4 text-base',
 };
 
+/** Shared with Textarea and the Select trigger so every field reads as one control. */
+export const FIELD_BASE =
+  'block w-full rounded-lg bg-white/60 text-ink ring-1 ring-inset transition ' +
+  'placeholder:text-ink-muted/60 focus:bg-white focus:outline-none focus:ring-2 ' +
+  'disabled:cursor-not-allowed disabled:bg-brand-900/4 disabled:text-ink-muted';
+
+export const FIELD_RING = {
+  normal: 'ring-hairline focus:ring-brand-600',
+  invalid: 'ring-red-500/60 focus:ring-red-600',
+} as const;
+
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { size = 'md', invalid = false, className, ...props },
   ref,
@@ -23,10 +34,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        'block w-full rounded-lg bg-white text-slate-900 ring-1 ring-inset transition',
-        'placeholder:text-slate-400 focus:outline-none focus:ring-2',
-        'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
-        invalid ? 'ring-red-500 focus:ring-red-500' : 'ring-slate-300 focus:ring-brand-600',
+        FIELD_BASE,
+        invalid ? FIELD_RING.invalid : FIELD_RING.normal,
         SIZES[size],
         className,
       )}

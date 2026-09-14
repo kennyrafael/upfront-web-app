@@ -11,7 +11,7 @@ export function LoginPage() {
       footer={
         <>
           New to Upfront?{' '}
-          <Link to="/signup" className="font-medium text-brand-700 hover:underline">
+          <Link to="/signup" className="font-medium text-white underline-offset-2 hover:underline">
             Create an account
           </Link>
         </>

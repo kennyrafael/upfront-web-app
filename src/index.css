@@ -1,11 +1,32 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-brand-50: oklch(0.97 0.02 250);
-  --color-brand-100: oklch(0.93 0.04 250);
-  --color-brand-500: oklch(0.62 0.17 254);
-  --color-brand-600: oklch(0.55 0.18 254);
-  --color-brand-700: oklch(0.47 0.17 254);
+  /* Deep pine green. 700 is the primary action colour; 800/900 carry the dark surfaces. */
+  --color-brand-50: oklch(0.97 0.017 162);
+  --color-brand-100: oklch(0.93 0.035 162);
+  --color-brand-200: oklch(0.87 0.055 162);
+  --color-brand-300: oklch(0.77 0.075 162);
+  --color-brand-400: oklch(0.65 0.088 162);
+  --color-brand-500: oklch(0.55 0.09 162);
+  --color-brand-600: oklch(0.46 0.083 162);
+  --color-brand-700: oklch(0.38 0.072 162);
+  --color-brand-800: oklch(0.3 0.058 162);
+  --color-brand-900: oklch(0.24 0.046 162);
+  --color-brand-950: oklch(0.17 0.034 162);
+
+  /* Ground the whole UI sits on, and the ink used over it. */
+  --color-canvas: oklch(0.982 0.006 162);
+  --color-ink: oklch(0.26 0.021 162);
+  --color-ink-muted: oklch(0.52 0.017 162);
+
+  /* Hairlines and shadows are tinted green rather than neutral grey, so the
+     translucent surfaces read as one material instead of stacked greys. */
+  --color-hairline: oklch(0.38 0.072 162 / 0.12);
+  --shadow-panel:
+    0 1px 2px oklch(0.24 0.046 162 / 0.05), 0 16px 40px -20px oklch(0.24 0.046 162 / 0.25);
+  --shadow-raised:
+    0 1px 2px oklch(0.24 0.046 162 / 0.08), 0 24px 56px -24px oklch(0.24 0.046 162 / 0.35);
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -15,6 +36,22 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-canvas text-ink antialiased;
+    /* Two faint green washes keep the light ground from looking flat behind
+       translucent panels, without tinting text areas. */
+    background-image:
+      radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.07), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.05), transparent 55%);
+    background-attachment: fixed;
   }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-900;
+  }
+}
+
+@utility panel {
+  /* The shared surface: translucent white over the tinted ground, hairline ring,
+     soft shadow. Everything card-like in the app uses this. */
+  @apply rounded-2xl bg-white/72 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
 }

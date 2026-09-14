@@ -13,12 +13,12 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(function Label(
   return (
     <RadixLabel.Root
       ref={ref}
-      className={cn('text-sm font-medium text-slate-700', className)}
+      className={cn('text-sm font-medium text-brand-900', className)}
       {...props}
     >
       {children}
       {required ? (
-        <span aria-hidden="true" className="ml-0.5 text-red-600">
+        <span aria-hidden="true" className="ml-0.5 text-red-700">
           *
         </span>
       ) : null}

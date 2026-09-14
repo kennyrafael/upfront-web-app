@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { Input, type InputProps, Label } from '@/components/atoms';
+import { FieldMessage } from '@/components/molecules/FieldMessage';
 import { cn } from '@/lib/utils';
 
 export interface FormFieldProps extends InputProps {
@@ -22,7 +23,6 @@ export function FormField({
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const messageId = `${fieldId}-message`;
-  const message = error ?? hint;
 
   return (
     <div className={cn('flex flex-col gap-1.5', containerClassName)}>
@@ -33,18 +33,10 @@ export function FormField({
         id={fieldId}
         required={required}
         invalid={Boolean(error)}
-        aria-describedby={message ? messageId : undefined}
+        aria-describedby={(error ?? hint) ? messageId : undefined}
         {...inputProps}
       />
-      {message ? (
-        <p
-          id={messageId}
-          className={cn('text-xs', error ? 'text-red-600' : 'text-slate-500')}
-          role={error ? 'alert' : undefined}
-        >
-          {message}
-        </p>
-      ) : null}
+      <FieldMessage id={messageId} error={error} hint={hint} />
     </div>
   );
 }

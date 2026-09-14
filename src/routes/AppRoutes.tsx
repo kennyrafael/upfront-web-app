@@ -1,12 +1,29 @@
-import { useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { DashboardPage, LoginPage, SignupPage } from '@/pages';
+import {
+  DashboardPage,
+  LoginPage,
+  OnboardingPage,
+  ServicesPage,
+  SettingsPage,
+  SignupPage,
+} from '@/pages';
 import { useAuthStore } from '@/stores';
 import { ProtectedRoute } from './ProtectedRoute';
+import { RequireOnboarding } from './RequireOnboarding';
 
-function GuestOnly({ children }: { children: React.ReactNode }) {
+function GuestOnly({ children }: { children: ReactNode }) {
   const accessToken = useAuthStore((state) => state.accessToken);
   return accessToken ? <Navigate to="/" replace /> : <>{children}</>;
+}
+
+/** Signed in, onboarded, and inside the app shell. */
+function AppPage({ children }: { children: ReactNode }) {
+  return (
+    <ProtectedRoute>
+      <RequireOnboarding>{children}</RequireOnboarding>
+    </ProtectedRoute>
+  );
 }
 
 export function AppRoutes() {
@@ -37,11 +54,35 @@ export function AppRoutes() {
           }
         />
         <Route
-          path="/"
+          path="/onboarding"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <OnboardingPage />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <AppPage>
+              <DashboardPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/services"
+          element={
+            <AppPage>
+              <ServicesPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <AppPage>
+              <SettingsPage />
+            </AppPage>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

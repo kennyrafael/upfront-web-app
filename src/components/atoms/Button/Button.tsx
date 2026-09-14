@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './Button.types';
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 focus-visible:outline-brand-600',
+  primary:
+    'bg-brand-700 text-white shadow-sm hover:bg-brand-800 focus-visible:outline-brand-700 active:bg-brand-900',
   secondary:
-    'bg-white text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus-visible:outline-slate-400',
-  ghost: 'text-slate-700 hover:bg-slate-100 focus-visible:outline-slate-400',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600',
+    'bg-white/70 text-brand-900 ring-1 ring-inset ring-hairline backdrop-blur-sm hover:bg-white focus-visible:outline-brand-600',
+  ghost: 'text-ink-muted hover:bg-brand-700/8 hover:text-brand-800 focus-visible:outline-brand-600',
+  danger: 'bg-red-700 text-white shadow-sm hover:bg-red-800 focus-visible:outline-red-700',
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -40,17 +41,25 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors',
         'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-        'disabled:cursor-not-allowed disabled:opacity-60',
+        'disabled:cursor-not-allowed disabled:opacity-55',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',
         className,
       )}
-      disabled={disabled || loading}
+      disabled={asChild ? undefined : disabled || loading}
       {...props}
     >
-      {loading ? <Spinner /> : null}
-      {children}
+      {/* Slot demands exactly one child, so an asChild button forwards the child
+          untouched — a link rendered as a button has nothing to load anyway. */}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {loading ? <Spinner /> : null}
+          {children}
+        </>
+      )}
     </Component>
   );
 });
