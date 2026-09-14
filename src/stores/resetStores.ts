@@ -1,3 +1,5 @@
+import { useBookingStore } from './useBookingStore';
+import { useClientStore } from './useClientStore';
 import { useProviderStore } from './useProviderStore';
 import { useServiceStore } from './useServiceStore';
 
@@ -8,4 +10,6 @@ import { useServiceStore } from './useServiceStore';
 export function resetDomainStores(): void {
   useProviderStore.getState().reset();
   useServiceStore.getState().reset();
+  useClientStore.getState().reset();
+  useBookingStore.getState().reset();
 }

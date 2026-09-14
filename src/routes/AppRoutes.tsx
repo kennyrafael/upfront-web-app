@@ -1,6 +1,8 @@
 import { type ReactNode, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import {
+  BookingsPage,
+  ClientsPage,
   DashboardPage,
   LoginPage,
   OnboardingPage,
@@ -74,6 +76,22 @@ export function AppRoutes() {
           element={
             <AppPage>
               <ServicesPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/bookings"
+          element={
+            <AppPage>
+              <BookingsPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/clients"
+          element={
+            <AppPage>
+              <ClientsPage />
             </AppPage>
           }
         />

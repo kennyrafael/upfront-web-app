@@ -1,3 +1,7 @@
+export * from './BookingCalendar';
+export * from './BookingFormDialog';
+export * from './ClientFormDialog';
+export * from './ClientTable';
 export * from './LoginForm';
 export * from './ProviderOnboardingForm';
 export * from './ProviderProfileForm';

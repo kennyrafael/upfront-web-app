@@ -9,11 +9,10 @@ import {
   CardTitle,
   DashboardLayout,
 } from '@/components';
-import { formatMoney, weekdayLabel } from '@/lib/utils';
-import { useProviderStore, useServiceStore } from '@/stores';
+import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
+import { useBookingStore, useClientStore, useProviderStore, useServiceStore } from '@/stores';
 
 const UPCOMING = [
-  { label: 'Clients & bookings', detail: 'Sprint 3' },
   { label: 'Recibos verdes', detail: 'Sprint 4' },
   { label: 'Payments', detail: 'Sprint 5' },
 ];
@@ -22,10 +21,21 @@ export function DashboardPage() {
   const profile = useProviderStore((state) => state.profile);
   const services = useServiceStore((state) => state.items);
   const loadServices = useServiceStore((state) => state.load);
+  const clients = useClientStore((state) => state.items);
+  const loadClients = useClientStore((state) => state.load);
+  const bookings = useBookingStore((state) => state.items);
+  const loadBookings = useBookingStore((state) => state.load);
 
   useEffect(() => {
     void loadServices();
-  }, [loadServices]);
+    void loadClients();
+    void loadBookings();
+  }, [loadServices, loadClients, loadBookings]);
+
+  const today = new Date();
+  const todaysBookings = bookings
+    .filter((booking) => isSameDay(new Date(booking.startsAt), today))
+    .filter((booking) => booking.status !== 'cancelled');
 
   const workingDays = new Set(profile?.workingHours.map((slot) => slot.weekday) ?? []);
   const cheapest = services.reduce<number | null>(
@@ -122,7 +132,65 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      <section className="mt-4 grid gap-4 sm:grid-cols-3">
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex items-center justify-between gap-4">
+            <CardTitle>Today</CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/bookings">Open calendar</Link>
+            </Button>
+          </CardHeader>
+          <CardBody>
+            {todaysBookings.length === 0 ? (
+              <p className="text-sm text-ink-muted">
+                Nothing booked today.{' '}
+                <Link to="/bookings" className="font-medium text-brand-700 hover:underline">
+                  Add a booking
+                </Link>
+                .
+              </p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-hairline/70">
+                {todaysBookings.map((booking) => (
+                  <li
+                    key={booking.id}
+                    className="flex items-center gap-3 py-2 first:pt-0 last:pb-0"
+                  >
+                    <span className="w-24 shrink-0 tabular-nums text-sm text-ink-muted">
+                      {formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-brand-900">
+                      {booking.client.name}
+                    </span>
+                    <span className="hidden truncate text-sm text-ink-muted sm:block">
+                      {booking.service.name}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex items-center justify-between gap-4">
+            <CardTitle>Clients</CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/clients">Manage</Link>
+            </Button>
+          </CardHeader>
+          <CardBody>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-semibold tabular-nums text-brand-900">
+                {clients.length}
+              </span>
+              <span className="text-sm text-ink-muted">on the books</span>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
+      <section className="mt-4 grid gap-4 sm:grid-cols-2">
         {UPCOMING.map((item) => (
           <Card key={item.label} className="px-5 py-4">
             <div className="flex items-center justify-between gap-2">
