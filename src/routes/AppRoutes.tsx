@@ -7,6 +7,7 @@ import {
   DashboardPage,
   LoginPage,
   OnboardingPage,
+  PaymentsPage,
   ServicesPage,
   SettingsPage,
   SignupPage,
@@ -93,6 +94,14 @@ export function AppRoutes() {
           element={
             <AppPage>
               <ClientsPage />
+            </AppPage>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <AppPage>
+              <PaymentsPage />
             </AppPage>
           }
         />

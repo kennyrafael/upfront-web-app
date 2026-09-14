@@ -6,6 +6,8 @@ export * from './ComplianceOverview';
 export * from './InvoiceFormDialog';
 export * from './InvoiceTable';
 export * from './LoginForm';
+export * from './PaymentDialog';
+export * from './PaymentLedger';
 export * from './ProviderOnboardingForm';
 export * from './ProviderProfileForm';
 export * from './ReciboPreview';

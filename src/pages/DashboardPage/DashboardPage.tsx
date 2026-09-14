@@ -10,9 +10,13 @@ import {
   DashboardLayout,
 } from '@/components';
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
-import { useBookingStore, useClientStore, useProviderStore, useServiceStore } from '@/stores';
-
-const UPCOMING = [{ label: 'Payments', detail: 'Sprint 5' }];
+import {
+  useBookingStore,
+  useClientStore,
+  usePaymentStore,
+  useProviderStore,
+  useServiceStore,
+} from '@/stores';
 
 export function DashboardPage() {
   const profile = useProviderStore((state) => state.profile);
@@ -22,12 +26,15 @@ export function DashboardPage() {
   const loadClients = useClientStore((state) => state.load);
   const bookings = useBookingStore((state) => state.items);
   const loadBookings = useBookingStore((state) => state.load);
+  const payments = usePaymentStore((state) => state.summary);
+  const loadPayments = usePaymentStore((state) => state.load);
 
   useEffect(() => {
     void loadServices();
     void loadClients();
     void loadBookings();
-  }, [loadServices, loadClients, loadBookings]);
+    void loadPayments();
+  }, [loadServices, loadClients, loadBookings, loadPayments]);
 
   const today = new Date();
   const todaysBookings = bookings
@@ -187,17 +194,39 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      <section className="mt-4 grid gap-4 sm:grid-cols-2">
-        {UPCOMING.map((item) => (
-          <Card key={item.label} className="px-5 py-4">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="font-medium text-brand-900">{item.label}</h2>
-              <Badge>{item.detail}</Badge>
+      {payments ? (
+        <Card className="mt-4">
+          <CardHeader className="flex items-center justify-between gap-4">
+            <CardTitle>Money</CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/payments">Open ledger</Link>
+            </Button>
+          </CardHeader>
+          <CardBody className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">Collected</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
+                {formatMoney(payments.collectedCents)}
+              </p>
             </div>
-            <p className="mt-1 text-sm text-ink-muted">Not built yet.</p>
-          </Card>
-        ))}
-      </section>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">Outstanding</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
+                {formatMoney(payments.outstanding.totalCents)}
+              </p>
+              <p className="text-xs text-ink-muted">
+                {payments.outstanding.count} booking{payments.outstanding.count === 1 ? '' : 's'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">Pending</p>
+              <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
+                {formatMoney(payments.pendingCents)}
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      ) : null}
     </DashboardLayout>
   );
 }

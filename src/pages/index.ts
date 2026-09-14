@@ -4,6 +4,7 @@ export * from './CompliancePage';
 export * from './DashboardPage';
 export * from './LoginPage';
 export * from './OnboardingPage';
+export * from './PaymentsPage';
 export * from './ServicesPage';
 export * from './SettingsPage';
 export * from './SignupPage';

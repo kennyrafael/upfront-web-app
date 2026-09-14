@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { to: '/services', label: 'Services' },
   { to: '/bookings', label: 'Bookings' },
   { to: '/clients', label: 'Clients' },
+  { to: '/payments', label: 'Payments' },
   { to: '/compliance', label: 'Compliance' },
   { to: '/settings', label: 'Settings' },
 ];
@@ -31,7 +32,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
           <span className="text-lg font-semibold tracking-tight text-brand-800">Upfront</span>
 
-          <nav className="hidden gap-1 sm:flex">
+          <nav className="hidden gap-1 lg:flex">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
@@ -66,8 +67,9 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
           </div>
         </div>
 
-        {/* The nav collapses out of the bar on phones; keep it reachable below it. */}
-        <nav className="flex gap-1 overflow-x-auto border-t border-hairline px-4 py-2 sm:hidden">
+        {/* Six items stop fitting beside the brand and account well before phone width,
+            so below lg the nav moves to its own scrollable row. */}
+        <nav className="flex gap-1 overflow-x-auto border-t border-hairline px-4 py-2 lg:hidden">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}

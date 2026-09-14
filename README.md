@@ -12,7 +12,8 @@ src/
     organisms/    LoginForm, SignupForm, ProviderProfileForm, ProviderOnboardingForm,
                   WorkingHoursEditor, ServiceCatalogTable, ServiceFormDialog,
                   ClientTable, ClientFormDialog, BookingCalendar, BookingFormDialog,
-                  ComplianceOverview, InvoiceTable, InvoiceFormDialog, ReciboPreview
+                  ComplianceOverview, InvoiceTable, InvoiceFormDialog, ReciboPreview,
+                  PaymentLedger, PaymentDialog
     layouts/      AuthLayout, DashboardLayout
   lib/
     api/          fetch client + typed endpoint wrappers per domain
