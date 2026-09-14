@@ -13,13 +13,13 @@ src/
                   WorkingHoursEditor, ServiceCatalogTable, ServiceFormDialog,
                   ClientTable, ClientFormDialog, BookingCalendar, BookingFormDialog,
                   ComplianceOverview, InvoiceTable, InvoiceFormDialog, ReciboPreview,
-                  PaymentLedger, PaymentDialog
-    layouts/      AuthLayout, DashboardLayout
+                  PaymentLedger, PaymentDialog, PublicBookingFlow, PublicBookingSettings
+    layouts/      AuthLayout, DashboardLayout, PublicLayout
   lib/
     api/          fetch client + typed endpoint wrappers per domain
-    utils/        cn(), money/duration formatting, calendar date maths
+    utils/        cn(), money/duration formatting, calendar date maths, zoned formatting
   pages/          route-level screens
-  routes/         router, auth guard, onboarding gate
+  routes/         router, auth guard, onboarding gate, and the public routes outside both
   stores/         Zustand stores, one per domain
 ```
 
@@ -65,6 +65,23 @@ click targets for booking an empty gap. Two things it gets deliberately right:
 validates working hours in the provider's stored timezone. Those agree for a provider
 working from their own machine in their own country. Rendering in the provider's zone
 needs a tz-aware date library — do that before any multi-timezone use.
+
+## The public booking pages
+
+`/book/:slug` and `/booking/:token` sit **outside** `ProtectedRoute` and
+`RequireOnboarding` — they are for clients who have no account and never will.
+
+Two things there are easy to get wrong:
+
+- **`lib/api/public.ts` has its own request path.** The shared `request()` in
+  `lib/api/client.ts` attaches an Authorization header whenever a token happens to be in
+  the store, and a provider browsing their own booking page while signed in must not
+  silently send credentials to a public route.
+- **Every time a visitor sees goes through `lib/utils/zoned.ts`, never `datetime.ts`.**
+  The `datetime.ts` helpers are anchored to the browser, which is correct for a provider on
+  their own machine and wrong here: a client in London picking "14:00" from a Lisbon
+  provider's calendar would arrive an hour out. The page renders in the provider's zone and
+  names it, and warns when the visitor's own clock disagrees.
 
 ## Trade-offs to watch
 

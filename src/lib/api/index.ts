@@ -6,4 +6,5 @@ export * from './compliance';
 export * from './invoices';
 export * from './payments';
 export * from './providers';
+export * from './public';
 export * from './services';

@@ -228,7 +228,19 @@ function DayColumn({
             )}
             style={{ top, height: (minutes / 60) * HOUR_HEIGHT - 2 }}
           >
-            <span className="block truncate font-medium">{booking.client.name}</span>
+            <span className="block truncate font-medium">
+              {booking.source === 'public' ? (
+                <>
+                  {/* Real text rather than an aria-label on a dot: a plain span has no
+                      role to hang one on, and this reads correctly to a screen reader. */}
+                  <span className="sr-only">Booked online: </span>
+                  <span aria-hidden="true" title="Booked by the client online">
+                    •{' '}
+                  </span>
+                </>
+              ) : null}
+              {booking.client.name}
+            </span>
             <span className="block truncate opacity-80">
               {formatTime(start)} · {booking.service.name}
             </span>

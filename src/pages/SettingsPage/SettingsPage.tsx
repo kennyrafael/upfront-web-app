@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { DashboardLayout, ProviderProfileForm } from '@/components';
+import { DashboardLayout, ProviderProfileForm, PublicBookingSettings } from '@/components';
 import { useProviderStore } from '@/stores';
 
 export function SettingsPage() {
@@ -12,6 +12,10 @@ export function SettingsPage() {
   return (
     <DashboardLayout title="Settings" description="Your business details and the hours you work.">
       <ProviderProfileForm />
+
+      <div className="mt-6">
+        <PublicBookingSettings />
+      </div>
     </DashboardLayout>
   );
 }

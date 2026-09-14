@@ -5,4 +5,5 @@ export * from './useClientStore';
 export * from './useComplianceStore';
 export * from './usePaymentStore';
 export * from './useProviderStore';
+export * from './usePublicBookingStore';
 export * from './useServiceStore';

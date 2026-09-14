@@ -6,8 +6,10 @@ import {
   CompliancePage,
   DashboardPage,
   LoginPage,
+  ManageBookingPage,
   OnboardingPage,
   PaymentsPage,
+  PublicBookingPage,
   ServicesPage,
   SettingsPage,
   SignupPage,
@@ -41,6 +43,14 @@ export function AppRoutes() {
   return (
     <Router>
       <Routes>
+        {/*
+          Public, and deliberately outside ProtectedRoute and RequireOnboarding: these are
+          for clients who have no account and never will. A signed-in provider opening
+          their own booking link sees exactly what a stranger sees.
+        */}
+        <Route path="/book/:slug" element={<PublicBookingPage />} />
+        <Route path="/booking/:token" element={<ManageBookingPage />} />
+
         <Route
           path="/login"
           element={

@@ -20,6 +20,8 @@ export interface Booking {
   status: BookingStatus;
   priceCents: number;
   notes?: string;
+  /** 'public' means the client booked it themselves, unattended. */
+  source: 'provider' | 'public';
 }
 
 export interface CreateBookingPayload {

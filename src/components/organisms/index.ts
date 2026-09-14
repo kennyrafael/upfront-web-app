@@ -10,6 +10,8 @@ export * from './PaymentDialog';
 export * from './PaymentLedger';
 export * from './ProviderOnboardingForm';
 export * from './ProviderProfileForm';
+export * from './PublicBookingFlow';
+export * from './PublicBookingSettings';
 export * from './ReciboPreview';
 export * from './ServiceCatalogTable';
 export * from './ServiceFormDialog';
