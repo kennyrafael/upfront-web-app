@@ -25,6 +25,7 @@ export function PublicBookingSettings() {
   const [slug, setSlug] = useState(profile?.slug ?? '');
   const [leadTime, setLeadTime] = useState(String(profile?.bookingLeadTimeHours ?? 2));
   const [horizon, setHorizon] = useState(String(profile?.bookingHorizonDays ?? 60));
+  const [deposit, setDeposit] = useState(String(profile?.depositPercent ?? 0));
   const [slugError, setSlugError] = useState<string>();
   const [enabling, setEnabling] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -33,6 +34,7 @@ export function PublicBookingSettings() {
     setSlug(profile?.slug ?? '');
     setLeadTime(String(profile?.bookingLeadTimeHours ?? 2));
     setHorizon(String(profile?.bookingHorizonDays ?? 60));
+    setDeposit(String(profile?.depositPercent ?? 0));
   }, [profile]);
 
   const enabled = profile?.publicBookingEnabled ?? false;
@@ -65,6 +67,7 @@ export function PublicBookingSettings() {
       slug: slug || undefined,
       bookingLeadTimeHours: Number(leadTime),
       bookingHorizonDays: Number(horizon),
+      depositPercent: Number(deposit),
     });
 
     if (ok) {
@@ -137,6 +140,24 @@ export function PublicBookingSettings() {
                   setSaved(false);
                 }}
               />
+            </div>
+
+            <div className="rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">
+              <FormField
+                label="Deposit"
+                inputMode="numeric"
+                hint="Percent of the price, taken by MB WAY when a client books. 0 takes none."
+                value={deposit}
+                onChange={(event) => {
+                  setDeposit(event.target.value);
+                  setSaved(false);
+                }}
+              />
+              <p className="mt-2 text-xs text-ink-muted">
+                {Number(deposit) > 0
+                  ? 'The slot is held only while the deposit is unpaid, and released if it is not approved in time. A small minimum applies, so tiny deposits are not eaten by fees.'
+                  : 'No deposit means a slot is held on trust — the usual reason for no-shows.'}
+              </p>
             </div>
 
             <div className="flex items-center justify-between gap-4 rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">

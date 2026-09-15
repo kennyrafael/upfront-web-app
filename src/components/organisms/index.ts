@@ -3,6 +3,7 @@ export * from './BookingFormDialog';
 export * from './ClientFormDialog';
 export * from './ClientTable';
 export * from './ComplianceOverview';
+export * from './DepositWaiting';
 export * from './InvoiceFormDialog';
 export * from './InvoiceTable';
 export * from './LoginForm';

@@ -17,6 +17,16 @@ export interface PublicProvider {
   services: PublicService[];
   leadTimeHours: number;
   horizonDays: number;
+  /** 0 when this provider takes no deposit. Shown before a client commits to anything. */
+  depositPercent: number;
+}
+
+export type DepositStatus = 'pending' | 'paid' | 'refunded' | 'failed' | 'expired';
+
+export interface PublicDeposit {
+  amountCents: number;
+  status: DepositStatus;
+  expiresAt?: string;
 }
 
 export interface PublicBooking {
@@ -29,6 +39,8 @@ export interface PublicBooking {
   timezone: string;
   clientName: string;
   cancellable: boolean;
+  /** Absent unless a deposit was asked for. */
+  deposit?: PublicDeposit;
 }
 
 export interface CreatePublicBookingPayload {
@@ -46,6 +58,8 @@ export interface CreatePublicBookingResult {
   reference: string;
   manageToken: string;
   nextStep: 'confirmed' | 'payment_required';
+  /** Present exactly when `nextStep` is `payment_required`. */
+  deposit?: { amountCents: number; expiresAt: string };
 }
 
 /**

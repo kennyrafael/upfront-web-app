@@ -3,17 +3,33 @@ import { api } from './client';
 export const PAYMENT_METHODS = ['cash', 'mbway', 'card', 'transfer', 'other'] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
-export const PAYMENT_STATUSES = ['pending', 'paid', 'refunded'] as const;
+/**
+ * `failed` and `expired` only ever come from a gateway — a provider cannot type them in.
+ * They are listed so the ledger can render a status it did not create.
+ */
+export const PAYMENT_STATUSES = ['pending', 'paid', 'refunded', 'failed', 'expired'] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+/** What a provider can record by hand. The rest arrive through the payment gateway. */
+export const RECORDABLE_STATUSES = ['pending', 'paid', 'refunded'] as const;
+
+export const PAYMENT_KINDS = ['manual', 'deposit', 'balance'] as const;
+export type PaymentKind = (typeof PAYMENT_KINDS)[number];
 
 export type SettlementState = 'unpaid' | 'partial' | 'paid' | 'overpaid';
 
 export interface Payment {
   id: string;
   bookingId: string;
+  /** Gross — what the client was charged. */
   amountCents: number;
   method: PaymentMethod;
   status: PaymentStatus;
+  kind: PaymentKind;
+  gatewayFeeCents: number;
+  platformFeeCents: number;
+  /** What the provider receives. Equals `amountCents` for anything recorded by hand. */
+  providerNetCents: number;
   paidAt?: string;
   notes?: string;
 }
@@ -26,6 +42,9 @@ export interface LedgerEntry {
   bookingStatus: string;
   priceCents: number;
   paidCents: number;
+  /** What reaches the provider out of `paidCents`, after the gateway's cut and Upfront's. */
+  netCents: number;
+  feesCents: number;
   pendingCents: number;
   outstandingCents: number;
   state: SettlementState;
@@ -34,6 +53,8 @@ export interface LedgerEntry {
 
 export interface PaymentsSummary {
   collectedCents: number;
+  netCents: number;
+  feesCents: number;
   pendingCents: number;
   outstanding: { count: number; totalCents: number };
   byMethod: { method: PaymentMethod; collectedCents: number; count: number }[];

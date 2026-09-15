@@ -37,6 +37,7 @@ export interface UpdateProviderPayload {
   autoConfirmPublicBookings?: boolean;
   bookingLeadTimeHours?: number;
   bookingHorizonDays?: number;
+  depositPercent?: number;
 }
 
 export const providersApi = {

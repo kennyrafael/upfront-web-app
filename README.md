@@ -91,3 +91,17 @@ scope imports to the category level (`@/components/atoms`) instead of the top-le
 A long-running dev server can also cache a barrel as empty if it reads the file mid-write;
 the symptom is `does not provide an export named 'X'` for a file that looks fine on disk.
 Restart the dev server — and check nothing stale is still holding the port.
+
+## The deposit step
+
+When a provider takes a deposit, `/book/:slug` gains a waiting screen (`DepositWaiting`)
+between the details form and the confirmation.
+
+The page cannot know the payment succeeded on its own — **the gateway tells the server, not
+the browser** — so it polls `GET /public/bookings/:token` until the deposit resolves.
+
+One trap, already paid for once: the poll interval must **not** depend on the countdown.
+Both live in the same component, the countdown re-renders every second, and an effect that
+lists it as a dependency rebuilds the 3-second interval every 1 second — so it never fires
+at all, and the screen waits forever on a payment that already landed. The deadline is
+re-read inside the tick instead.

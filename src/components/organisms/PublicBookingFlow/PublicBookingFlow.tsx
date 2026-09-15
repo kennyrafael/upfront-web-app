@@ -46,6 +46,15 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
 
   const zoneDiffers = useMemo(() => isDifferentZone(provider.timezone), [provider.timezone]);
 
+  /**
+   * An estimate, shown so nobody is surprised. The server decides the real figure — it also
+   * applies a minimum — and it is the server's number that gets charged.
+   */
+  const deposit = useMemo(() => {
+    if (!service || !provider.depositPercent) return 0;
+    return Math.round((service.priceCents * provider.depositPercent) / 100);
+  }, [service, provider.depositPercent]);
+
   // The horizon is the provider's; offering days past it would only produce empty grids.
   const lastBookableDay = useMemo(
     () => new Date(Date.now() + provider.horizonDays * DAY_MS),
@@ -263,8 +272,18 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         </p>
       ) : null}
 
+      {/* Said before the button, not after it. A deposit a client only discovers once their
+          phone buzzes is the kind of surprise that ends in a chargeback. */}
+      {deposit > 0 ? (
+        <p className="rounded-lg bg-brand-700/8 px-3 py-2 text-sm text-brand-900">
+          A <strong className="font-medium">{formatMoney(deposit, service?.currency)}</strong>{' '}
+          deposit holds this slot. You will approve it in MB WAY on the next screen; the rest is due
+          at your appointment.
+        </p>
+      ) : null}
+
       <Button type="submit" fullWidth loading={status === 'saving'}>
-        Request this time
+        {deposit > 0 ? 'Continue to deposit' : 'Request this time'}
       </Button>
     </form>
   );

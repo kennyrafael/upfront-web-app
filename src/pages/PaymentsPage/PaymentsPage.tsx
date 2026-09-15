@@ -62,6 +62,17 @@ export function PaymentsPage() {
               <p className="text-3xl font-semibold tabular-nums text-brand-900">
                 {formatMoney(summary.collectedCents)}
               </p>
+              {/* Only when a fee was actually taken. A provider who has never used the
+                  booking page should not be shown a "yours" line that simply repeats the
+                  number above it. */}
+              {summary.feesCents > 0 ? (
+                <p className="mt-1 text-sm text-ink-muted">
+                  <span className="font-medium text-brand-900">
+                    {formatMoney(summary.netCents)}
+                  </span>{' '}
+                  yours, after {formatMoney(summary.feesCents)} in fees
+                </p>
+              ) : null}
               {summary.byMethod.length > 0 ? (
                 <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
                   {summary.byMethod.map((bucket) => (

@@ -2,12 +2,20 @@ import { create } from 'zustand';
 import {
   ApiError,
   type CreatePublicBookingPayload,
+  type DepositStatus,
   type PublicBooking,
   type PublicProvider,
   publicApi,
 } from '@/lib/api';
 
-type Step = 'service' | 'slot' | 'details' | 'done';
+type Step = 'service' | 'slot' | 'details' | 'payment' | 'done';
+
+interface BookingResult {
+  reference: string;
+  manageToken: string;
+  nextStep: 'confirmed' | 'payment_required';
+  deposit?: { amountCents: number; expiresAt: string };
+}
 
 interface PublicBookingState {
   slug: string | null;
@@ -18,7 +26,11 @@ interface PublicBookingState {
   day: Date;
   slots: string[];
   selectedSlot: string | null;
-  result: { reference: string; manageToken: string } | null;
+  result: BookingResult | null;
+  /** Kept so the waiting screen can say which phone the MB WAY request went to. */
+  clientPhone: string;
+  /** Where the deposit got to, once there is one to watch. */
+  depositStatus: DepositStatus | null;
   status: 'idle' | 'loading' | 'loadingSlots' | 'saving';
   error: string | null;
   loadProvider: (slug: string) => Promise<void>;
@@ -28,6 +40,8 @@ interface PublicBookingState {
   selectSlot: (slot: string) => void;
   back: () => void;
   book: (details: Omit<CreatePublicBookingPayload, 'serviceId' | 'startsAt'>) => Promise<boolean>;
+  /** One poll of the deposit's state. The gateway tells the server, never this page. */
+  refreshDeposit: () => Promise<void>;
   reset: () => void;
 }
 
@@ -51,6 +65,8 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   slots: [],
   selectedSlot: null,
   result: null,
+  clientPhone: '',
+  depositStatus: null,
   status: 'idle',
   error: null,
 
@@ -111,7 +127,14 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
         serviceId,
         startsAt: selectedSlot,
       });
-      set({ result, step: 'done', status: 'idle' });
+
+      set({
+        result,
+        clientPhone: details.phone,
+        step: result.nextStep === 'payment_required' ? 'payment' : 'done',
+        depositStatus: result.nextStep === 'payment_required' ? 'pending' : null,
+        status: 'idle',
+      });
       return true;
     } catch (error) {
       // The slot may have gone while the form was being filled in, so refresh what is
@@ -125,6 +148,25 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
     }
   },
 
+  refreshDeposit: async () => {
+    const { result } = get();
+    if (!result?.manageToken) return;
+
+    try {
+      const booking = await publicApi.booking(result.manageToken);
+      const depositStatus = booking.deposit?.status ?? null;
+
+      // Anything other than 'pending' is the end of the wait, one way or the other.
+      set({
+        depositStatus,
+        ...(depositStatus === 'paid' ? { step: 'done' as const } : {}),
+      });
+    } catch {
+      // A failed poll is not worth an error banner: the next tick will try again, and the
+      // client can see for themselves whether their MB WAY app asked them anything.
+    }
+  },
+
   reset: () =>
     set({
       slug: null,
@@ -135,6 +177,8 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
       slots: [],
       selectedSlot: null,
       result: null,
+      clientPhone: '',
+      depositStatus: null,
       status: 'idle',
       error: null,
     }),

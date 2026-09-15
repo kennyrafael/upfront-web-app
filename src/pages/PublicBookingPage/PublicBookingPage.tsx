@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Card, PublicBookingFlow, PublicLayout, Spinner } from '@/components';
-import { zonedDateTime } from '@/lib/utils';
+import { Card, DepositWaiting, PublicBookingFlow, PublicLayout, Spinner } from '@/components';
+import { formatMoney, zonedDateTime } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
 
 export function PublicBookingPage() {
@@ -13,6 +13,7 @@ export function PublicBookingPage() {
   const error = usePublicBookingStore((state) => state.error);
   const result = usePublicBookingStore((state) => state.result);
   const selectedSlot = usePublicBookingStore((state) => state.selectedSlot);
+  const clientPhone = usePublicBookingStore((state) => state.clientPhone);
   const loadProvider = usePublicBookingStore((state) => state.loadProvider);
   const reset = usePublicBookingStore((state) => state.reset);
 
@@ -41,7 +42,23 @@ export function PublicBookingPage() {
     );
   }
 
+  if (step === 'payment' && result) {
+    return (
+      <PublicLayout businessName={provider.businessName} title="Almost there">
+        <DepositWaiting
+          phone={clientPhone}
+          onStartOver={() => {
+            reset();
+            void loadProvider(slug);
+          }}
+        />
+      </PublicLayout>
+    );
+  }
+
   if (step === 'done' && result) {
+    const paidDeposit = result.deposit?.amountCents;
+
     return (
       <PublicLayout businessName={provider.businessName} title="You're booked in">
         <div className="flex flex-col gap-4">
@@ -53,10 +70,20 @@ export function PublicBookingPage() {
                 {zonedDateTime(selectedSlot, provider.timezone)}
               </p>
             ) : null}
+            {paidDeposit ? (
+              <p className="mt-2 text-sm text-ink-muted">
+                Deposit paid:{' '}
+                <span className="font-medium tabular-nums text-brand-900">
+                  {formatMoney(paidDeposit, 'EUR')}
+                </span>
+              </p>
+            ) : null}
           </Card>
 
           <p className="text-sm text-ink-muted">
-            {provider.businessName} will be in touch to confirm. We have sent you the details.
+            {paidDeposit
+              ? `Your slot is held. The rest is due at your appointment.`
+              : `${provider.businessName} will be in touch to confirm. We have sent you the details.`}
           </p>
 
           {result.manageToken ? (
@@ -76,6 +103,7 @@ export function PublicBookingPage() {
     service: { title: 'Book an appointment', subtitle: 'What would you like?' },
     slot: { title: 'Pick a time', subtitle: undefined },
     details: { title: 'Your details', subtitle: undefined },
+    payment: { title: '', subtitle: undefined },
     done: { title: '', subtitle: undefined },
   } as const;
 
