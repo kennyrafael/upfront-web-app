@@ -28,13 +28,33 @@ const STATUS_STYLES: Record<BookingStatus, string> = {
   completed: 'bg-brand-900/10 ring-brand-900/20 text-brand-900 hover:bg-brand-900/16',
   cancelled: 'bg-slate-500/10 ring-slate-500/20 text-slate-600 line-through hover:bg-slate-500/16',
   no_show: 'bg-red-600/12 ring-red-700/25 text-red-900 hover:bg-red-600/20',
+  // Never rendered — see HIDDEN_FROM_CALENDAR — but the map must be total.
+  expired: 'hidden',
 };
+
+/**
+ * Statuses that never appear on the week grid.
+ *
+ * An expired booking is a slot that was held for a deposit nobody paid. It is not an
+ * appointment that was cancelled, it is one that never existed — and drawing it puts a dead
+ * block on the provider's calendar for every abandoned attempt. With a public booking page
+ * that is most of them.
+ *
+ * `cancelled` still shows: somebody really did have that appointment and called it off,
+ * which is history worth seeing.
+ */
+const HIDDEN_FROM_CALENDAR: BookingStatus[] = ['expired'];
 
 export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) {
   const bookings = useBookingStore((state) => state.items);
   const weekStart = useBookingStore((state) => state.weekStart);
   const status = useBookingStore((state) => state.status);
   const workingHours = useProviderStore((state) => state.profile?.workingHours);
+
+  const visible = useMemo(
+    () => bookings.filter((booking) => !HIDDEN_FROM_CALENDAR.includes(booking.status)),
+    [bookings],
+  );
 
   const days = useMemo(
     () => Array.from({ length: 7 }, (_, index) => addDays(weekStart, index)),
@@ -50,7 +70,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
       bounds.start = Math.min(bounds.start, toMinutes(slot.start));
       bounds.end = Math.max(bounds.end, toMinutes(slot.end));
     }
-    for (const booking of bookings) {
+    for (const booking of visible) {
       bounds.start = Math.min(bounds.start, minutesSinceMidnight(new Date(booking.startsAt)));
       bounds.end = Math.max(bounds.end, minutesSinceMidnight(new Date(booking.endsAt)) || 24 * 60);
     }
@@ -61,7 +81,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
       start: Math.max(0, Math.floor(bounds.start / 60) * 60 - 60),
       end: Math.min(24 * 60, Math.ceil(bounds.end / 60) * 60 + 60),
     };
-  }, [workingHours, bookings]);
+  }, [workingHours, visible]);
 
   const hours = useMemo(() => {
     const list: number[] = [];
@@ -124,7 +144,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
                 range={range}
                 hours={hours}
                 height={gridHeight}
-                bookings={bookings.filter((booking) => isSameDay(new Date(booking.startsAt), day))}
+                bookings={visible.filter((booking) => isSameDay(new Date(booking.startsAt), day))}
                 workingMinutes={(workingHours ?? [])
                   .filter((slot) => slot.weekday === day.getDay())
                   .map((slot) => ({ start: toMinutes(slot.start), end: toMinutes(slot.end) }))}

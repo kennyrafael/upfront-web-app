@@ -12,6 +12,7 @@ const STATUS_LABELS: Record<string, { label: string; variant: 'brand' | 'warning
   confirmed: { label: 'Confirmed', variant: 'brand' },
   completed: { label: 'Completed', variant: 'neutral' },
   cancelled: { label: 'Cancelled', variant: 'neutral' },
+  expired: { label: 'Not held — deposit unpaid', variant: 'neutral' },
   no_show: { label: 'Missed', variant: 'neutral' },
 };
 
@@ -95,7 +96,9 @@ export function ManageBookingPage() {
 
         {/* The deposit rule, said once, in the place where it decides what someone does
             next. A client who only learns it after cancelling has a grievance. */}
-        {booking.deposit && booking.status !== 'cancelled' ? (
+        {/* Not on an expired booking: nothing was ever charged, so telling someone their
+            deposit is non-refundable would be alarming and untrue. */}
+        {booking.deposit && booking.status !== 'cancelled' && booking.status !== 'expired' ? (
           <p className="rounded-lg bg-brand-700/8 px-3 py-2 text-sm text-brand-900">
             Your {formatMoney(booking.deposit.amountCents, 'EUR')} deposit is not refundable.
             {booking.reschedulable
@@ -172,6 +175,12 @@ export function ManageBookingPage() {
           <Button variant="secondary" fullWidth onClick={() => setConfirming(true)}>
             Cancel this booking
           </Button>
+        ) : booking.status === 'expired' ? (
+          <p className="text-sm text-ink-muted">
+            The deposit was not completed in time, so this slot went back on offer.{' '}
+            <strong className="font-medium text-brand-900">Nothing was charged.</strong> You are
+            welcome to book again.
+          </p>
         ) : booking.status === 'cancelled' ? (
           <p className="text-sm text-ink-muted">
             This booking is cancelled. Contact {booking.businessName} if you would like another

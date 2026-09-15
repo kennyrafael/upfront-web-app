@@ -6,9 +6,17 @@ export const BOOKING_STATUSES = [
   'completed',
   'cancelled',
   'no_show',
+  /**
+   * A slot held for a deposit nobody paid. Set by the server only — never something a
+   * provider chooses — and kept off the calendar, because nobody ever had this appointment.
+   */
+  'expired',
 ] as const;
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+
+/** What a provider may set by hand. `expired` is the server's to give, not theirs. */
+export const SETTABLE_BOOKING_STATUSES = BOOKING_STATUSES.filter((status) => status !== 'expired');
 
 export interface Booking {
   id: string;

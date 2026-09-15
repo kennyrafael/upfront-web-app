@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Label, Switch } from '@/components/atoms';
 import { FormField, SelectField, TextareaField } from '@/components/molecules';
-import { BOOKING_STATUSES, type Booking } from '@/lib/api';
+import { type Booking, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
 import {
   formatDuration,
   formatMoney,
@@ -219,7 +219,7 @@ export function BookingFormDialog({
         {booking ? (
           <SelectField
             label="Status"
-            options={BOOKING_STATUSES.map((value) => ({
+            options={SETTABLE_BOOKING_STATUSES.map((value) => ({
               value,
               label: STATUS_LABELS[value] ?? value,
             }))}
