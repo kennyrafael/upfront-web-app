@@ -5,14 +5,17 @@ import {
   ClientsPage,
   CompliancePage,
   DashboardPage,
+  ForgotPasswordPage,
   LoginPage,
   ManageBookingPage,
   OnboardingPage,
   PaymentsPage,
   PublicBookingPage,
+  ResetPasswordPage,
   ServicesPage,
   SettingsPage,
   SignupPage,
+  VerifyEmailPage,
 } from '@/pages';
 import { useAuthStore } from '@/stores';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -67,6 +70,23 @@ export function AppRoutes() {
             </GuestOnly>
           }
         />
+        {/*
+          Reachable signed out, because that is the state everyone who needs them is in.
+          `/verify-email` is deliberately not GuestOnly: a provider usually clicks it from
+          their inbox while already signed in, and bouncing them home would leave the
+          address unconfirmed with no explanation.
+        */}
+        <Route
+          path="/forgot-password"
+          element={
+            <GuestOnly>
+              <ForgotPasswordPage />
+            </GuestOnly>
+          }
+        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+
         <Route
           path="/onboarding"
           element={

@@ -17,4 +17,5 @@ export * from './ReciboPreview';
 export * from './ServiceCatalogTable';
 export * from './ServiceFormDialog';
 export * from './SignupForm';
+export * from './VerifyEmailNotice';
 export * from './WorkingHoursEditor';

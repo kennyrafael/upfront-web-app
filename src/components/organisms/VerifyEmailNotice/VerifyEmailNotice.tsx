@@ -1,0 +1,53 @@
+import { useState } from 'react';
+import { Button } from '@/components/atoms';
+import { authApi } from '@/lib/api';
+import { useAuthStore } from '@/stores';
+
+/**
+ * The nudge an unverified provider sees until they confirm their address.
+ *
+ * Deliberately a notice rather than a wall. Blocking the product on a confirmation email is
+ * how you lose someone who was only ever going to try it once — so everything keeps working,
+ * and only publishing a booking page is gated. That is the point where strangers start
+ * sending money and every notice about it arrives by email.
+ */
+export function VerifyEmailNotice() {
+  const provider = useAuthStore((state) => state.provider);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  if (!provider || provider.emailVerified) return null;
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-500/12 px-4 py-3 ring-1 ring-amber-600/25">
+      <div>
+        <p className="text-sm font-medium text-amber-900">Confirm your email address</p>
+        <p className="text-xs text-amber-900/80">
+          We sent a link to {provider.email}. Confirming lets you publish your booking page and
+          makes sure payment notices reach you.
+        </p>
+      </div>
+
+      {sent ? (
+        <span className="text-xs font-medium text-amber-900">Sent — check your inbox.</span>
+      ) : (
+        <Button
+          size="sm"
+          variant="secondary"
+          loading={sending}
+          onClick={async () => {
+            setSending(true);
+            try {
+              await authApi.resendVerification();
+              setSent(true);
+            } finally {
+              setSending(false);
+            }
+          }}
+        >
+          Send it again
+        </Button>
+      )}
+    </div>
+  );
+}

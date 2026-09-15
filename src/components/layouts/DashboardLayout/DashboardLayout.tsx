@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/atoms';
+import { VerifyEmailNotice } from '@/components/organisms/VerifyEmailNotice';
 import { cn } from '@/lib/utils';
 import { resetDomainStores, useAuthStore } from '@/stores';
 
@@ -59,7 +60,9 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
               size="sm"
               onClick={() => {
                 resetDomainStores();
-                logout();
+                // Awaited by the store, not here: it revokes the session server-side now,
+                // and the local state clears either way.
+                void logout();
               }}
             >
               Sign out
@@ -98,6 +101,11 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
             {actions ? <div className="flex gap-2">{actions}</div> : null}
           </div>
         ) : null}
+
+        {/* Shown on every screen until the address is confirmed, then it disappears by
+            itself. One place rather than remembering to add it to each page. */}
+        <VerifyEmailNotice />
+
         {children}
       </main>
     </div>
