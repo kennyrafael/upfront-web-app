@@ -39,7 +39,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     const { weekStart } = get();
     set({ status: 'loading', error: null });
     try {
-      const items = await bookingsApi.list({
+      const { items } = await bookingsApi.list({
         from: weekStart.toISOString(),
         to: addDays(weekStart, 7).toISOString(),
       });

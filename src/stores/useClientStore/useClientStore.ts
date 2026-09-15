@@ -4,11 +4,14 @@ import {
   type ClientRecord,
   type CreateClientPayload,
   clientsApi,
+  MAX_PAGE_SIZE,
   type UpdateClientPayload,
 } from '@/lib/api';
 
 interface ClientState {
   items: ClientRecord[];
+  /** Rows matching the search, so a truncated list can say so rather than look complete. */
+  total: number;
   search: string;
   status: 'idle' | 'loading' | 'saving';
   error: string | null;
@@ -28,6 +31,7 @@ function toMessage(error: unknown): string {
 
 export const useClientStore = create<ClientState>((set, get) => ({
   items: [],
+  total: 0,
   search: '',
   status: 'idle',
   error: null,
@@ -35,7 +39,10 @@ export const useClientStore = create<ClientState>((set, get) => ({
   load: async () => {
     set({ status: 'loading', error: null });
     try {
-      set({ items: await clientsApi.list(get().search || undefined), status: 'idle' });
+      const { items, total } = await clientsApi.list(get().search || undefined, {
+        pageSize: MAX_PAGE_SIZE,
+      });
+      set({ items, total, status: 'idle' });
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });
     }
@@ -84,5 +91,5 @@ export const useClientStore = create<ClientState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  reset: () => set({ items: [], search: '', status: 'idle', error: null }),
+  reset: () => set({ items: [], total: 0, search: '', status: 'idle', error: null }),
 }));

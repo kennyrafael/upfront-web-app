@@ -6,6 +6,7 @@ import {
   complianceApi,
   type Invoice,
   invoicesApi,
+  MAX_PAGE_SIZE,
   type UpdateInvoicePayload,
 } from '@/lib/api';
 
@@ -50,10 +51,10 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
       // paint the dashboard before the table it explains.
       const [summary, invoices, billedBookingIds] = await Promise.all([
         complianceApi.summary(year),
-        invoicesApi.list(year),
+        invoicesApi.list(year, { pageSize: MAX_PAGE_SIZE }),
         invoicesApi.billedBookingIds(),
       ]);
-      set({ summary, invoices, billedBookingIds, status: 'idle' });
+      set({ summary, invoices: invoices.items, billedBookingIds, status: 'idle' });
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });
     }

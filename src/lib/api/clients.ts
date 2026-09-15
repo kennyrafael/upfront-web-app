@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { Page } from './pagination';
 
 export interface ClientRecord {
   id: string;
@@ -18,8 +19,14 @@ export interface CreateClientPayload {
 export type UpdateClientPayload = Partial<CreateClientPayload>;
 
 export const clientsApi = {
-  list: (search?: string) =>
-    api.get<ClientRecord[]>(`/clients${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+  list: (search?: string, paging?: { page?: number; pageSize?: number }) =>
+    api.get<Page<ClientRecord>>(
+      `/clients?${new URLSearchParams({
+        ...(search ? { search } : {}),
+        ...(paging?.page ? { page: String(paging.page) } : {}),
+        ...(paging?.pageSize ? { pageSize: String(paging.pageSize) } : {}),
+      })}`,
+    ),
   create: (payload: CreateClientPayload) => api.post<ClientRecord>('/clients', payload),
   update: (id: string, payload: UpdateClientPayload) =>
     api.patch<ClientRecord>(`/clients/${id}`, payload),

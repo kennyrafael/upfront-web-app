@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { Page } from './pagination';
 
 export const INVOICE_STATUSES = ['draft', 'issued', 'cancelled'] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
@@ -35,7 +36,12 @@ export interface CreateInvoicePayload {
 export type UpdateInvoicePayload = Partial<CreateInvoicePayload>;
 
 export const invoicesApi = {
-  list: (year: number) => api.get<Invoice[]>(`/invoices?year=${year}`),
+  list: (year: number, paging?: { page?: number; pageSize?: number }) =>
+    api.get<Page<Invoice>>(
+      `/invoices?year=${year}${paging?.page ? `&page=${paging.page}` : ''}${
+        paging?.pageSize ? `&pageSize=${paging.pageSize}` : ''
+      }`,
+    ),
   create: (payload: CreateInvoicePayload) => api.post<Invoice>('/invoices', payload),
   update: (id: string, payload: UpdateInvoicePayload) =>
     api.patch<Invoice>(`/invoices/${id}`, payload),

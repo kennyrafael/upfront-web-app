@@ -72,7 +72,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
     bookingsApi
       .listByClient(fields.clientId)
       .then((result) => {
-        if (!cancelled) setBookings(result);
+        if (!cancelled) setBookings(result.items);
       })
       .finally(() => {
         if (!cancelled) setLoadingBookings(false);

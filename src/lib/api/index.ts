@@ -4,6 +4,7 @@ export * from './client';
 export * from './clients';
 export * from './compliance';
 export * from './invoices';
+export * from './pagination';
 export * from './payments';
 export * from './providers';
 export * from './public';
