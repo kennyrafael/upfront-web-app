@@ -186,24 +186,77 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
 
 interface ManageBookingState {
   booking: PublicBooking | null;
-  status: 'idle' | 'loading' | 'saving';
+  /** Slots offered for a move, loaded on demand rather than with the booking. */
+  slots: string[];
+  day: Date;
+  status: 'idle' | 'loading' | 'loadingSlots' | 'saving';
   error: string | null;
   load: (token: string) => Promise<void>;
+  setDay: (day: Date) => Promise<void>;
+  loadSlots: () => Promise<void>;
+  reschedule: (token: string, startsAt: string) => Promise<boolean>;
   cancel: (token: string) => Promise<boolean>;
   reset: () => void;
 }
 
-export const useManageBookingStore = create<ManageBookingState>((set) => ({
+export const useManageBookingStore = create<ManageBookingState>((set, get) => ({
   booking: null,
+  slots: [],
+  day: startOfLocalDay(new Date()),
   status: 'idle',
   error: null,
 
   load: async (token) => {
     set({ status: 'loading', error: null });
     try {
-      set({ booking: await publicApi.booking(token), status: 'idle' });
+      const booking = await publicApi.booking(token);
+      // Open the picker on the day they already have, which is usually near the one they want.
+      set({ booking, day: startOfLocalDay(new Date(booking.startsAt)), status: 'idle' });
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });
+    }
+  },
+
+  setDay: async (day) => {
+    set({ day: startOfLocalDay(day) });
+    await get().loadSlots();
+  },
+
+  loadSlots: async () => {
+    const { booking, day } = get();
+    if (!booking) return;
+
+    set({ status: 'loadingSlots', error: null });
+    try {
+      const from = new Date(day);
+      const to = new Date(day);
+      to.setDate(to.getDate() + 1);
+
+      set({
+        slots: await publicApi.availability(
+          booking.slug,
+          booking.serviceId,
+          from.toISOString(),
+          to.toISOString(),
+        ),
+        status: 'idle',
+      });
+    } catch (error) {
+      set({ status: 'idle', slots: [], error: toMessage(error) });
+    }
+  },
+
+  reschedule: async (token, startsAt) => {
+    set({ status: 'saving', error: null });
+    try {
+      set({ booking: await publicApi.reschedule(token, startsAt), status: 'idle', slots: [] });
+      return true;
+    } catch (error) {
+      // Somebody may have taken the slot while it was being chosen, so refresh what is left
+      // rather than leaving a stale grid next to the error.
+      set({ status: 'idle', error: toMessage(error) });
+      if (error instanceof ApiError && error.status === 409) await get().loadSlots();
+      return false;
     }
   },
 
@@ -218,5 +271,5 @@ export const useManageBookingStore = create<ManageBookingState>((set) => ({
     }
   },
 
-  reset: () => set({ booking: null, status: 'idle', error: null }),
+  reset: () => set({ booking: null, slots: [], status: 'idle', error: null }),
 }));

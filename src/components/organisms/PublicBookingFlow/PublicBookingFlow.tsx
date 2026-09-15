@@ -279,6 +279,10 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
           A <strong className="font-medium">{formatMoney(deposit, service?.currency)}</strong>{' '}
           deposit holds this slot. You will approve it in MB WAY on the next screen; the rest is due
           at your appointment.
+          {/* The condition, stated before they commit rather than discovered afterwards. */}
+          <span className="mt-1 block">
+            It is not refundable — but you can move your appointment, and it moves with you.
+          </span>
         </p>
       ) : null}
 

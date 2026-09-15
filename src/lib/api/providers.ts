@@ -23,6 +23,7 @@ export interface ProviderProfile {
   bookingLeadTimeHours: number;
   bookingHorizonDays: number;
   depositPercent: number;
+  cancellationNoticeHours: number;
 }
 
 export interface UpdateProviderPayload {
@@ -37,6 +38,7 @@ export interface UpdateProviderPayload {
   autoConfirmPublicBookings?: boolean;
   bookingLeadTimeHours?: number;
   bookingHorizonDays?: number;
+  cancellationNoticeHours?: number;
   depositPercent?: number;
 }
 

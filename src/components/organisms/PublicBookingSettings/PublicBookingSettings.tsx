@@ -26,6 +26,7 @@ export function PublicBookingSettings() {
   const [leadTime, setLeadTime] = useState(String(profile?.bookingLeadTimeHours ?? 2));
   const [horizon, setHorizon] = useState(String(profile?.bookingHorizonDays ?? 60));
   const [deposit, setDeposit] = useState(String(profile?.depositPercent ?? 0));
+  const [notice, setNotice] = useState(String(profile?.cancellationNoticeHours ?? 24));
   const [slugError, setSlugError] = useState<string>();
   const [enabling, setEnabling] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -35,6 +36,7 @@ export function PublicBookingSettings() {
     setLeadTime(String(profile?.bookingLeadTimeHours ?? 2));
     setHorizon(String(profile?.bookingHorizonDays ?? 60));
     setDeposit(String(profile?.depositPercent ?? 0));
+    setNotice(String(profile?.cancellationNoticeHours ?? 24));
   }, [profile]);
 
   const enabled = profile?.publicBookingEnabled ?? false;
@@ -68,6 +70,7 @@ export function PublicBookingSettings() {
       bookingLeadTimeHours: Number(leadTime),
       bookingHorizonDays: Number(horizon),
       depositPercent: Number(deposit),
+      cancellationNoticeHours: Number(notice),
     });
 
     if (ok) {
@@ -153,9 +156,22 @@ export function PublicBookingSettings() {
                   setSaved(false);
                 }}
               />
+              {Number(deposit) > 0 ? (
+                <FormField
+                  label="Notice to move an appointment"
+                  inputMode="numeric"
+                  hint="Hours. Inside this, a client can move their booking and the deposit goes with them."
+                  value={notice}
+                  onChange={(event) => {
+                    setNotice(event.target.value);
+                    setSaved(false);
+                  }}
+                />
+              ) : null}
+
               <p className="mt-2 text-xs text-ink-muted">
                 {Number(deposit) > 0
-                  ? 'The slot is held only while the deposit is unpaid, and released if it is not approved in time. A small minimum applies, so tiny deposits are not eaten by fees.'
+                  ? 'Deposits are never refunded. With enough notice a client moves the appointment instead and keeps it; later than that, the slot was lost at your expense and the deposit stays with you. A small minimum applies, so tiny deposits are not eaten by fees.'
                   : 'No deposit means a slot is held on trust — the usual reason for no-shows.'}
               </p>
             </div>

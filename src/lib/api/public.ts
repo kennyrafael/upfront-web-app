@@ -41,6 +41,12 @@ export interface PublicBooking {
   cancellable: boolean;
   /** Absent unless a deposit was asked for. */
   deposit?: PublicDeposit;
+  /** For the reschedule picker, which reuses the ordinary availability endpoint. */
+  slug: string;
+  serviceId: string;
+  /** False once the notice period has gone — at which point cancelling costs the deposit. */
+  reschedulable: boolean;
+  noticeHours: number;
 }
 
 export interface CreatePublicBookingPayload {
@@ -115,6 +121,12 @@ export const publicApi = {
 
   booking: (token: string) =>
     publicRequest<PublicBooking>(`/bookings/${encodeURIComponent(token)}`),
+
+  reschedule: (token: string, startsAt: string) =>
+    publicRequest<PublicBooking>(`/bookings/${encodeURIComponent(token)}/reschedule`, {
+      method: 'POST',
+      body: JSON.stringify({ startsAt }),
+    }),
 
   cancel: (token: string) =>
     publicRequest<PublicBooking>(`/bookings/${encodeURIComponent(token)}/cancel`, {
