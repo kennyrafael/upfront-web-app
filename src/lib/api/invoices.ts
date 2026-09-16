@@ -51,4 +51,6 @@ export const invoicesApi = {
   billedBookingIds: () => api.get<string[]>('/invoices/billed-bookings'),
   /** The browser sandbox blocks script-driven downloads, so this returns the text. */
   exportCsv: (year: number) => api.text(`/invoices/export?year=${year}`),
+  /** The recibo as a PDF. Rendered on the server, so it matches what was issued. */
+  pdf: (id: string) => api.blob(`/invoices/${id}/pdf`),
 };

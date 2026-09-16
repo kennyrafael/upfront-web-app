@@ -66,7 +66,7 @@ export function ProviderProfileForm() {
 
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
-      <Card>
+      <Card id="profile">
         <CardHeader>
           <CardTitle>Business details</CardTitle>
           <p className="mt-1 text-sm text-ink-muted">

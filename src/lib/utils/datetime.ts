@@ -95,3 +95,33 @@ export function formatWeekRange(weekStart: Date): string {
   }
   return `${RANGE_FORMAT.format(weekStart)} – ${RANGE_FORMAT.format(weekEnd)} ${year}`;
 }
+
+/**
+ * "4 min ago", "yesterday" — how long ago something happened, in words.
+ *
+ * `Intl.RelativeTimeFormat` rather than a hand-rolled ladder, because it already knows that
+ * "1 days ago" is wrong and which unit to switch to, and it will be right in Portuguese for
+ * free once the UI is translated.
+ */
+export function relativeTime(value: string | Date): string {
+  const then = typeof value === 'string' ? new Date(value) : value;
+  const seconds = Math.round((then.getTime() - Date.now()) / 1000);
+
+  const format = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto', style: 'narrow' });
+
+  const scale: [Intl.RelativeTimeFormatUnit, number][] = [
+    ['second', 60],
+    ['minute', 60],
+    ['hour', 24],
+    ['day', 7],
+    ['week', 4.35],
+    ['month', 12],
+  ];
+
+  let amount = seconds;
+  for (const [unit, size] of scale) {
+    if (Math.abs(amount) < size) return format.format(Math.round(amount), unit);
+    amount /= size;
+  }
+  return format.format(Math.round(amount), 'year');
+}

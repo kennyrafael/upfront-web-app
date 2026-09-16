@@ -119,6 +119,24 @@ async function extractMessage(response: Response): Promise<string> {
   return `Request failed with status ${response.status}`;
 }
 
+/**
+ * Fetches a file rather than JSON.
+ *
+ * Its own path for the same reason as `requestText`: `request` parses the body as JSON,
+ * which a PDF is not. The Authorization header is why this cannot simply be a link — a
+ * browser navigating to the URL sends no token and gets a 401.
+ */
+async function requestBlob(path: string): Promise<Blob> {
+  const token = readToken();
+  const response = await fetch(`/api${path}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new ApiError(await extractMessage(response), response.status);
+  }
+  return response.blob();
+}
+
 async function requestText(path: string): Promise<string> {
   const token = readToken();
   const response = await fetch(`/api${path}`, {
@@ -134,6 +152,8 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   /** For endpoints that answer with CSV or plain text rather than JSON. */
   text: (path: string) => requestText(path),
+  /** For endpoints that answer with a file — today, the recibo PDF. */
+  blob: (path: string) => requestBlob(path),
   post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
   /** Multipart, for the one thing we accept as a file: a logo. */
   upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form }),

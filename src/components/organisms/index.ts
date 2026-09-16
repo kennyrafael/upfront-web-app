@@ -1,3 +1,4 @@
+export * from './AccountMenu';
 export * from './BookingCalendar';
 export * from './BookingFormDialog';
 export * from './BrandingSettings';
@@ -8,6 +9,7 @@ export * from './DepositWaiting';
 export * from './InvoiceFormDialog';
 export * from './InvoiceTable';
 export * from './LoginForm';
+export * from './NotificationBell';
 export * from './PaymentDialog';
 export * from './PaymentLedger';
 export * from './ProviderOnboardingForm';

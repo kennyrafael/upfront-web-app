@@ -1,6 +1,7 @@
-import { Badge, Button, Dialog } from '@/components/atoms';
-import type { Invoice } from '@/lib/api';
-import { formatDate, formatMoney } from '@/lib/utils';
+import { useState } from 'react';
+import { Badge, Button, Dialog, Icon } from '@/components/atoms';
+import { type Invoice, invoicesApi } from '@/lib/api';
+import { formatDate, formatMoney, saveBlob } from '@/lib/utils';
 import { useProviderStore } from '@/stores';
 
 export interface ReciboPreviewProps {
@@ -15,6 +16,21 @@ export interface ReciboPreviewProps {
  */
 export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProps) {
   const profile = useProviderStore((state) => state.profile);
+  const [downloading, setDownloading] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  async function downloadPdf() {
+    setDownloading(true);
+    setFailed(false);
+    try {
+      const blob = await invoicesApi.pdf(invoice.id);
+      saveBlob(blob, `recibo-${invoice.number?.replace(/[^w.-]+/g, '-') ?? 'rascunho'}.pdf`);
+    } catch {
+      setFailed(true);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <Dialog
@@ -24,9 +40,20 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
       description="Copy these values into the Portal das Finanças. Upfront does not submit them."
       className="max-w-xl"
       footer={
-        <Button variant="secondary" onClick={() => onOpenChange(false)}>
-          Close
-        </Button>
+        <>
+          {failed ? (
+            <p role="alert" className="mr-auto self-center text-sm text-red-800">
+              That PDF could not be produced.
+            </p>
+          ) : null}
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button loading={downloading} onClick={downloadPdf}>
+            <Icon name="download" className="size-4" />
+            Download PDF
+          </Button>
+        </>
       }
     >
       <div className="flex flex-col gap-5">

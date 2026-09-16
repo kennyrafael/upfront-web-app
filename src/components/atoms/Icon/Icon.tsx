@@ -24,6 +24,10 @@ const PATHS = {
   upload: 'M12 16V4M7 9l5-5 5 5M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2',
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
   menu: 'M4 6h16M4 12h16M4 18h16',
+  bell: 'M18 8a6 6 0 10-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10.3 21a2 2 0 003.4 0',
+  profile: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1',
+  download: 'M12 4v12M7 11l5 5 5-5M4 19v1a1 1 0 001 1h14a1 1 0 001-1v-1',
+  check: 'M4 12.5l5 5L20 6.5',
   close: 'M6 6l12 12M18 6L6 18',
 } as const;
 

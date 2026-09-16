@@ -1,9 +1,10 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Button, Icon, type IconName } from '@/components/atoms';
+import { Icon, type IconName } from '@/components/atoms';
+import { AccountMenu } from '@/components/organisms/AccountMenu';
+import { NotificationBell } from '@/components/organisms/NotificationBell';
 import { VerifyEmailNotice } from '@/components/organisms/VerifyEmailNotice';
 import { cn } from '@/lib/utils';
-import { resetDomainStores, useAuthStore } from '@/stores';
 
 export interface DashboardLayoutProps {
   title?: string;
@@ -13,6 +14,14 @@ export interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * The sidebar is the work; the top bar is the account.
+ *
+ * Settings is deliberately absent here even though it is a page like any other — it lives
+ * behind the avatar with the profile and sign-out, because those three are all "about me"
+ * rather than "about the business", and grouping them is what lets the sidebar stay a list
+ * of places to work.
+ */
 const NAV_ITEMS: { to: string; label: string; icon: IconName }[] = [
   { to: '/', label: 'Overview', icon: 'overview' },
   { to: '/services', label: 'Services', icon: 'services' },
@@ -20,7 +29,6 @@ const NAV_ITEMS: { to: string; label: string; icon: IconName }[] = [
   { to: '/clients', label: 'Clients', icon: 'clients' },
   { to: '/payments', label: 'Payments', icon: 'payments' },
   { to: '/compliance', label: 'Compliance', icon: 'compliance' },
-  { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
 
 /** Remembered per browser: a provider who works collapsed should stay collapsed. */
@@ -37,9 +45,6 @@ function readCollapsed(): boolean {
 }
 
 export function DashboardLayout({ title, description, actions, children }: DashboardLayoutProps) {
-  const provider = useAuthStore((state) => state.provider);
-  const logout = useAuthStore((state) => state.logout);
-
   const [collapsed, setCollapsed] = useState(readCollapsed);
   /** Separate from `collapsed`: on a phone the sidebar is a drawer, not a narrow rail. */
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -80,49 +85,8 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
     </nav>
   );
 
-  const account = (
-    <div className="border-t border-hairline p-3">
-      {!collapsed && (
-        <div className="px-3 pb-2">
-          <p className="truncate text-sm font-medium text-brand-900">{provider?.name}</p>
-          <p className="truncate text-xs text-ink-muted">
-            {provider?.businessName ?? provider?.email}
-          </p>
-        </div>
-      )}
-      <Button
-        variant="ghost"
-        size="sm"
-        fullWidth
-        title={collapsed ? 'Sign out' : undefined}
-        onClick={() => {
-          resetDomainStores();
-          void logout();
-        }}
-      >
-        <span className={cn('flex items-center gap-2', collapsed && 'justify-center')}>
-          <Icon name="logout" className="size-4" />
-          <span className={cn(collapsed && 'sr-only')}>Sign out</span>
-        </span>
-      </Button>
-    </div>
-  );
-
   return (
     <div className="min-h-dvh md:flex">
-      {/* Phone: a top bar with a drawer trigger, because a rail would eat a quarter of the
-          screen on a device that has none to spare. */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-hairline bg-white/80 px-4 backdrop-blur-xl md:hidden">
-        <button
-          type="button"
-          onClick={() => setDrawerOpen(true)}
-          className="rounded-lg p-2 text-brand-800 hover:bg-brand-700/8"
-        >
-          <Icon name="menu" label="Open menu" />
-        </button>
-        <span className="font-semibold tracking-tight text-brand-800">Upfront</span>
-      </header>
-
       {drawerOpen && (
         <>
           <button
@@ -143,7 +107,6 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
               </button>
             </div>
             {nav}
-            {account}
           </aside>
         </>
       )}
@@ -176,28 +139,48 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
           </button>
         </div>
         {nav}
-        {account}
       </aside>
 
-      <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
-        <div className="mx-auto max-w-5xl">
-          {title ? (
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-brand-900">{title}</h1>
-                {description ? <p className="mt-1 text-sm text-ink-muted">{description}</p> : null}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-white/80 px-4 backdrop-blur-xl md:px-8">
+          {/* Phone: the drawer trigger takes the place the sidebar would. */}
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="rounded-lg p-2 text-brand-800 hover:bg-brand-700/8 md:hidden"
+          >
+            <Icon name="menu" label="Open menu" />
+          </button>
+          <span className="font-semibold tracking-tight text-brand-800 md:hidden">Upfront</span>
+
+          <div className="ml-auto flex items-center gap-1.5">
+            <NotificationBell />
+            <AccountMenu />
+          </div>
+        </header>
+
+        <main className="min-w-0 flex-1 px-4 py-8 md:px-8">
+          <div className="mx-auto max-w-5xl">
+            {title ? (
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight text-brand-900">{title}</h1>
+                  {description ? (
+                    <p className="mt-1 text-sm text-ink-muted">{description}</p>
+                  ) : null}
+                </div>
+                {actions ? <div className="flex gap-2">{actions}</div> : null}
               </div>
-              {actions ? <div className="flex gap-2">{actions}</div> : null}
-            </div>
-          ) : null}
+            ) : null}
 
-          {/* Shown on every screen until the address is confirmed, then it disappears by
-              itself. One place rather than remembering to add it to each page. */}
-          <VerifyEmailNotice />
+            {/* Shown on every screen until the address is confirmed, then it disappears by
+                itself. One place rather than remembering to add it to each page. */}
+            <VerifyEmailNotice />
 
-          {children}
-        </div>
-      </main>
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
