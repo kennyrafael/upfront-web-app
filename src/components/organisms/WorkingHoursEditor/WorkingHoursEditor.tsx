@@ -1,6 +1,6 @@
-import { Button, Input, Label } from '@/components/atoms';
+import { Button, Input, Label, Select } from '@/components/atoms';
 import type { WorkingHours } from '@/lib/api';
-import { cn, WEEKDAY_OPTIONS } from '@/lib/utils';
+import { WEEKDAY_OPTIONS } from '@/lib/utils';
 
 export interface WorkingHoursEditorProps {
   value: WorkingHours[];
@@ -41,25 +41,17 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
           key={index}
           className="flex flex-wrap items-end gap-2 rounded-xl bg-sheet/50 p-3 ring-1 ring-hairline"
         >
-          <div className="flex min-w-36 flex-1 flex-col gap-1.5">
+          {/* A fixed width, not `flex-1`: a weekday name is short, and letting the column
+              grow gave it six hundred pixels for the word "Wednesday". */}
+          <div className="flex w-44 flex-col gap-1.5">
             <Label htmlFor={`slot-${index}-weekday`}>Day</Label>
-            {/* A native select keeps the row compact and keyboard-native inside a form. */}
-            <select
+            <Select
               id={`slot-${index}-weekday`}
+              options={WEEKDAY_OPTIONS}
               value={String(slot.weekday)}
               disabled={disabled}
-              onChange={(event) => updateSlot(index, { weekday: Number(event.target.value) })}
-              className={cn(
-                'h-10 rounded-lg bg-sheet/60 px-3 text-sm text-ink ring-1 ring-inset ring-hairline',
-                'transition focus:bg-sheet focus:outline-none focus:ring-2 focus:ring-brand-600',
-              )}
-            >
-              {WEEKDAY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              onValueChange={(weekday) => updateSlot(index, { weekday: Number(weekday) })}
+            />
           </div>
 
           <div className="flex w-28 flex-col gap-1.5">
@@ -84,15 +76,26 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
             />
           </div>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={disabled}
-            onClick={() => onChange(value.filter((_, i) => i !== index))}
-          >
-            Remove
-          </Button>
+          {/* Given the same label-above-control shape as the fields, with the label hidden,
+              and then centred in a box the height of a control.
+              Aligning it by its own box does not work: the button is shorter than a field,
+              so matching their bottoms leaves it sitting low against the line they share. */}
+          <div className="flex flex-col gap-1.5">
+            <Label aria-hidden="true" className="invisible">
+              Remove
+            </Label>
+            <div className="flex h-8 items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={disabled}
+                onClick={() => onChange(value.filter((_, i) => i !== index))}
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
         </div>
       ))}
 
