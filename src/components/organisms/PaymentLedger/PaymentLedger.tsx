@@ -89,7 +89,7 @@ export function PaymentLedger({ onRecord }: PaymentLedgerProps) {
                   <td className="px-5 py-3 text-right tabular-nums text-brand-900">
                     {formatMoney(entry.paidCents)}
                     {entry.pendingCents > 0 ? (
-                      <span className="block text-xs text-amber-800">
+                      <span className="block text-xs text-warn-ink">
                         +{formatMoney(entry.pendingCents)} pending
                       </span>
                     ) : null}

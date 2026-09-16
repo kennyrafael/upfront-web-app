@@ -44,6 +44,30 @@
   --shadow-raised:
     0 1px 2px oklch(0.24 0.046 162 / 0.08), 0 24px 56px -24px oklch(0.24 0.046 162 / 0.35);
 
+
+  /**
+   * Warning, danger and success, as token pairs rather than Tailwind's fixed palette.
+   *
+   * A fill and an ink, because the two move in opposite directions between themes: on a
+   * light ground the fill is a faint wash and the ink is nearly black, and on a dark one the
+   * fill stays faint while the ink has to become nearly white. `text-red-800` on
+   * `bg-red-600/8` reads perfectly in one theme and is invisible in the other, which is
+   * exactly what happened to pending bookings.
+   *
+   * The `-solid` fills are the ones that carry white text — a danger button, a progress
+   * bar — and so stay mid-toned in both themes rather than flipping.
+   */
+  --color-warn: oklch(0.75 0.15 75);
+  --color-warn-ink: oklch(0.42 0.1 75);
+  --color-warn-solid: oklch(0.72 0.16 65);
+
+  --color-danger: oklch(0.58 0.2 27);
+  --color-danger-ink: oklch(0.45 0.18 27);
+  --color-danger-solid: oklch(0.52 0.2 27);
+
+  --color-good: oklch(0.6 0.13 155);
+  --color-good-ink: oklch(0.45 0.11 155);
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
   /* Two faint washes keep the ground from looking flat behind translucent panels. Held in
@@ -103,6 +127,19 @@
       --shadow-raised:
         0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
 
+
+      /* Fills stay faint washes; the inks flip to the light end so they read on the dark
+         ground. The solids barely move — they carry white text in either theme. */
+      --color-warn: oklch(0.78 0.15 75);
+      --color-warn-ink: oklch(0.85 0.1 75);
+      --color-warn-solid: oklch(0.68 0.16 65);
+
+      --color-danger: oklch(0.65 0.2 27);
+      --color-danger-ink: oklch(0.78 0.14 27);
+      --color-danger-solid: oklch(0.55 0.2 27);
+
+      --color-good: oklch(0.68 0.13 155);
+      --color-good-ink: oklch(0.84 0.11 155);
       --ground-wash:
         radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
         radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
@@ -139,6 +176,19 @@
     --shadow-raised:
       0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
 
+
+    /* Fills stay faint washes; the inks flip to the light end so they read on the dark
+       ground. The solids barely move — they carry white text in either theme. */
+    --color-warn: oklch(0.78 0.15 75);
+    --color-warn-ink: oklch(0.85 0.1 75);
+    --color-warn-solid: oklch(0.68 0.16 65);
+
+    --color-danger: oklch(0.65 0.2 27);
+    --color-danger-ink: oklch(0.78 0.14 27);
+    --color-danger-solid: oklch(0.55 0.2 27);
+
+    --color-good: oklch(0.68 0.13 155);
+    --color-good-ink: oklch(0.84 0.11 155);
     --ground-wash:
       radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
       radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
@@ -187,6 +237,13 @@
   --color-ink-muted: oklch(0.52 0.017 162);
   --color-surface: #ffffff;
   --color-hairline: oklch(0.38 0.072 162 / 0.12);
+
+  --color-warn: oklch(0.75 0.15 75);
+  --color-warn-ink: oklch(0.42 0.1 75);
+  --color-danger: oklch(0.58 0.2 27);
+  --color-danger-ink: oklch(0.45 0.18 27);
+  --color-good: oklch(0.6 0.13 155);
+  --color-good-ink: oklch(0.45 0.11 155);
 }
 
 @utility panel {

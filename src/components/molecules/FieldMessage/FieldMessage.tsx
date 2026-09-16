@@ -14,7 +14,7 @@ export function FieldMessage({ id, error, hint }: FieldMessageProps) {
   return (
     <p
       id={id}
-      className={cn('text-xs', error ? 'text-red-700' : 'text-ink-muted')}
+      className={cn('text-xs', error ? 'text-danger-ink' : 'text-ink-muted')}
       role={error ? 'alert' : undefined}
     >
       {message}

@@ -182,7 +182,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
 
         {/* Only shown when it could actually mislead: the visitor's clock disagrees. */}
         {zoneDiffers ? (
-          <p className="rounded-lg bg-amber-500/12 px-3 py-2 text-xs text-amber-900">
+          <p className="rounded-lg bg-warn/12 px-3 py-2 text-xs text-warn-ink">
             Times are shown in {provider.timezone}, which is not your device's timezone.
           </p>
         ) : (
@@ -190,7 +190,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         )}
 
         {error ? (
-          <p role="alert" className="rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+          <p role="alert" className="rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
             {error}
           </p>
         ) : null}
@@ -267,7 +267,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
       </div>
 
       {error ? (
-        <p role="alert" className="rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+        <p role="alert" className="rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
           {error}
         </p>
       ) : null}

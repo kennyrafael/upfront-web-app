@@ -22,7 +22,7 @@ export const FIELD_BASE =
 
 export const FIELD_RING = {
   normal: 'ring-hairline focus:ring-brand-600',
-  invalid: 'ring-red-500/60 focus:ring-red-600',
+  invalid: 'ring-danger/60 focus:ring-danger',
 } as const;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(

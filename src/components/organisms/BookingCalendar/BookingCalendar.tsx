@@ -23,11 +23,11 @@ const SLOT_MINUTES = 30;
 const FALLBACK_RANGE = { start: 8 * 60, end: 20 * 60 };
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
-  pending: 'bg-amber-500/18 ring-amber-600/30 text-amber-900 hover:bg-amber-500/26',
+  pending: 'bg-warn/18 ring-warn/30 text-warn-ink hover:bg-warn/26',
   confirmed: 'bg-brand-700/16 ring-brand-700/30 text-brand-900 hover:bg-brand-700/24',
   completed: 'bg-brand-900/10 ring-brand-900/20 text-brand-900 hover:bg-brand-900/16',
-  cancelled: 'bg-slate-500/10 ring-slate-500/20 text-slate-600 line-through hover:bg-slate-500/16',
-  no_show: 'bg-red-600/12 ring-red-700/25 text-red-900 hover:bg-red-600/20',
+  cancelled: 'bg-ink-muted/10 ring-ink-muted/20 text-ink-muted line-through hover:bg-ink-muted/16',
+  no_show: 'bg-danger/12 ring-danger/25 text-danger-ink hover:bg-danger/20',
   // Never rendered — see HIDDEN_FROM_CALENDAR — but the map must be total.
   expired: 'hidden',
 };

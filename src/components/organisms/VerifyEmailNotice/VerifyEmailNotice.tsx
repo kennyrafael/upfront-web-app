@@ -19,17 +19,17 @@ export function VerifyEmailNotice() {
   if (!provider || provider.emailVerified) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-500/12 px-4 py-3 ring-1 ring-amber-600/25">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warn/12 px-4 py-3 ring-1 ring-warn/25">
       <div>
-        <p className="text-sm font-medium text-amber-900">Confirm your email address</p>
-        <p className="text-xs text-amber-900/80">
+        <p className="text-sm font-medium text-warn-ink">Confirm your email address</p>
+        <p className="text-xs text-warn-ink/80">
           We sent a link to {provider.email}. Confirming lets you publish your booking page and
           makes sure payment notices reach you.
         </p>
       </div>
 
       {sent ? (
-        <span className="text-xs font-medium text-amber-900">Sent — check your inbox.</span>
+        <span className="text-xs font-medium text-warn-ink">Sent — check your inbox.</span>
       ) : (
         <Button
           size="sm"

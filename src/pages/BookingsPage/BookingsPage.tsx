@@ -55,7 +55,7 @@ export function BookingsPage() {
       </div>
 
       {error ? (
-        <p role="alert" className="mb-4 rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+        <p role="alert" className="mb-4 rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
           {error}
         </p>
       ) : null}

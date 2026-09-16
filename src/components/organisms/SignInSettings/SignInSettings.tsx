@@ -111,7 +111,7 @@ export function SignInSettings() {
               role={emailOutcome.tone === 'bad' ? 'alert' : 'status'}
               className={
                 emailOutcome.tone === 'bad'
-                  ? 'rounded-lg bg-red-700/8 px-3 py-2 text-sm text-red-800'
+                  ? 'rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink'
                   : 'rounded-lg bg-brand-700/8 px-3 py-2 text-sm text-brand-900'
               }
             >
@@ -159,7 +159,7 @@ export function SignInSettings() {
               role={passwordOutcome.tone === 'bad' ? 'alert' : 'status'}
               className={
                 passwordOutcome.tone === 'bad'
-                  ? 'rounded-lg bg-red-700/8 px-3 py-2 text-sm text-red-800'
+                  ? 'rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink'
                   : 'rounded-lg bg-brand-700/8 px-3 py-2 text-sm text-brand-900'
               }
             >

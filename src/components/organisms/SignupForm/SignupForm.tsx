@@ -89,7 +89,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         onChange={(event) => setPassword(event.target.value)}
       />
       {error ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger-ink">
           {error}
         </p>
       ) : null}

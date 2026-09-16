@@ -1,6 +1,6 @@
-import { Badge, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
+import { Badge, Card, CardBody, CardHeader, CardTitle, Progress } from '@/components/atoms';
 import type { ComplianceSummary } from '@/lib/api';
-import { cn, formatDate, formatMoney, formatPercent } from '@/lib/utils';
+import { formatDate, formatMoney, formatPercent } from '@/lib/utils';
 
 export interface ComplianceOverviewProps {
   summary: ComplianceSummary;
@@ -10,8 +10,8 @@ const QUARTER_MONTHS = ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'];
 
 const THRESHOLD_TONE = {
   ok: { bar: 'bg-brand-700', badge: 'brand' as const, label: 'Within the exemption' },
-  warning: { bar: 'bg-amber-500', badge: 'warning' as const, label: 'Approaching the ceiling' },
-  exceeded: { bar: 'bg-red-600', badge: 'danger' as const, label: 'Ceiling exceeded' },
+  warning: { bar: 'bg-warn-solid', badge: 'warning' as const, label: 'Approaching the ceiling' },
+  exceeded: { bar: 'bg-danger-solid', badge: 'danger' as const, label: 'Ceiling exceeded' },
 };
 
 const DEADLINE_LABELS = {
@@ -41,19 +41,12 @@ export function ComplianceOverview({ summary }: ComplianceOverviewProps) {
             </span>
           </div>
 
-          <div
-            className="mt-3 h-2 overflow-hidden rounded-full bg-brand-900/10"
-            role="progressbar"
-            aria-valuenow={Math.round(summary.threshold.ratio * 100)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Share of the IVA exemption ceiling used"
-          >
-            <div
-              className={cn('h-full rounded-full transition-[width]', tone.bar)}
-              style={{ width: `${Math.min(100, summary.threshold.ratio * 100)}%` }}
-            />
-          </div>
+          <Progress
+            className="mt-3"
+            value={summary.threshold.ratio}
+            label="Share of the IVA exemption ceiling used"
+            barClassName={tone.bar}
+          />
 
           {summary.draftCents > 0 ? (
             <p className="mt-3 text-sm text-ink-muted">

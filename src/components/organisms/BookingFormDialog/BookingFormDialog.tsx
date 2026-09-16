@@ -183,7 +183,7 @@ export function BookingFormDialog({
           {booking ? (
             <Button
               variant="ghost"
-              className="mr-auto text-red-700 hover:bg-red-600/8 hover:text-red-800"
+              className="mr-auto text-danger-ink hover:bg-danger/8 hover:text-danger-ink"
               disabled={busy}
               onClick={async () => {
                 if (await remove(booking.id)) onOpenChange(false);
@@ -208,7 +208,7 @@ export function BookingFormDialog({
     >
       <form id="booking-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         {noClients || noServices ? (
-          <p className="rounded-lg bg-amber-500/12 px-3 py-2 text-sm text-amber-900">
+          <p className="rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
             You need at least one {noClients ? 'client' : 'service'} before you can book.
           </p>
         ) : null}
@@ -226,7 +226,7 @@ export function BookingFormDialog({
         <div>
           <Label>
             Services
-            <span aria-hidden="true" className="ml-0.5 text-red-700">
+            <span aria-hidden="true" className="ml-0.5 text-danger-ink">
               *
             </span>
           </Label>
@@ -254,7 +254,7 @@ export function BookingFormDialog({
                         fields.services.filter((row) => row.key !== service.key),
                       )
                     }
-                    className="shrink-0 rounded-md p-1 text-ink-muted transition-colors hover:bg-red-600/8 hover:text-red-800"
+                    className="shrink-0 rounded-md p-1 text-ink-muted transition-colors hover:bg-danger/8 hover:text-danger-ink"
                   >
                     <Icon name="close" className="size-4" />
                   </button>
@@ -326,7 +326,7 @@ export function BookingFormDialog({
         />
 
         {error ? (
-          <p role="alert" className="rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+          <p role="alert" className="rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
             {error}
           </p>
         ) : null}

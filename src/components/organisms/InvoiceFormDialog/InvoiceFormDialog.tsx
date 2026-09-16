@@ -223,7 +223,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
           )}
 
           {errors.bookings ? (
-            <p role="alert" className="text-xs text-red-700">
+            <p role="alert" className="text-xs text-danger-ink">
               {errors.bookings}
             </p>
           ) : null}
@@ -265,7 +265,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
         </dl>
 
         {error ? (
-          <p role="alert" className="rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+          <p role="alert" className="rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
             {error}
           </p>
         ) : null}

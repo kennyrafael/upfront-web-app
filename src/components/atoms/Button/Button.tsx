@@ -10,7 +10,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
   secondary:
     'bg-surface/70 text-brand-900 ring-1 ring-inset ring-hairline backdrop-blur-sm hover:bg-surface focus-visible:outline-brand-600',
   ghost: 'text-ink-muted hover:bg-brand-700/8 hover:text-brand-800 focus-visible:outline-brand-600',
-  danger: 'bg-red-700 text-white shadow-sm hover:bg-red-800 focus-visible:outline-red-700',
+  danger:
+    'bg-danger-solid text-white shadow-sm hover:bg-danger-solid/85 focus-visible:outline-danger',
 };
 
 const SIZES: Record<ButtonSize, string> = {

@@ -139,7 +139,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-red-700 hover:bg-red-600/8 hover:text-red-800"
+                      className="text-danger-ink hover:bg-danger/8 hover:text-danger-ink"
                       disabled={busy}
                       onClick={() => void remove(payment.id)}
                     >
@@ -204,7 +204,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
           />
 
           {error ? (
-            <p role="alert" className="rounded-lg bg-red-600/8 px-3 py-2 text-sm text-red-800">
+            <p role="alert" className="rounded-lg bg-danger/8 px-3 py-2 text-sm text-danger-ink">
               {error}
             </p>
           ) : null}

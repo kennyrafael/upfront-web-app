@@ -1,6 +1,8 @@
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as RadioGroup from '@radix-ui/react-radio-group';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon, type IconName, Popover } from '@/components/atoms';
+import { Avatar, Icon, type IconName, Separator } from '@/components/atoms';
 import { cn, type Theme } from '@/lib/utils';
 import { resetDomainStores, useAuthStore, useThemeStore } from '@/stores';
 
@@ -10,16 +12,17 @@ const THEME_OPTIONS: { value: Theme; label: string; icon: IconName }[] = [
   { value: 'system', label: 'System', icon: 'display' },
 ];
 
-/** Two letters from the name, which is all a 32px circle has room for. */
-function initialsOf(name?: string): string {
-  if (!name) return '?';
-  const words = name.trim().split(/\s+/);
-  const first = words[0]?.[0] ?? '';
-  // First and last, not first two: "Ana Silva Pereira" is AP to anyone who knows her.
-  const last = words.length > 1 ? (words[words.length - 1]?.[0] ?? '') : '';
-  return (first + last).toUpperCase();
-}
+const ITEM_CLASS =
+  'flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-ink-muted outline-none transition-colors data-[highlighted]:bg-brand-700/8 data-[highlighted]:text-brand-800';
 
+/**
+ * A menu rather than a popover full of links.
+ *
+ * The difference is behaviour, not markup: a menu moves between its items with the arrow
+ * keys, jumps to one when you type its first letter, closes on Escape and hands focus back
+ * to the trigger. A popover containing anchors does none of that, and every one of them is
+ * something a keyboard user expects from a thing that looks like this.
+ */
 export function AccountMenu() {
   const provider = useAuthStore((state) => state.provider);
   const logout = useAuthStore((state) => state.logout);
@@ -28,100 +31,104 @@ export function AccountMenu() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={setOpen}
-      className="w-64 p-0"
-      trigger={
+    <DropdownMenu.Root open={open} onOpenChange={setOpen}>
+      <DropdownMenu.Trigger asChild>
         <button
           type="button"
           aria-label="Account"
-          className="flex size-8 items-center justify-center rounded-full bg-brand-700/12 text-xs font-semibold text-brand-800 transition-colors hover:bg-brand-700/20"
+          className="rounded-full outline-none transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
-          {initialsOf(provider?.name)}
+          <Avatar name={provider?.name} />
         </button>
-      }
-    >
-      <div className="border-b border-hairline px-4 py-3">
-        <p className="truncate font-medium text-brand-900">{provider?.name}</p>
-        <p className="truncate text-xs text-ink-muted">
-          {provider?.businessName ?? provider?.email}
-        </p>
-      </div>
+      </DropdownMenu.Trigger>
 
-      <div className="p-1.5">
-        {/* Both land on Settings; the hash is what keeps them from being the same item,
-            taking this one to the business details rather than the top of a long page. */}
-        <Link
-          to="/settings#profile"
-          onClick={() => setOpen(false)}
-          className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-ink-muted transition-colors hover:bg-brand-700/6 hover:text-brand-800"
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={8}
+          collisionPadding={12}
+          className="z-50 w-64 rounded-xl bg-surface/95 shadow-raised ring-1 ring-hairline backdrop-blur-2xl"
         >
-          <Icon name="profile" className="size-4" />
-          Your profile
-        </Link>
-        <Link
-          to="/settings"
-          onClick={() => setOpen(false)}
-          className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-ink-muted transition-colors hover:bg-brand-700/6 hover:text-brand-800"
-        >
-          <Icon name="settings" className="size-4" />
-          Settings
-        </Link>
+          <DropdownMenu.Label className="border-b border-hairline px-4 py-3">
+            <p className="truncate font-medium text-brand-900">{provider?.name}</p>
+            <p className="truncate text-xs text-ink-muted">
+              {provider?.businessName ?? provider?.email}
+            </p>
+          </DropdownMenu.Label>
 
-        <div className="my-1.5 border-t border-hairline" />
+          <div className="p-1.5">
+            <DropdownMenu.Item asChild>
+              {/* Both land on Settings; the hash is what keeps them from being the same
+                  item, taking this one to the business details rather than the page top. */}
+              <Link to="/settings#profile" className={ITEM_CLASS}>
+                <Icon name="profile" className="size-4" />
+                Your profile
+              </Link>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item asChild>
+              <Link to="/settings" className={ITEM_CLASS}>
+                <Icon name="settings" className="size-4" />
+                Settings
+              </Link>
+            </DropdownMenu.Item>
 
-        {/* Applied on click rather than on save: a theme is judged by looking at it, and
-            anything between choosing and seeing it makes that judgement harder. */}
-        <div className="px-2.5 pb-1 pt-1.5">
-          <p className="text-xs font-medium text-ink-muted">Appearance</p>
-          {/* Real radios rather than buttons wearing radio roles: the arrow-key behaviour
-              a segmented control is expected to have comes free with them. */}
-          <fieldset className="mt-1.5 flex gap-1 rounded-lg bg-brand-900/5 p-1">
-            <legend className="sr-only">Appearance</legend>
-            {THEME_OPTIONS.map((option) => (
-              <label
-                key={option.value}
-                className={cn(
-                  'flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-1.5 text-[11px] transition-colors',
-                  'focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-600',
-                  theme === option.value
-                    ? 'bg-surface text-brand-900 shadow-sm'
-                    : 'text-ink-muted hover:text-brand-800',
-                )}
+            <Separator className="my-1.5" />
+
+            {/**
+             * Deliberately outside the menu's own keyboard model.
+             *
+             * Selecting a menu item closes the menu, and a theme is judged by looking at it
+             * — being thrown out on every try would mean reopening to compare. The radio
+             * group brings its own arrow-key handling, so nothing is lost by stopping the
+             * menu from seeing those keys.
+             */}
+            <div className="px-1 pb-1 pt-0.5">
+              <p className="px-1.5 text-xs font-medium text-ink-muted">Appearance</p>
+              <RadioGroup.Root
+                value={theme}
+                onValueChange={(value) => setTheme(value as Theme)}
+                aria-label="Appearance"
+                // Held on the group itself, which is the element that owns these keys.
+                onKeyDown={(event) => event.stopPropagation()}
+                className="mt-1.5 flex gap-1 rounded-lg bg-brand-900/5 p-1"
+                loop
               >
-                <input
-                  type="radio"
-                  name="appearance"
-                  value={option.value}
-                  checked={theme === option.value}
-                  onChange={() => setTheme(option.value)}
-                  className="sr-only"
-                />
-                <Icon name={option.icon} className="size-4" />
-                {option.label}
-              </label>
-            ))}
-          </fieldset>
-        </div>
+                {THEME_OPTIONS.map((option) => (
+                  <RadioGroup.Item
+                    key={option.value}
+                    value={option.value}
+                    className={cn(
+                      'flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-1.5 text-[11px] outline-none transition-colors',
+                      'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600',
+                      theme === option.value
+                        ? 'bg-surface text-brand-900 shadow-sm'
+                        : 'text-ink-muted hover:text-brand-800',
+                    )}
+                  >
+                    <Icon name={option.icon} className="size-4" />
+                    {option.label}
+                  </RadioGroup.Item>
+                ))}
+              </RadioGroup.Root>
+            </div>
 
-        <div className="my-1.5 border-t border-hairline" />
+            <Separator className="my-1.5" />
 
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            // Cleared before the request, so a slow sign-out never leaves one account's
-            // data on screen under another account's name.
-            resetDomainStores();
-            void logout();
-          }}
-          className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-ink-muted transition-colors hover:bg-brand-700/6 hover:text-brand-800"
-        >
-          <Icon name="logout" className="size-4" />
-          Sign out
-        </button>
-      </div>
-    </Popover>
+            <DropdownMenu.Item
+              className={ITEM_CLASS}
+              onSelect={() => {
+                // Cleared before the request, so a slow sign-out never leaves one account's
+                // data on screen under another account's name.
+                resetDomainStores();
+                void logout();
+              }}
+            >
+              <Icon name="logout" className="size-4" />
+              Sign out
+            </DropdownMenu.Item>
+          </div>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

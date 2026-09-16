@@ -18,7 +18,7 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(function Label(
     >
       {children}
       {required ? (
-        <span aria-hidden="true" className="ml-0.5 text-red-700">
+        <span aria-hidden="true" className="ml-0.5 text-danger-ink">
           *
         </span>
       ) : null}

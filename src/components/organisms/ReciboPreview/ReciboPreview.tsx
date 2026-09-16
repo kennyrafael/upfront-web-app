@@ -42,7 +42,7 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
       footer={
         <>
           {failed ? (
-            <p role="alert" className="mr-auto self-center text-sm text-red-800">
+            <p role="alert" className="mr-auto self-center text-sm text-danger-ink">
               That PDF could not be produced.
             </p>
           ) : null}
@@ -66,7 +66,7 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
             {profile?.nif ? (
               <p className="text-sm tabular-nums text-ink-muted">NIF {profile.nif}</p>
             ) : (
-              <p className="text-sm text-amber-800">No NIF on file — add one in Settings.</p>
+              <p className="text-sm text-warn-ink">No NIF on file — add one in Settings.</p>
             )}
           </div>
           <Badge variant={invoice.status === 'cancelled' ? 'danger' : 'brand'}>
