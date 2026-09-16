@@ -8,3 +8,4 @@ export * from './usePaymentStore';
 export * from './useProviderStore';
 export * from './usePublicBookingStore';
 export * from './useServiceStore';
+export * from './useThemeStore';

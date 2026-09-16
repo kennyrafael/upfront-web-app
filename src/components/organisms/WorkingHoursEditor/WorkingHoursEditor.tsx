@@ -39,7 +39,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
           // index is the stable identity here.
           // biome-ignore lint/suspicious/noArrayIndexKey: rows have no id of their own
           key={index}
-          className="flex flex-wrap items-end gap-2 rounded-xl bg-white/50 p-3 ring-1 ring-hairline"
+          className="flex flex-wrap items-end gap-2 rounded-xl bg-surface/50 p-3 ring-1 ring-hairline"
         >
           <div className="flex min-w-36 flex-1 flex-col gap-1.5">
             <Label htmlFor={`slot-${index}-weekday`}>Day</Label>
@@ -50,8 +50,8 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
               disabled={disabled}
               onChange={(event) => updateSlot(index, { weekday: Number(event.target.value) })}
               className={cn(
-                'h-10 rounded-lg bg-white/60 px-3 text-sm text-ink ring-1 ring-inset ring-hairline',
-                'transition focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600',
+                'h-10 rounded-lg bg-surface/60 px-3 text-sm text-ink ring-1 ring-inset ring-hairline',
+                'transition focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-600',
               )}
             >
               {WEEKDAY_OPTIONS.map((option) => (

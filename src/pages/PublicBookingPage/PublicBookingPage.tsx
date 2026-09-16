@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Card, DepositWaiting, PublicBookingFlow, PublicLayout, Spinner } from '@/components';
 import { formatMoney, zonedDateTime } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
 
 export function PublicBookingPage() {
   const { slug = '' } = useParams();
+  const navigate = useNavigate();
 
   const provider = usePublicBookingStore((state) => state.provider);
   const step = usePublicBookingStore((state) => state.step);
@@ -21,6 +22,22 @@ export function PublicBookingPage() {
     void loadProvider(slug);
     return reset;
   }, [slug, loadProvider, reset]);
+
+  /**
+   * Moves a visitor who arrived on an address the provider used to have.
+   *
+   * The API still answers on old addresses so a link printed on a card keeps working; this
+   * is the other half — putting the current address in the visitor's bar, so what they
+   * bookmark or forward is the one that will outlive the next rename.
+   *
+   * `replace` rather than a push, so Back goes where they came from rather than bouncing
+   * them through the redirect again.
+   */
+  useEffect(() => {
+    if (provider && provider.slug !== slug) {
+      navigate(`/book/${provider.slug}`, { replace: true });
+    }
+  }, [provider, slug, navigate]);
 
   if (status === 'loading' && !provider) {
     return (

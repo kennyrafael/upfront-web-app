@@ -52,7 +52,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
           sideOffset={6}
           className={cn(
             'z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden',
-            'rounded-xl bg-white/90 shadow-raised ring-1 ring-hairline backdrop-blur-xl',
+            'rounded-xl bg-surface/90 shadow-raised ring-1 ring-hairline backdrop-blur-xl',
           )}
         >
           <RadixSelect.Viewport className="p-1">

@@ -16,8 +16,8 @@ const SIZES: Record<InputSize, string> = {
 
 /** Shared with Textarea and the Select trigger so every field reads as one control. */
 export const FIELD_BASE =
-  'block w-full rounded-lg bg-white/60 text-ink ring-1 ring-inset transition ' +
-  'placeholder:text-ink-muted/60 focus:bg-white focus:outline-none focus:ring-2 ' +
+  'block w-full rounded-lg bg-surface/60 text-ink ring-1 ring-inset transition ' +
+  'placeholder:text-ink-muted/60 focus:bg-surface focus:outline-none focus:ring-2 ' +
   'disabled:cursor-not-allowed disabled:bg-brand-900/4 disabled:text-ink-muted';
 
 export const FIELD_RING = {

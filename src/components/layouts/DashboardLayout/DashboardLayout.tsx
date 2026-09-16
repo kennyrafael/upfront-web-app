@@ -93,9 +93,9 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
             type="button"
             aria-label="Close menu"
             onClick={() => setDrawerOpen(false)}
-            className="fixed inset-0 z-40 bg-brand-950/30 md:hidden"
+            className="fixed inset-0 z-40 bg-scrim/30 md:hidden"
           />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-white shadow-xl md:hidden">
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-surface shadow-xl md:hidden">
             <div className="flex h-14 items-center justify-between border-b border-hairline px-4">
               <span className="font-semibold tracking-tight text-brand-800">Upfront</span>
               <button
@@ -113,7 +113,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
 
       <aside
         className={cn(
-          'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-white/60 backdrop-blur-xl transition-[width] duration-200 md:flex',
+          'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-surface/60 backdrop-blur-xl transition-[width] duration-200 md:flex',
           collapsed ? 'w-16' : 'w-60',
         )}
       >
@@ -142,7 +142,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-white/80 px-4 backdrop-blur-xl md:px-8">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-surface/80 px-4 backdrop-blur-xl md:px-8">
           {/* Phone: the drawer trigger takes the place the sidebar would. */}
           <button
             type="button"

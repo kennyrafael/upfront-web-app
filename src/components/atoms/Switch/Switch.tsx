@@ -22,7 +22,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
     >
       <RadixSwitch.Thumb
         className={cn(
-          'block size-5 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform',
+          'block size-5 translate-x-0.5 rounded-full bg-surface shadow-sm transition-transform',
           'data-[state=checked]:translate-x-[1.375rem]',
         )}
       />

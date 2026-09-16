@@ -65,7 +65,7 @@ export function ComplianceOverview({ summary }: ComplianceOverviewProps) {
             {summary.quarters.map((quarter) => (
               <div
                 key={quarter.quarter}
-                className="rounded-xl bg-white/50 px-3 py-2 ring-1 ring-hairline"
+                className="rounded-xl bg-surface/50 px-3 py-2 ring-1 ring-hairline"
               >
                 <p className="text-xs font-medium text-ink-muted">
                   Q{quarter.quarter} · {QUARTER_MONTHS[quarter.quarter - 1]}

@@ -8,7 +8,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 export function Card({ raised = false, className, ...props }: CardProps) {
   return (
-    <div className={cn('panel', raised && 'shadow-raised bg-white/85', className)} {...props} />
+    <div className={cn('panel', raised && 'shadow-raised bg-surface/85', className)} {...props} />
   );
 }
 

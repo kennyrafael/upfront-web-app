@@ -38,7 +38,7 @@ export function Popover({
           // would otherwise sit flush against the screen.
           collisionPadding={12}
           className={cn(
-            'z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white/95 shadow-raised',
+            'z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-xl bg-surface/95 shadow-raised',
             'ring-1 ring-hairline backdrop-blur-2xl focus:outline-none',
             className,
           )}

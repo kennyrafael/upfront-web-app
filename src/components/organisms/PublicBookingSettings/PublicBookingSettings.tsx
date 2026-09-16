@@ -94,7 +94,7 @@ export function PublicBookingSettings() {
       </CardHeader>
 
       <CardBody className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4 rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">
+        <div className="flex items-center justify-between gap-4 rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
           <div>
             <Label htmlFor="public-booking-enabled">Accept bookings from clients</Label>
             <p className="text-xs text-ink-muted">
@@ -145,7 +145,7 @@ export function PublicBookingSettings() {
               />
             </div>
 
-            <div className="rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">
+            <div className="rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
               <FormField
                 label="Deposit"
                 inputMode="numeric"
@@ -176,7 +176,7 @@ export function PublicBookingSettings() {
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-4 rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">
+            <div className="flex items-center justify-between gap-4 rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
               <div>
                 <Label htmlFor="auto-confirm">Confirm bookings automatically</Label>
                 <p className="text-xs text-ink-muted">

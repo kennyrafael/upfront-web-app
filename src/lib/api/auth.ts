@@ -46,6 +46,12 @@ export const authApi = {
   changePassword: (currentPassword: string, password: string) =>
     api.post<void>('/auth/change-password', { currentPassword, password }),
 
+  /** Starts a move to a new address; nothing changes until that address confirms. */
+  changeEmail: (email: string, password: string) =>
+    api.post<void>('/auth/change-email', { email, password }),
+  confirmEmailChange: (token: string) =>
+    api.post<{ email: string }>('/auth/confirm-email-change', { token }),
+
   verifyEmail: (token: string) => api.post<Provider>('/auth/verify-email', { token }),
   resendVerification: () => api.post<void>('/auth/resend-verification'),
 };

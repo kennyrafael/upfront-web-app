@@ -1,4 +1,5 @@
 export * from './BookingsPage';
+export * from './ChangeEmailPage';
 export * from './ClientsPage';
 export * from './CompliancePage';
 export * from './DashboardPage';

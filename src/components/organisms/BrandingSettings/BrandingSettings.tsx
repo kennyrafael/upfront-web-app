@@ -138,7 +138,7 @@ export function BrandingSettings() {
                   setColor(event.target.value);
                   setSaved(false);
                 }}
-                className="size-10 cursor-pointer rounded-lg border border-hairline bg-white p-1"
+                className="size-10 cursor-pointer rounded-lg border border-hairline bg-surface p-1"
               />
               <code className="rounded-lg bg-brand-900/5 px-2 py-1 text-sm tabular-nums text-brand-900">
                 {color.toUpperCase()}

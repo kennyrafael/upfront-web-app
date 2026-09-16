@@ -88,7 +88,7 @@ export function BookingPagePreview({ businessName, brandColor, logoUrl }: Bookin
       // running anything.
       sandbox=""
       srcDoc={document}
-      className="h-[330px] w-full rounded-xl border border-hairline bg-white"
+      className="h-[330px] w-full rounded-xl border border-hairline bg-surface"
     />
   );
 }

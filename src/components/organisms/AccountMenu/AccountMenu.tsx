@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon, Popover } from '@/components/atoms';
-import { resetDomainStores, useAuthStore } from '@/stores';
+import { Icon, type IconName, Popover } from '@/components/atoms';
+import { cn, type Theme } from '@/lib/utils';
+import { resetDomainStores, useAuthStore, useThemeStore } from '@/stores';
+
+const THEME_OPTIONS: { value: Theme; label: string; icon: IconName }[] = [
+  { value: 'light', label: 'Light', icon: 'sun' },
+  { value: 'dark', label: 'Dark', icon: 'moon' },
+  { value: 'system', label: 'System', icon: 'display' },
+];
 
 /** Two letters from the name, which is all a 32px circle has room for. */
 function initialsOf(name?: string): string {
@@ -16,6 +23,8 @@ function initialsOf(name?: string): string {
 export function AccountMenu() {
   const provider = useAuthStore((state) => state.provider);
   const logout = useAuthStore((state) => state.logout);
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
   const [open, setOpen] = useState(false);
 
   return (
@@ -59,6 +68,42 @@ export function AccountMenu() {
           <Icon name="settings" className="size-4" />
           Settings
         </Link>
+
+        <div className="my-1.5 border-t border-hairline" />
+
+        {/* Applied on click rather than on save: a theme is judged by looking at it, and
+            anything between choosing and seeing it makes that judgement harder. */}
+        <div className="px-2.5 pb-1 pt-1.5">
+          <p className="text-xs font-medium text-ink-muted">Appearance</p>
+          {/* Real radios rather than buttons wearing radio roles: the arrow-key behaviour
+              a segmented control is expected to have comes free with them. */}
+          <fieldset className="mt-1.5 flex gap-1 rounded-lg bg-brand-900/5 p-1">
+            <legend className="sr-only">Appearance</legend>
+            {THEME_OPTIONS.map((option) => (
+              <label
+                key={option.value}
+                className={cn(
+                  'flex flex-1 cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-1.5 text-[11px] transition-colors',
+                  'focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-600',
+                  theme === option.value
+                    ? 'bg-surface text-brand-900 shadow-sm'
+                    : 'text-ink-muted hover:text-brand-800',
+                )}
+              >
+                <input
+                  type="radio"
+                  name="appearance"
+                  value={option.value}
+                  checked={theme === option.value}
+                  onChange={() => setTheme(option.value)}
+                  className="sr-only"
+                />
+                <Icon name={option.icon} className="size-4" />
+                {option.label}
+              </label>
+            ))}
+          </fieldset>
+        </div>
 
         <div className="my-1.5 border-t border-hairline" />
 

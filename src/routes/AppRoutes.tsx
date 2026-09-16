@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import {
   BookingsPage,
+  ChangeEmailPage,
   ClientsPage,
   CompliancePage,
   DashboardPage,
@@ -86,6 +87,9 @@ export function AppRoutes() {
         />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        {/* Not GuestOnly, for the same reason: the link is usually opened from an inbox,
+            on a device that may or may not be signed in. */}
+        <Route path="/change-email" element={<ChangeEmailPage />} />
 
         <Route
           path="/onboarding"

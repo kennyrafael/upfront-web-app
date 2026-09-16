@@ -95,7 +95,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
         {entry.payments.length > 0 ? (
           <section className="flex flex-col gap-2">
             <h3 className="text-sm font-medium text-brand-900">Recorded so far</h3>
-            <ul className="flex flex-col divide-y divide-hairline/70 rounded-xl bg-white/50 px-3 ring-1 ring-hairline">
+            <ul className="flex flex-col divide-y divide-hairline/70 rounded-xl bg-surface/50 px-3 ring-1 ring-hairline">
               {entry.payments.map((payment) => (
                 <li key={payment.id} className="flex items-center gap-3 py-2">
                   <span className="w-20 shrink-0 tabular-nums text-sm text-brand-900">
@@ -180,7 +180,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
             />
           </div>
 
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-white/50 px-3 py-3 ring-1 ring-hairline">
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
             <input
               type="checkbox"
               className="size-4 accent-brand-700"

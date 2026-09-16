@@ -24,6 +24,18 @@
   --color-ink: oklch(0.26 0.021 162);
   --color-ink-muted: oklch(0.52 0.017 162);
 
+  /* The material every card, dialog and bar is made of: a translucent sheet over the
+     tinted ground. A token rather than a literal white, because in dark mode this is the
+     one thing that has to stop being white, and it is used at eight different opacities
+     across the app. */
+  --color-surface: #ffffff;
+
+  /* The deep field behind sign-in and the public booking page, and the wash over the page
+     behind a dialog. Both stay dark in either theme: a dialog scrim that inverted would
+     wash the page out instead of dimming it. */
+  --color-backdrop: oklch(0.24 0.046 162);
+  --color-scrim: oklch(0.17 0.034 162);
+
   /* Hairlines and shadows are tinted green rather than neutral grey, so the
      translucent surfaces read as one material instead of stacked greys. */
   --color-hairline: oklch(0.38 0.072 162 / 0.12);
@@ -33,20 +45,112 @@
     0 1px 2px oklch(0.24 0.046 162 / 0.08), 0 24px 56px -24px oklch(0.24 0.046 162 / 0.35);
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Two faint washes keep the ground from looking flat behind translucent panels. Held in
+     a variable so the dark theme can swap them rather than fight them. */
+  --ground-wash:
+    radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.07), transparent 60%),
+    radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.05), transparent 55%);
 }
 
+/**
+ * The dark palette.
+ *
+ * **The brand ramp is re-pointed, not inverted.** Its steps are used semantically rather
+ * than numerically: 900 means "strong text" and 700 means "the primary action". On a dark
+ * ground 900 has to become light, while 700 must stay a green somebody would recognise as
+ * the brand. A mechanical inversion gives a pastel button and nothing that reads as Upfront.
+ *
+ * Declared once here and consumed by every existing brand-* class, so no component needs to
+ * know the theme exists.
+ */
 @layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  /* "System" stamps no attribute at all and falls through to this; an explicit light choice
+     opts back out of it. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+
+      --color-brand-50: oklch(0.22 0.028 162);
+      --color-brand-100: oklch(0.26 0.038 162);
+      --color-brand-200: oklch(0.32 0.05 162);
+      --color-brand-300: oklch(0.4 0.062 162);
+      --color-brand-400: oklch(0.5 0.075 162);
+      --color-brand-500: oklch(0.6 0.085 162);
+      --color-brand-600: oklch(0.68 0.092 162);
+      --color-brand-700: oklch(0.74 0.095 162);
+      --color-brand-800: oklch(0.84 0.07 162);
+      --color-brand-900: oklch(0.93 0.04 162);
+      --color-brand-950: oklch(0.97 0.02 162);
+
+      /* The primary action is now a light green, so what sits on it must be dark. */
+      --color-oncolor: oklch(0.19 0.035 162);
+
+      --color-canvas: oklch(0.17 0.018 162);
+      --color-ink: oklch(0.93 0.015 162);
+      --color-ink-muted: oklch(0.72 0.018 162);
+      --color-surface: oklch(0.255 0.022 162);
+
+      --color-hairline: oklch(0.93 0.04 162 / 0.14);
+      /* Shadows do almost nothing on a dark ground. Depth comes from the surface sitting
+         lighter than the canvas, so these only deepen edges rather than pretending. */
+      --shadow-panel:
+        0 1px 2px oklch(0.1 0.02 162 / 0.4), 0 16px 40px -20px oklch(0.1 0.02 162 / 0.6);
+      --shadow-raised:
+        0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
+
+      --ground-wash:
+        radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
+        radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
+    }
+  }
+
+  /* The same palette for an explicit dark choice on a light system. Spelled out twice
+     rather than shared, because a media query cannot be switched on by an attribute. */
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --color-brand-50: oklch(0.22 0.028 162);
+    --color-brand-100: oklch(0.26 0.038 162);
+    --color-brand-200: oklch(0.32 0.05 162);
+    --color-brand-300: oklch(0.4 0.062 162);
+    --color-brand-400: oklch(0.5 0.075 162);
+    --color-brand-500: oklch(0.6 0.085 162);
+    --color-brand-600: oklch(0.68 0.092 162);
+    --color-brand-700: oklch(0.74 0.095 162);
+    --color-brand-800: oklch(0.84 0.07 162);
+    --color-brand-900: oklch(0.93 0.04 162);
+    --color-brand-950: oklch(0.97 0.02 162);
+
+    --color-oncolor: oklch(0.19 0.035 162);
+
+    --color-canvas: oklch(0.17 0.018 162);
+    --color-ink: oklch(0.93 0.015 162);
+    --color-ink-muted: oklch(0.72 0.018 162);
+    --color-surface: oklch(0.255 0.022 162);
+
+    --color-hairline: oklch(0.93 0.04 162 / 0.14);
+    --shadow-panel:
+      0 1px 2px oklch(0.1 0.02 162 / 0.4), 0 16px 40px -20px oklch(0.1 0.02 162 / 0.6);
+    --shadow-raised:
+      0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
+
+    --ground-wash:
+      radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-canvas text-ink antialiased;
-    /* Two faint green washes keep the light ground from looking flat behind
-       translucent panels, without tinting text areas. */
-    background-image:
-      radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.07), transparent 60%),
-      radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.05), transparent 55%);
+    background-image: var(--ground-wash);
     background-attachment: fixed;
   }
 
@@ -55,8 +159,38 @@
   }
 }
 
+/**
+ * Pins a subtree to the light palette whatever the provider chose.
+ *
+ * The public booking page wears the provider's own colour and is read by their clients, not
+ * by them. A private preference for a dark dashboard says nothing about how their shop
+ * window should look to a stranger — and `brandStyle` works out that colour's contrast
+ * against a light ground, so a dark one underneath would quietly undo it.
+ */
+@utility theme-light {
+  color-scheme: light;
+
+  --color-brand-50: oklch(0.97 0.017 162);
+  --color-brand-100: oklch(0.93 0.035 162);
+  --color-brand-200: oklch(0.87 0.055 162);
+  --color-brand-300: oklch(0.77 0.075 162);
+  --color-brand-400: oklch(0.65 0.088 162);
+  --color-brand-500: oklch(0.55 0.09 162);
+  --color-brand-600: oklch(0.46 0.083 162);
+  --color-brand-700: oklch(0.38 0.072 162);
+  --color-brand-800: oklch(0.3 0.058 162);
+  --color-brand-900: oklch(0.24 0.046 162);
+  --color-brand-950: oklch(0.17 0.034 162);
+
+  --color-oncolor: #ffffff;
+  --color-ink: oklch(0.26 0.021 162);
+  --color-ink-muted: oklch(0.52 0.017 162);
+  --color-surface: #ffffff;
+  --color-hairline: oklch(0.38 0.072 162 / 0.12);
+}
+
 @utility panel {
-  /* The shared surface: translucent white over the tinted ground, hairline ring,
+  /* The shared surface: a translucent sheet over the tinted ground, hairline ring,
      soft shadow. Everything card-like in the app uses this. */
-  @apply rounded-2xl bg-white/72 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
+  @apply rounded-2xl bg-surface/72 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
 }

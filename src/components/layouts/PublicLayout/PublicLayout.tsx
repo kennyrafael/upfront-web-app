@@ -35,7 +35,10 @@ export function PublicLayout({
   return (
     <div
       style={brandStyle(brandColor)}
-      className="relative flex min-h-dvh flex-col items-center px-4 py-10"
+      // `theme-light` pins this page to the light palette. It belongs to the provider's
+      // clients, not to the provider, and their private preference for a dark dashboard is
+      // not a statement about how their shop window should look to a stranger.
+      className="theme-light relative flex min-h-dvh flex-col items-center px-4 py-10"
     >
       {/* Painted from the ramp rather than fixed oklch values, so it follows the colour too. */}
       <div
@@ -62,7 +65,7 @@ export function PublicLayout({
           </p>
         ) : null}
 
-        <div className="rounded-2xl bg-white/92 p-6 shadow-raised ring-1 ring-white/20 backdrop-blur-2xl sm:p-8">
+        <div className="rounded-2xl bg-surface/92 p-6 shadow-raised ring-1 ring-hairline backdrop-blur-2xl sm:p-8">
           {title ? <h1 className="text-xl font-semibold text-brand-900">{title}</h1> : null}
           {subtitle ? <p className="mt-1 text-sm text-ink-muted">{subtitle}</p> : null}
           <div className={title ? 'mt-6' : ''}>{children}</div>
