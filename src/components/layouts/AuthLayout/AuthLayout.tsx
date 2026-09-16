@@ -30,7 +30,7 @@ export function AuthLayout({ title, subtitle, children, footer, size = 'md' }: A
           <div className="mt-6">{children}</div>
         </div>
 
-        {footer ? <div className="mt-6 text-center text-sm text-brand-100">{footer}</div> : null}
+        {footer ? <div className="mt-6 text-center text-sm text-onbackdrop">{footer}</div> : null}
       </div>
     </div>
   );

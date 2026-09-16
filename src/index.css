@@ -32,7 +32,8 @@
   --color-ink-muted: #5f6d68;
   --color-sheet: #ffffff;
   --color-backdrop: #1d3b31;
-  --color-scrim: #1f2c28;
+  --color-onbackdrop: rgba(255, 255, 255, 0.75);
+  --color-scrim: rgba(0, 0, 0, 0.6);
   --color-hairline: rgba(29, 59, 49, 0.12);
 
   --color-warn: #ffc53d;
@@ -103,11 +104,25 @@
      */
     --color-sheet: var(--color-panel-solid);
 
-    /* The deep field behind sign-in and the public booking page, and the wash behind a
-       dialog. Both stay dark in either appearance: a scrim that inverted would wash the
-       page out instead of dimming it. */
-    --color-backdrop: var(--jade-12);
-    --color-scrim: var(--gray-a11);
+    /**
+     * The deep field behind sign-in and the public booking page, and the wash behind a
+     * dialog. Both have to stay dark in *either* appearance.
+     *
+     * **Neither can be a step from an accent scale.** Themes flips the whole ramp between
+     * appearances, so `--jade-12` is a near-black green in light and a pale mint in dark —
+     * which turned the sign-in screen into a bright green field with a dark card on it. The
+     * scrim was worse: `--gray-a11` inverted to a near-white wash, so a dialog *lightened*
+     * the page behind it instead of dimming it.
+     *
+     * So the backdrop is a literal, and the scrim uses Radix's own `--color-overlay`, which
+     * is what they dim their dialogs with and is dark in both.
+     */
+    --color-backdrop: oklch(0.24 0.046 162);
+    /* Its pair. Anything written on the backdrop needs an ink that does not flip either —
+       the sign-in footer used `brand-100`, which is a pale green in light and a near-black
+       one in dark, and vanished against the field it sits on. */
+    --color-onbackdrop: rgba(255, 255, 255, 0.75);
+    --color-scrim: var(--color-overlay);
 
     /* An alpha step, so a hairline stays a hairline over whatever surface is beneath it. */
     --color-hairline: var(--gray-a6);

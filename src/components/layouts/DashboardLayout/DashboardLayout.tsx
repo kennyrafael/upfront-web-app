@@ -31,6 +31,15 @@ const NAV_ITEMS: { to: string; label: string; icon: IconName }[] = [
   { to: '/compliance', label: 'Compliance', icon: 'compliance' },
 ];
 
+/**
+ * The width at which a persistent sidebar earns its place.
+ *
+ * `lg` rather than `md`, because 240px of navigation out of a 768px window is a third of
+ * the screen spent on six links — and what is left over is too narrow for the forms, which
+ * wrap into unreadable stacks. Below this the sidebar is a drawer and the content gets the
+ * whole width.
+ */
+
 /** Remembered per browser: a provider who works collapsed should stay collapsed. */
 const COLLAPSED_KEY = 'upfront.sidebar.collapsed';
 
@@ -89,16 +98,18 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
     // One provider for the whole shell: Radix shares its open delay across every tooltip
     // beneath it, so running a cursor down the rail does not re-wait at each icon.
     <TooltipProvider>
-      <div className="min-h-dvh md:flex">
+      <div className="min-h-dvh lg:flex">
         {drawerOpen && (
           <>
             <button
               type="button"
               aria-label="Close menu"
               onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 z-40 bg-scrim/30 md:hidden"
+              // No opacity modifier: Radix's overlay already carries the alpha it wants, and
+              // thinning it further leaves the page behind barely dimmed.
+              className="fixed inset-0 z-40 bg-scrim lg:hidden"
             />
-            <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sheet shadow-xl md:hidden">
+            <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sheet shadow-xl lg:hidden">
               <div className="flex h-14 items-center justify-between border-b border-hairline px-4">
                 <span className="font-semibold tracking-tight text-brand-800">Upfront</span>
                 <button
@@ -116,7 +127,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
 
         <aside
           className={cn(
-            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet/60 backdrop-blur-xl transition-[width] duration-200 md:flex',
+            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet/60 backdrop-blur-xl transition-[width] duration-200 lg:flex',
             collapsed ? 'w-16' : 'w-60',
           )}
         >
@@ -152,11 +163,11 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="rounded-lg p-2 text-brand-800 hover:bg-brand-700/8 md:hidden"
+              className="rounded-lg p-2 text-brand-800 hover:bg-brand-700/8 lg:hidden"
             >
               <Icon name="menu" label="Open menu" />
             </button>
-            <span className="font-semibold tracking-tight text-brand-800 md:hidden">Upfront</span>
+            <span className="font-semibold tracking-tight text-brand-800 lg:hidden">Upfront</span>
 
             <div className="ml-auto flex items-center gap-1.5">
               <NotificationBell />
