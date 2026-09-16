@@ -49,7 +49,7 @@ export function AppRoutes() {
       <Routes>
         {/*
           Public, and deliberately outside ProtectedRoute and RequireOnboarding: these are
-          for clients who have no account and never will. A signed-in provider opening
+          for clients who have no account and never will. A signed-in user opening
           their own booking link sees exactly what a stranger sees.
         */}
         <Route path="/book/:slug" element={<PublicBookingPage />} />
@@ -73,7 +73,7 @@ export function AppRoutes() {
         />
         {/*
           Reachable signed out, because that is the state everyone who needs them is in.
-          `/verify-email` is deliberately not GuestOnly: a provider usually clicks it from
+          `/verify-email` is deliberately not GuestOnly: a user usually clicks it from
           their inbox while already signed in, and bouncing them home would leave the
           address unconfirmed with no explanation.
         */}

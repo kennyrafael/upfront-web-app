@@ -18,7 +18,7 @@ function messageFor(error: unknown, fallback: string): string {
  * take the account with it.
  */
 export function SignInSettings() {
-  const provider = useAuthStore((state) => state.provider);
+  const user = useAuthStore((state) => state.user);
 
   const [email, setEmail] = useState('');
   const [emailPassword, setEmailPassword] = useState('');
@@ -75,7 +75,7 @@ export function SignInSettings() {
       <CardHeader>
         <CardTitle>Signing in</CardTitle>
         <p className="mt-1 text-sm text-ink-muted">
-          You sign in as <span className="text-brand-900">{provider?.email}</span>.
+          You sign in as <span className="text-brand-900">{user?.email}</span>.
         </p>
       </CardHeader>
 

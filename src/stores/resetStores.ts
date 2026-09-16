@@ -1,9 +1,9 @@
 import { useAlertStore } from './useAlertStore';
 import { useBookingStore } from './useBookingStore';
+import { useBusinessStore } from './useBusinessStore';
 import { useClientStore } from './useClientStore';
 import { useComplianceStore } from './useComplianceStore';
 import { usePaymentStore } from './usePaymentStore';
-import { useProviderStore } from './useProviderStore';
 import { useServiceStore } from './useServiceStore';
 
 /**
@@ -11,7 +11,7 @@ import { useServiceStore } from './useServiceStore';
  * the previous one's data. Lives outside the stores to avoid importing between them.
  */
 export function resetDomainStores(): void {
-  useProviderStore.getState().reset();
+  useBusinessStore.getState().reset();
   useServiceStore.getState().reset();
   useClientStore.getState().reset();
   useBookingStore.getState().reset();

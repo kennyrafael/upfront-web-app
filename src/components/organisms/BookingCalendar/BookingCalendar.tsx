@@ -9,7 +9,7 @@ import {
   isSameDay,
   minutesSinceMidnight,
 } from '@/lib/utils';
-import { useBookingStore, useProviderStore } from '@/stores';
+import { useBookingStore, useBusinessStore } from '@/stores';
 
 export interface BookingCalendarProps {
   onSelect: (booking: Booking) => void;
@@ -49,7 +49,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
   const bookings = useBookingStore((state) => state.items);
   const weekStart = useBookingStore((state) => state.weekStart);
   const status = useBookingStore((state) => state.status);
-  const workingHours = useProviderStore((state) => state.profile?.workingHours);
+  const workingHours = useBusinessStore((state) => state.profile?.workingHours);
 
   const visible = useMemo(
     () => bookings.filter((booking) => !HIDDEN_FROM_CALENDAR.includes(booking.status)),

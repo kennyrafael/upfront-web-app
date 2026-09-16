@@ -2,15 +2,15 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   BrandingSettings,
+  BusinessProfileForm,
   DashboardLayout,
-  ProviderProfileForm,
   PublicBookingSettings,
   SignInSettings,
 } from '@/components';
-import { useProviderStore } from '@/stores';
+import { useBusinessStore } from '@/stores';
 
 export function SettingsPage() {
-  const load = useProviderStore((state) => state.load);
+  const load = useBusinessStore((state) => state.load);
   const { hash } = useLocation();
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function SettingsPage() {
 
   return (
     <DashboardLayout title="Settings" description="Your business details and the hours you work.">
-      <ProviderProfileForm />
+      <BusinessProfileForm />
 
       <div className="mt-6">
         <SignInSettings />

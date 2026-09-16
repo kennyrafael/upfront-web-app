@@ -13,14 +13,14 @@ import { describeBooking } from '@/lib/api';
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
 import {
   useBookingStore,
+  useBusinessStore,
   useClientStore,
   usePaymentStore,
-  useProviderStore,
   useServiceStore,
 } from '@/stores';
 
 export function DashboardPage() {
-  const profile = useProviderStore((state) => state.profile);
+  const profile = useBusinessStore((state) => state.profile);
   const services = useServiceStore((state) => state.items);
   const loadServices = useServiceStore((state) => state.load);
   const clients = useClientStore((state) => state.items);

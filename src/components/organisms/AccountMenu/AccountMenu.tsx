@@ -22,7 +22,7 @@ const ITEM_CLASS = 'flex w-full cursor-pointer items-center gap-3';
  * something a keyboard user expects from a thing that looks like this.
  */
 export function AccountMenu() {
-  const provider = useAuthStore((state) => state.provider);
+  const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
@@ -36,7 +36,7 @@ export function AccountMenu() {
           aria-label="Account"
           className="rounded-full outline-none transition-opacity hover:opacity-80"
         >
-          <Avatar name={provider?.name} />
+          <Avatar name={user?.name} />
         </button>
       </DropdownMenu.Trigger>
 
@@ -46,10 +46,8 @@ export function AccountMenu() {
       <DropdownMenu.Content align="end" variant="soft" className="min-w-64">
         <DropdownMenu.Label>
           <div className="py-1">
-            <p className="truncate font-medium text-brand-900">{provider?.name}</p>
-            <p className="truncate text-xs text-ink-muted">
-              {provider?.businessName ?? provider?.email}
-            </p>
+            <p className="truncate font-medium text-brand-900">{user?.name}</p>
+            <p className="truncate text-xs text-ink-muted">{user?.businessName ?? user?.email}</p>
           </div>
         </DropdownMenu.Label>
 

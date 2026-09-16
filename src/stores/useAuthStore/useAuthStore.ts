@@ -2,16 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
   ApiError,
+  type AuthenticatedUser,
   authApi,
   type LoginPayload,
-  type Provider,
   type SignupPayload,
   setSessionHandlers,
   setTokenReader,
 } from '@/lib/api';
 
 interface AuthState {
-  provider: Provider | null;
+  user: AuthenticatedUser | null;
   accessToken: string | null;
   status: 'idle' | 'loading';
   error: string | null;
@@ -23,7 +23,7 @@ interface AuthState {
   /** Revalidates on boot, falling back to the refresh cookie before giving up. */
   restore: () => Promise<void>;
   /** After confirming an email address, so the banner disappears without a reload. */
-  markVerified: (provider: Provider) => void;
+  markVerified: (user: AuthenticatedUser) => void;
   clearError: () => void;
 }
 
@@ -37,7 +37,7 @@ function toMessage(error: unknown): string {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      provider: null,
+      user: null,
       accessToken: null,
       status: 'idle',
       error: null,
@@ -45,8 +45,8 @@ export const useAuthStore = create<AuthState>()(
       login: async (payload) => {
         set({ status: 'loading', error: null });
         try {
-          const { accessToken, provider } = await authApi.login(payload);
-          set({ accessToken, provider, status: 'idle' });
+          const { accessToken, user } = await authApi.login(payload);
+          set({ accessToken, user, status: 'idle' });
           return true;
         } catch (error) {
           set({ status: 'idle', error: toMessage(error) });
@@ -57,8 +57,8 @@ export const useAuthStore = create<AuthState>()(
       signup: async (payload) => {
         set({ status: 'loading', error: null });
         try {
-          const { accessToken, provider } = await authApi.signup(payload);
-          set({ accessToken, provider, status: 'idle' });
+          const { accessToken, user } = await authApi.signup(payload);
+          set({ accessToken, user, status: 'idle' });
           return true;
         } catch (error) {
           set({ status: 'idle', error: toMessage(error) });
@@ -79,16 +79,16 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // Already gone, or the network is down. Either way, sign out locally.
         }
-        set({ provider: null, accessToken: null, error: null });
+        set({ user: null, accessToken: null, error: null });
       },
 
       refresh: async () => {
         try {
-          const { accessToken, provider } = await authApi.refresh();
-          set({ accessToken, provider });
+          const { accessToken, user } = await authApi.refresh();
+          set({ accessToken, user });
           return accessToken;
         } catch {
-          set({ provider: null, accessToken: null });
+          set({ user: null, accessToken: null });
           return null;
         }
       },
@@ -102,19 +102,29 @@ export const useAuthStore = create<AuthState>()(
       restore: async () => {
         if (!get().accessToken) return;
         try {
-          set({ provider: await authApi.me() });
+          set({ user: await authApi.me() });
         } catch {
           await get().refresh();
         }
       },
 
-      markVerified: (provider) => set({ provider }),
+      markVerified: (user) => set({ user }),
 
       clearError: () => set({ error: null }),
     }),
     {
       name: STORAGE_KEY,
-      partialize: (state) => ({ accessToken: state.accessToken, provider: state.provider }),
+      version: 1,
+      /**
+       * v0 persisted the signed-in account as `provider`. It is now `user`, and carries a
+       * `businessId` the old shape never had.
+       *
+       * Discarding rather than reshaping is deliberate: an ended session is a state every
+       * page already handles, and a half-shaped one is not. The cost is that everyone signs
+       * in again once.
+       */
+      migrate: () => ({ accessToken: null, user: null }),
+      partialize: (state) => ({ accessToken: state.accessToken, user: state.user }),
     },
   ),
 );
@@ -123,8 +133,8 @@ export const useAuthStore = create<AuthState>()(
 setTokenReader(() => useAuthStore.getState().accessToken);
 
 // And it calls back here when a request meets a 401, so one expired access token is renewed
-// rather than dumping the provider on the sign-in screen mid-task.
+// rather than dumping the user on the sign-in screen mid-task.
 setSessionHandlers({
   refresh: () => useAuthStore.getState().refresh(),
-  onSignedOut: () => useAuthStore.setState({ provider: null, accessToken: null }),
+  onSignedOut: () => useAuthStore.setState({ user: null, accessToken: null }),
 });

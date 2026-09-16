@@ -12,7 +12,7 @@ import {
 } from '@/components';
 import type { Invoice } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
-import { useComplianceStore, useProviderStore } from '@/stores';
+import { useBusinessStore, useComplianceStore } from '@/stores';
 
 /** The current year and the four before it — enough for any open fiscal question. */
 function yearOptions(): { value: string; label: string }[] {
@@ -31,7 +31,7 @@ export function CompliancePage() {
   const status = useComplianceStore((state) => state.status);
   const error = useComplianceStore((state) => state.error);
   const exportCsv = useComplianceStore((state) => state.exportCsv);
-  const loadProfile = useProviderStore((state) => state.load);
+  const loadProfile = useBusinessStore((state) => state.load);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Invoice>();

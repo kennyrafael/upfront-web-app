@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { BookingCalendar, BookingFormDialog, Button, DashboardLayout } from '@/components';
 import type { Booking } from '@/lib/api';
 import { formatWeekRange, startOfWeek } from '@/lib/utils';
-import { useBookingStore, useProviderStore } from '@/stores';
+import { useBookingStore, useBusinessStore } from '@/stores';
 
 export function BookingsPage() {
   const load = useBookingStore((state) => state.load);
@@ -10,8 +10,8 @@ export function BookingsPage() {
   const shiftWeek = useBookingStore((state) => state.shiftWeek);
   const goToWeek = useBookingStore((state) => state.goToWeek);
   const error = useBookingStore((state) => state.error);
-  const loadProfile = useProviderStore((state) => state.load);
-  const timezone = useProviderStore((state) => state.profile?.timezone);
+  const loadProfile = useBusinessStore((state) => state.load);
+  const timezone = useBusinessStore((state) => state.profile?.timezone);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Booking>();

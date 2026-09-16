@@ -4,7 +4,7 @@ import { FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import type { WorkingHours } from '@/lib/api';
 import { amountToCents, cn } from '@/lib/utils';
-import { useProviderStore, useServiceStore } from '@/stores';
+import { useBusinessStore, useServiceStore } from '@/stores';
 
 export interface ProviderOnboardingFormProps {
   onDone: () => void;
@@ -18,12 +18,12 @@ const DEFAULT_HOURS: WorkingHours[] = [1, 2, 3, 4, 5].map((weekday) => ({
   end: '18:00',
 }));
 
-export function ProviderOnboardingForm({ onDone }: ProviderOnboardingFormProps) {
-  const profile = useProviderStore((state) => state.profile);
-  const updateProfile = useProviderStore((state) => state.update);
-  const completeOnboarding = useProviderStore((state) => state.completeOnboarding);
-  const providerStatus = useProviderStore((state) => state.status);
-  const providerError = useProviderStore((state) => state.error);
+export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) {
+  const profile = useBusinessStore((state) => state.profile);
+  const updateProfile = useBusinessStore((state) => state.update);
+  const completeOnboarding = useBusinessStore((state) => state.completeOnboarding);
+  const providerStatus = useBusinessStore((state) => state.status);
+  const providerError = useBusinessStore((state) => state.error);
 
   const createService = useServiceStore((state) => state.create);
   const serviceError = useServiceStore((state) => state.error);

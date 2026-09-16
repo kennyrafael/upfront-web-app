@@ -7,7 +7,7 @@ export interface WorkingHours {
   end: string;
 }
 
-export interface ProviderProfile {
+export interface BusinessProfile {
   id: string;
   email: string;
   name: string;
@@ -30,7 +30,7 @@ export interface ProviderProfile {
   logoUrl?: string;
 }
 
-export interface UpdateProviderPayload {
+export interface UpdateBusinessPayload {
   name?: string;
   businessName?: string;
   phone?: string;
@@ -47,24 +47,24 @@ export interface UpdateProviderPayload {
   brandColor?: string;
 }
 
-export const providersApi = {
-  me: () => api.get<ProviderProfile>('/providers/me'),
-  update: (payload: UpdateProviderPayload) => api.patch<ProviderProfile>('/providers/me', payload),
-  completeOnboarding: () => api.post<ProviderProfile>('/providers/me/onboarding/complete'),
+export const businessesApi = {
+  me: () => api.get<BusinessProfile>('/businesses/me'),
+  update: (payload: UpdateBusinessPayload) => api.patch<BusinessProfile>('/businesses/me', payload),
+  completeOnboarding: () => api.post<BusinessProfile>('/businesses/me/onboarding/complete'),
   /** Mints a slug from the business name the first time, so publishing is one click. */
-  enablePublicBooking: () => api.post<ProviderProfile>('/providers/me/public-booking/enable'),
+  enablePublicBooking: () => api.post<BusinessProfile>('/businesses/me/public-booking/enable'),
 
   uploadLogo: (file: File) => {
     const form = new FormData();
     form.append('logo', file);
-    return api.upload<ProviderProfile>('/providers/me/logo', form);
+    return api.upload<BusinessProfile>('/businesses/me/logo', form);
   },
-  removeLogo: () => api.delete<ProviderProfile>('/providers/me/logo'),
+  removeLogo: () => api.delete<BusinessProfile>('/businesses/me/logo'),
   /**
    * The logo as a data URL, for the settings preview.
    *
    * `logoUrl` cannot serve that screen: it is a public address that only exists once the
    * booking page is published, so a provider still setting things up would see nothing.
    */
-  myLogo: () => api.get<{ dataUrl: string }>('/providers/me/logo'),
+  myLogo: () => api.get<{ dataUrl: string }>('/businesses/me/logo'),
 };

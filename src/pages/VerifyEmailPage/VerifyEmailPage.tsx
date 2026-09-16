@@ -29,9 +29,9 @@ export function VerifyEmailPage() {
 
     void (async () => {
       try {
-        const provider = await authApi.verifyEmail(token);
+        const user = await authApi.verifyEmail(token);
         // Updates the banner immediately rather than waiting for the next page load.
-        if (signedIn) markVerified(provider);
+        if (signedIn) markVerified(user);
         setState('done');
       } catch (error) {
         setState('failed');

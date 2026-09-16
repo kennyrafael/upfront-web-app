@@ -1,23 +1,23 @@
 import { create } from 'zustand';
 import {
   ApiError,
-  type ProviderProfile,
-  providersApi,
-  type UpdateProviderPayload,
+  type BusinessProfile,
+  businessesApi,
+  type UpdateBusinessPayload,
 } from '@/lib/api';
 
 interface ProviderState {
-  profile: ProviderProfile | null;
+  profile: BusinessProfile | null;
   status: 'idle' | 'loading' | 'saving';
   error: string | null;
   load: () => Promise<void>;
-  update: (payload: UpdateProviderPayload) => Promise<boolean>;
+  update: (payload: UpdateBusinessPayload) => Promise<boolean>;
   completeOnboarding: () => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }
 
-export const useProviderStore = create<ProviderState>((set) => ({
+export const useBusinessStore = create<ProviderState>((set) => ({
   profile: null,
   status: 'idle',
   error: null,
@@ -25,7 +25,7 @@ export const useProviderStore = create<ProviderState>((set) => ({
   load: async () => {
     set({ status: 'loading', error: null });
     try {
-      set({ profile: await providersApi.me(), status: 'idle' });
+      set({ profile: await businessesApi.me(), status: 'idle' });
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });
     }
@@ -34,7 +34,7 @@ export const useProviderStore = create<ProviderState>((set) => ({
   update: async (payload) => {
     set({ status: 'saving', error: null });
     try {
-      set({ profile: await providersApi.update(payload), status: 'idle' });
+      set({ profile: await businessesApi.update(payload), status: 'idle' });
       return true;
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });
@@ -45,7 +45,7 @@ export const useProviderStore = create<ProviderState>((set) => ({
   completeOnboarding: async () => {
     set({ status: 'saving', error: null });
     try {
-      set({ profile: await providersApi.completeOnboarding(), status: 'idle' });
+      set({ profile: await businessesApi.completeOnboarding(), status: 'idle' });
       return true;
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });

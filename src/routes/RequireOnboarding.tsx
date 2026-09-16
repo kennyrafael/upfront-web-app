@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Spinner } from '@/components/atoms';
-import { useProviderStore } from '@/stores';
+import { useBusinessStore } from '@/stores';
 
 export interface RequireOnboardingProps {
   children: ReactNode;
@@ -12,10 +12,10 @@ export interface RequireOnboardingProps {
  * finished the wizard to /onboarding. Sits inside ProtectedRoute, so a token exists here.
  */
 export function RequireOnboarding({ children }: RequireOnboardingProps) {
-  const profile = useProviderStore((state) => state.profile);
-  const status = useProviderStore((state) => state.status);
-  const error = useProviderStore((state) => state.error);
-  const load = useProviderStore((state) => state.load);
+  const profile = useBusinessStore((state) => state.profile);
+  const status = useBusinessStore((state) => state.status);
+  const error = useBusinessStore((state) => state.error);
+  const load = useBusinessStore((state) => state.load);
 
   useEffect(() => {
     if (!profile && status === 'idle' && !error) {

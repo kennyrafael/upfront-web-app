@@ -2,8 +2,8 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
-import type { ProviderProfile, WorkingHours } from '@/lib/api';
-import { useProviderStore } from '@/stores';
+import type { BusinessProfile, WorkingHours } from '@/lib/api';
+import { useBusinessStore } from '@/stores';
 
 interface ProfileFields {
   name: string;
@@ -12,7 +12,7 @@ interface ProfileFields {
   nif: string;
 }
 
-function toFields(profile: ProviderProfile | null): ProfileFields {
+function toFields(profile: BusinessProfile | null): ProfileFields {
   return {
     name: profile?.name ?? '',
     businessName: profile?.businessName ?? '',
@@ -21,11 +21,11 @@ function toFields(profile: ProviderProfile | null): ProfileFields {
   };
 }
 
-export function ProviderProfileForm() {
-  const profile = useProviderStore((state) => state.profile);
-  const status = useProviderStore((state) => state.status);
-  const error = useProviderStore((state) => state.error);
-  const update = useProviderStore((state) => state.update);
+export function BusinessProfileForm() {
+  const profile = useBusinessStore((state) => state.profile);
+  const status = useBusinessStore((state) => state.status);
+  const error = useBusinessStore((state) => state.error);
+  const update = useBusinessStore((state) => state.update);
 
   const [fields, setFields] = useState<ProfileFields>(() => toFields(profile));
   const [workingHours, setWorkingHours] = useState<WorkingHours[]>(profile?.workingHours ?? []);

@@ -10,17 +10,17 @@ import {
   Switch,
 } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
-import { providersApi } from '@/lib/api';
-import { useProviderStore } from '@/stores';
+import { businessesApi } from '@/lib/api';
+import { useBusinessStore } from '@/stores';
 
 /** Mirrors the API's own rule, so an invalid slug is caught before the round trip. */
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
 
 export function PublicBookingSettings() {
-  const profile = useProviderStore((state) => state.profile);
-  const update = useProviderStore((state) => state.update);
-  const load = useProviderStore((state) => state.load);
-  const status = useProviderStore((state) => state.status);
+  const profile = useBusinessStore((state) => state.profile);
+  const update = useBusinessStore((state) => state.update);
+  const load = useBusinessStore((state) => state.load);
+  const status = useBusinessStore((state) => state.status);
 
   const [slug, setSlug] = useState(profile?.slug ?? '');
   const [leadTime, setLeadTime] = useState(String(profile?.bookingLeadTimeHours ?? 2));
@@ -48,7 +48,7 @@ export function PublicBookingSettings() {
     if (next && !profile?.slug) {
       setEnabling(true);
       try {
-        await providersApi.enablePublicBooking();
+        await businessesApi.enablePublicBooking();
         await load();
       } finally {
         setEnabling(false);
@@ -77,7 +77,7 @@ export function PublicBookingSettings() {
       setSaved(true);
     } else {
       // The API is the authority on whether an address is free or reserved.
-      setSlugError(useProviderStore.getState().error ?? undefined);
+      setSlugError(useBusinessStore.getState().error ?? undefined);
     }
   }
 

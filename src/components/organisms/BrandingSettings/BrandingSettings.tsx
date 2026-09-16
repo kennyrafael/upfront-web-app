@@ -1,7 +1,7 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle, Icon, Label } from '@/components/atoms';
-import { ApiError, providersApi } from '@/lib/api';
-import { useProviderStore } from '@/stores';
+import { ApiError, businessesApi } from '@/lib/api';
+import { useBusinessStore } from '@/stores';
 import { BookingPagePreview } from './BookingPagePreview';
 
 /** Upfront's own green, and what the page falls back to. */
@@ -13,10 +13,10 @@ const SUGGESTIONS = ['#144e36', '#0f5c7a', '#7a2f4e', '#b4551f', '#2d3a8c', '#3f
 const MAX_LOGO_KB = 200;
 
 export function BrandingSettings() {
-  const profile = useProviderStore((state) => state.profile);
-  const update = useProviderStore((state) => state.update);
-  const load = useProviderStore((state) => state.load);
-  const status = useProviderStore((state) => state.status);
+  const profile = useBusinessStore((state) => state.profile);
+  const update = useBusinessStore((state) => state.update);
+  const load = useBusinessStore((state) => state.load);
+  const status = useBusinessStore((state) => state.status);
 
   const fileInput = useRef<HTMLInputElement>(null);
   /** The blob URL on screen, so it can be released when it is replaced. */
@@ -41,7 +41,7 @@ export function BrandingSettings() {
    */
   useEffect(() => {
     let current = true;
-    providersApi
+    businessesApi
       .myLogo()
       .then(({ dataUrl }) => {
         if (current) setLogo(dataUrl);
@@ -90,7 +90,7 @@ export function BrandingSettings() {
     showLocally(file);
     setBusy(true);
     try {
-      await providersApi.uploadLogo(file);
+      await businessesApi.uploadLogo(file);
       // Reloads the profile so `logoUrl` — the address the public page uses — is current.
       await load();
       setSaved(true);
@@ -106,7 +106,7 @@ export function BrandingSettings() {
     setBusy(true);
     setError(undefined);
     try {
-      await providersApi.removeLogo();
+      await businessesApi.removeLogo();
       setLogo(undefined);
       await load();
     } catch (caught) {

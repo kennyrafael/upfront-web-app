@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Badge, Button, Dialog, Icon } from '@/components/atoms';
 import { type Invoice, invoicesApi } from '@/lib/api';
 import { formatDate, formatMoney, saveBlob } from '@/lib/utils';
-import { useProviderStore } from '@/stores';
+import { useBusinessStore } from '@/stores';
 
 export interface ReciboPreviewProps {
   open: boolean;
@@ -15,7 +15,7 @@ export interface ReciboPreviewProps {
  * transcribe it into the AT portal. Upfront never files — this is the hand-off.
  */
 export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProps) {
-  const profile = useProviderStore((state) => state.profile);
+  const profile = useBusinessStore((state) => state.profile);
   const [downloading, setDownloading] = useState(false);
   const [failed, setFailed] = useState(false);
 
