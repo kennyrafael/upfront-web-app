@@ -236,7 +236,7 @@ export function BookingFormDialog({
               {chosen.map((service) => (
                 <li
                   key={service.key}
-                  className="flex items-center gap-3 rounded-lg bg-surface/60 px-3 py-2 text-sm ring-1 ring-hairline"
+                  className="flex items-center gap-3 rounded-lg bg-sheet/60 px-3 py-2 text-sm ring-1 ring-hairline"
                 >
                   <span className="min-w-0 flex-1 truncate text-brand-900">{service.name}</span>
                   <span className="shrink-0 text-xs text-ink-muted">
@@ -332,7 +332,7 @@ export function BookingFormDialog({
         ) : null}
 
         {outsideHoursRejected ? (
-          <div className="flex items-center justify-between rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
+          <div className="flex items-center justify-between rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
             <div>
               <Label htmlFor="allow-outside-hours">Book outside working hours</Label>
               <p className="text-xs text-ink-muted">

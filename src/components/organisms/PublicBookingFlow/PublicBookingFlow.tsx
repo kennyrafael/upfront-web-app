@@ -97,7 +97,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
               type="button"
               onClick={() => void chooseService(item.id)}
               className={cn(
-                'w-full rounded-xl bg-surface/60 px-4 py-3 text-left ring-1 ring-hairline transition-colors',
+                'w-full rounded-xl bg-sheet/60 px-4 py-3 text-left ring-1 ring-hairline transition-colors',
                 'hover:bg-brand-700/8 focus-visible:outline focus-visible:outline-2',
                 'focus-visible:outline-offset-2 focus-visible:outline-brand-600',
               )}
@@ -167,7 +167,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
                   type="button"
                   onClick={() => selectSlot(slot)}
                   className={cn(
-                    'w-full rounded-lg bg-surface/60 px-2 py-2 text-sm tabular-nums text-brand-900',
+                    'w-full rounded-lg bg-sheet/60 px-2 py-2 text-sm tabular-nums text-brand-900',
                     'ring-1 ring-hairline transition-colors hover:bg-brand-700/10',
                     'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
                     'focus-visible:outline-brand-600',
@@ -209,7 +209,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         </Badge>
       </div>
 
-      <div className="rounded-xl bg-surface/50 px-4 py-3 ring-1 ring-hairline">
+      <div className="rounded-xl bg-sheet/50 px-4 py-3 ring-1 ring-hairline">
         <p className="font-medium text-brand-900">{service?.name}</p>
         <p className="text-sm text-ink-muted">
           {selectedSlot ? zonedDate(selectedSlot, provider.timezone) : ''} at{' '}

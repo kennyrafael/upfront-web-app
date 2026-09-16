@@ -40,7 +40,10 @@ export function AccountMenu() {
         </button>
       </DropdownMenu.Trigger>
 
-      <DropdownMenu.Content align="end" variant="soft" className="w-64">
+      {/* A floor rather than a fixed width: Themes puts the menu inside a scroll area, so a
+          width its own padding and items then exceed gives a horizontal scrollbar rather
+          than a wider menu. */}
+      <DropdownMenu.Content align="end" variant="soft" className="min-w-64">
         <DropdownMenu.Label>
           <div className="py-1">
             <p className="truncate font-medium text-brand-900">{provider?.name}</p>

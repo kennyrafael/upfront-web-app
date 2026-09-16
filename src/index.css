@@ -30,7 +30,7 @@
   --color-canvas: #fbfefd;
   --color-ink: #1d3b31;
   --color-ink-muted: #5f6d68;
-  --color-surface: #ffffff;
+  --color-sheet: #ffffff;
   --color-backdrop: #1d3b31;
   --color-scrim: #1f2c28;
   --color-hairline: rgba(29, 59, 49, 0.12);
@@ -89,10 +89,19 @@
     --color-ink: var(--gray-12);
     --color-ink-muted: var(--gray-11);
 
-    /* The material every card, dialog and bar is made of. Solid rather than translucent,
-       because these are already stacked on a washed ground and layering two translucencies
-       turns the text grey. */
-    --color-surface: var(--color-panel-solid);
+    /**
+     * The material every card, dialog and bar is made of.
+     *
+     * Called `sheet` and not `surface`, which is the obvious name, because Radix Themes
+     * already defines `--color-surface` for its own translucent component fills. Theirs is
+     * unlayered CSS and ours sits in `@layer base`, so unlayered wins the cascade and every
+     * `bg-surface` in the app quietly painted at 85% — which is what made the mobile
+     * sidebar see-through.
+     *
+     * Solid rather than translucent: these are already stacked on a washed ground, and
+     * layering two translucencies turns the text grey.
+     */
+    --color-sheet: var(--color-panel-solid);
 
     /* The deep field behind sign-in and the public booking page, and the wash behind a
        dialog. Both stay dark in either appearance: a scrim that inverted would wash the
@@ -150,5 +159,5 @@
 @utility panel {
   /* The shared surface: a panel over the washed ground, hairline ring, soft shadow.
      Everything card-like in the app uses this. */
-  @apply rounded-2xl bg-surface/85 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
+  @apply rounded-2xl bg-sheet/85 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
 }

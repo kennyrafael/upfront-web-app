@@ -143,7 +143,7 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
           />
         </div>
 
-        <div className="flex items-center justify-between rounded-xl bg-surface/50 px-3 py-3 ring-1 ring-hairline">
+        <div className="flex items-center justify-between rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
           <div>
             <Label htmlFor="service-active">Bookable</Label>
             <p className="text-xs text-ink-muted">Archived services stay on past bookings.</p>

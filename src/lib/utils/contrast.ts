@@ -76,7 +76,7 @@ export function brandStyle(hex?: string): CSSProperties | undefined {
     '--accent-a11': tintOf(hex, 0.98),
     '--accent-a12': tintOf(hex, 1),
 
-    '--accent-surface': tintOf(hex, 0.06),
+    '--accent-sheet': tintOf(hex, 0.06),
     '--accent-indicator': hex,
     '--accent-track': hex,
     // What Themes writes on top of step 9. Follows the colour rather than being white, so a

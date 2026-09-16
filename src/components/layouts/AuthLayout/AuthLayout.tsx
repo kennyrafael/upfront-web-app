@@ -24,7 +24,7 @@ export function AuthLayout({ title, subtitle, children, footer, size = 'md' }: A
       <div className={size === 'lg' ? 'w-full max-w-2xl' : 'w-full max-w-md'}>
         <p className="mb-8 text-center text-2xl font-semibold tracking-tight text-white">Upfront</p>
 
-        <div className="rounded-2xl bg-surface/92 p-8 shadow-raised ring-1 ring-hairline backdrop-blur-2xl">
+        <div className="rounded-2xl bg-sheet/92 p-8 shadow-raised ring-1 ring-hairline backdrop-blur-2xl">
           <h1 className="text-xl font-semibold text-brand-900">{title}</h1>
           {subtitle ? <p className="mt-1 text-sm text-ink-muted">{subtitle}</p> : null}
           <div className="mt-6">{children}</div>

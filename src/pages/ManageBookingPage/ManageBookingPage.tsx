@@ -165,7 +165,7 @@ export function ManageBookingPage() {
                       onClick={async () => {
                         if (await reschedule(token, slot)) setPicking(false);
                       }}
-                      className="w-full rounded-lg bg-surface/60 px-2 py-2 text-sm tabular-nums text-brand-900 ring-1 ring-hairline transition-colors hover:bg-brand-700/10 disabled:opacity-50"
+                      className="w-full rounded-lg bg-sheet/60 px-2 py-2 text-sm tabular-nums text-brand-900 ring-1 ring-hairline transition-colors hover:bg-brand-700/10 disabled:opacity-50"
                     >
                       {zonedTime(slot, booking.timezone)}
                     </button>

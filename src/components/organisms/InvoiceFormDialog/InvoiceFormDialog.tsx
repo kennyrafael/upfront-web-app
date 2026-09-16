@@ -197,7 +197,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
               and are not already on a recibo.
             </p>
           ) : (
-            <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto rounded-xl bg-surface/50 p-2 ring-1 ring-hairline">
+            <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto rounded-xl bg-sheet/50 p-2 ring-1 ring-hairline">
               {billable.map((booking) => (
                 <li key={booking.id}>
                   <label className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-700/6">
@@ -249,7 +249,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
           ) : null}
         </div>
 
-        <dl className="flex flex-col gap-1 rounded-xl bg-surface/50 px-4 py-3 text-sm ring-1 ring-hairline">
+        <dl className="flex flex-col gap-1 rounded-xl bg-sheet/50 px-4 py-3 text-sm ring-1 ring-hairline">
           <div className="flex justify-between">
             <dt className="text-ink-muted">Subtotal</dt>
             <dd className="tabular-nums text-brand-900">{formatMoney(subtotalCents)}</dd>

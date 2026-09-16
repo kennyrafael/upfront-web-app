@@ -109,7 +109,7 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
           </tbody>
         </table>
 
-        <dl className="flex flex-col gap-1 rounded-xl bg-surface/50 px-4 py-3 text-sm ring-1 ring-hairline">
+        <dl className="flex flex-col gap-1 rounded-xl bg-sheet/50 px-4 py-3 text-sm ring-1 ring-hairline">
           <div className="flex justify-between">
             <dt className="text-ink-muted">Base tributável</dt>
             <dd className="tabular-nums text-brand-900">{formatMoney(invoice.subtotalCents)}</dd>

@@ -71,7 +71,7 @@ export function PublicLayout({
           </p>
         ) : null}
 
-        <div className="rounded-2xl bg-surface/92 p-6 shadow-raised ring-1 ring-hairline backdrop-blur-2xl sm:p-8">
+        <div className="rounded-2xl bg-sheet/92 p-6 shadow-raised ring-1 ring-hairline backdrop-blur-2xl sm:p-8">
           {title ? <h1 className="text-xl font-semibold text-brand-900">{title}</h1> : null}
           {subtitle ? <p className="mt-1 text-sm text-ink-muted">{subtitle}</p> : null}
           <div className={title ? 'mt-6' : ''}>{children}</div>
