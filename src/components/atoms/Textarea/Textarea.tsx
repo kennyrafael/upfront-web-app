@@ -1,8 +1,9 @@
-import { forwardRef, type TextareaHTMLAttributes } from 'react';
-import { FIELD_BASE, FIELD_RING } from '@/components/atoms/Input';
+import { TextArea } from '@radix-ui/themes';
+import { type ComponentPropsWithoutRef, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps
+  extends Omit<ComponentPropsWithoutRef<typeof TextArea>, 'size' | 'color'> {
   invalid?: boolean;
 }
 
@@ -11,16 +12,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   ref,
 ) {
   return (
-    <textarea
+    <TextArea
       ref={ref}
       rows={rows}
+      size="2"
+      color={invalid ? 'red' : undefined}
       aria-invalid={invalid || undefined}
-      className={cn(
-        FIELD_BASE,
-        invalid ? FIELD_RING.invalid : FIELD_RING.normal,
-        'resize-y px-3 py-2 text-sm',
-        className,
-      )}
+      className={cn('w-full', className)}
       {...props}
     />
   );

@@ -1,197 +1,130 @@
 @import 'tailwindcss';
 
+/**
+ * Upfront's token names, registered with Tailwind.
+ *
+ * The values here are static fallbacks, not the live palette — the real assignments are in
+ * the `.radix-themes` rule below. Two blocks rather than one because of how custom
+ * properties resolve: `@theme` emits to `:root`, Radix Themes defines `--accent-*` and
+ * `--gray-*` on its own element, and `var(--accent-9)` written at `:root` resolves against
+ * a variable that does not exist there — to nothing at all. It has to be written where the
+ * Radix variables live.
+ *
+ * Keeping real colours here rather than empty placeholders means the app still renders
+ * something sane if the Themes stylesheet ever fails to load.
+ */
 @theme {
-  /* Deep pine green. 700 is the primary action colour; 800/900 carry the dark surfaces. */
-  --color-brand-50: oklch(0.97 0.017 162);
-  --color-brand-100: oklch(0.93 0.035 162);
-  --color-brand-200: oklch(0.87 0.055 162);
-  --color-brand-300: oklch(0.77 0.075 162);
-  --color-brand-400: oklch(0.65 0.088 162);
-  --color-brand-500: oklch(0.55 0.09 162);
-  --color-brand-600: oklch(0.46 0.083 162);
-  --color-brand-700: oklch(0.38 0.072 162);
-  --color-brand-800: oklch(0.3 0.058 162);
-  --color-brand-900: oklch(0.24 0.046 162);
-  --color-brand-950: oklch(0.17 0.034 162);
+  --color-brand-50: #f4fbf7;
+  --color-brand-100: #e6f7ed;
+  --color-brand-200: #d6f1e3;
+  --color-brand-300: #c3e9d7;
+  --color-brand-400: #acdec8;
+  --color-brand-500: #8bceb6;
+  --color-brand-600: #56ba9f;
+  --color-brand-700: #29a383;
+  --color-brand-800: #26997b;
+  --color-brand-900: #1d3b31;
+  --color-brand-950: #1d3b31;
 
-  /* What gets written on top of the brand colour. A token rather than a literal white,
-     because the public booking page repaints the ramp with the provider's own colour and
-     this has to follow it — see brandStyle in lib/utils/contrast.ts. */
   --color-oncolor: #ffffff;
-
-  /* Ground the whole UI sits on, and the ink used over it. */
-  --color-canvas: oklch(0.982 0.006 162);
-  --color-ink: oklch(0.26 0.021 162);
-  --color-ink-muted: oklch(0.52 0.017 162);
-
-  /* The material every card, dialog and bar is made of: a translucent sheet over the
-     tinted ground. A token rather than a literal white, because in dark mode this is the
-     one thing that has to stop being white, and it is used at eight different opacities
-     across the app. */
+  --color-canvas: #fbfefd;
+  --color-ink: #1d3b31;
+  --color-ink-muted: #5f6d68;
   --color-surface: #ffffff;
+  --color-backdrop: #1d3b31;
+  --color-scrim: #1f2c28;
+  --color-hairline: rgba(29, 59, 49, 0.12);
 
-  /* The deep field behind sign-in and the public booking page, and the wash over the page
-     behind a dialog. Both stay dark in either theme: a dialog scrim that inverted would
-     wash the page out instead of dimming it. */
-  --color-backdrop: oklch(0.24 0.046 162);
-  --color-scrim: oklch(0.17 0.034 162);
+  --color-warn: #ffc53d;
+  --color-warn-ink: #ab6400;
+  --color-warn-solid: #ffc53d;
+  --color-danger: #e5484d;
+  --color-danger-ink: #ce2c31;
+  --color-danger-solid: #e5484d;
+  --color-good: #29a383;
+  --color-good-ink: #208368;
 
-  /* Hairlines and shadows are tinted green rather than neutral grey, so the
-     translucent surfaces read as one material instead of stacked greys. */
-  --color-hairline: oklch(0.38 0.072 162 / 0.12);
-  --shadow-panel:
-    0 1px 2px oklch(0.24 0.046 162 / 0.05), 0 16px 40px -20px oklch(0.24 0.046 162 / 0.25);
-  --shadow-raised:
-    0 1px 2px oklch(0.24 0.046 162 / 0.08), 0 24px 56px -24px oklch(0.24 0.046 162 / 0.35);
-
-
-  /**
-   * Warning, danger and success, as token pairs rather than Tailwind's fixed palette.
-   *
-   * A fill and an ink, because the two move in opposite directions between themes: on a
-   * light ground the fill is a faint wash and the ink is nearly black, and on a dark one the
-   * fill stays faint while the ink has to become nearly white. `text-red-800` on
-   * `bg-red-600/8` reads perfectly in one theme and is invisible in the other, which is
-   * exactly what happened to pending bookings.
-   *
-   * The `-solid` fills are the ones that carry white text — a danger button, a progress
-   * bar — and so stay mid-toned in both themes rather than flipping.
-   */
-  --color-warn: oklch(0.75 0.15 75);
-  --color-warn-ink: oklch(0.42 0.1 75);
-  --color-warn-solid: oklch(0.72 0.16 65);
-
-  --color-danger: oklch(0.58 0.2 27);
-  --color-danger-ink: oklch(0.45 0.18 27);
-  --color-danger-solid: oklch(0.52 0.2 27);
-
-  --color-good: oklch(0.6 0.13 155);
-  --color-good-ink: oklch(0.45 0.11 155);
+  --shadow-panel: 0 1px 2px rgba(29, 59, 49, 0.06), 0 16px 40px -20px rgba(29, 59, 49, 0.22);
+  --shadow-raised: 0 1px 2px rgba(29, 59, 49, 0.09), 0 24px 56px -24px rgba(29, 59, 49, 0.32);
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-
-  /* Two faint washes keep the ground from looking flat behind translucent panels. Held in
-     a variable so the dark theme can swap them rather than fight them. */
-  --ground-wash:
-    radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.07), transparent 60%),
-    radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.05), transparent 55%);
 }
 
 /**
- * The dark palette.
+ * The live bridge: Upfront's names, pointed at Radix Themes' palette.
  *
- * **The brand ramp is re-pointed, not inverted.** Its steps are used semantically rather
- * than numerically: 900 means "strong text" and 700 means "the primary action". On a dark
- * ground 900 has to become light, while 700 must stay a green somebody would recognise as
- * the brand. A mechanical inversion gives a pastel button and nothing that reads as Upfront.
+ * Every colour in the app now comes from Themes. This is the only place that names a Radix
+ * variable — the components keep saying `brand-700`, `ink-muted`, `surface`, and nothing
+ * had to be rewritten to adopt them.
  *
- * Declared once here and consumed by every existing brand-* class, so no component needs to
- * know the theme exists.
+ * **Light and dark are no longer ours to maintain.** Themes redefines these under its own
+ * `.light` and `.dark` classes, so the hand-written dark palette that used to live here —
+ * two near-identical eighty-line blocks — is gone. Setting `appearance` on the `<Theme>` in
+ * App.tsx is the whole of it now.
+ *
+ * The step numbering is Radix's, and it is semantic rather than a lightness ramp: 9 is the
+ * solid fill an action is painted with, 11 is low-contrast text, 12 is high-contrast text.
+ * Those meanings hold in both appearances, which is why `text-brand-900` reads correctly on
+ * a dark ground without a second definition.
  */
 @layer base {
-  :root {
-    color-scheme: light;
-  }
+  .radix-themes {
+    --color-brand-50: var(--accent-2);
+    --color-brand-100: var(--accent-3);
+    --color-brand-200: var(--accent-4);
+    --color-brand-300: var(--accent-5);
+    --color-brand-400: var(--accent-6);
+    --color-brand-500: var(--accent-7);
+    --color-brand-600: var(--accent-8);
+    /* 700 is the primary action colour, so it maps to the step Radix paints buttons with. */
+    --color-brand-700: var(--accent-9);
+    --color-brand-800: var(--accent-10);
+    --color-brand-900: var(--accent-12);
+    --color-brand-950: var(--accent-12);
 
-  /* "System" stamps no attribute at all and falls through to this; an explicit light choice
-     opts back out of it. */
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-      color-scheme: dark;
+    /* What Radix itself writes on top of accent-9, so a label on a button is never guesswork. */
+    --color-oncolor: var(--accent-contrast);
 
-      --color-brand-50: oklch(0.22 0.028 162);
-      --color-brand-100: oklch(0.26 0.038 162);
-      --color-brand-200: oklch(0.32 0.05 162);
-      --color-brand-300: oklch(0.4 0.062 162);
-      --color-brand-400: oklch(0.5 0.075 162);
-      --color-brand-500: oklch(0.6 0.085 162);
-      --color-brand-600: oklch(0.68 0.092 162);
-      --color-brand-700: oklch(0.74 0.095 162);
-      --color-brand-800: oklch(0.84 0.07 162);
-      --color-brand-900: oklch(0.93 0.04 162);
-      --color-brand-950: oklch(0.97 0.02 162);
+    --color-canvas: var(--color-background);
+    --color-ink: var(--gray-12);
+    --color-ink-muted: var(--gray-11);
 
-      /* The primary action is now a light green, so what sits on it must be dark. */
-      --color-oncolor: oklch(0.19 0.035 162);
+    /* The material every card, dialog and bar is made of. Solid rather than translucent,
+       because these are already stacked on a washed ground and layering two translucencies
+       turns the text grey. */
+    --color-surface: var(--color-panel-solid);
 
-      --color-canvas: oklch(0.17 0.018 162);
-      --color-ink: oklch(0.93 0.015 162);
-      --color-ink-muted: oklch(0.72 0.018 162);
-      --color-surface: oklch(0.255 0.022 162);
+    /* The deep field behind sign-in and the public booking page, and the wash behind a
+       dialog. Both stay dark in either appearance: a scrim that inverted would wash the
+       page out instead of dimming it. */
+    --color-backdrop: var(--jade-12);
+    --color-scrim: var(--gray-a11);
 
-      --color-hairline: oklch(0.93 0.04 162 / 0.14);
-      /* Shadows do almost nothing on a dark ground. Depth comes from the surface sitting
-         lighter than the canvas, so these only deepen edges rather than pretending. */
-      --shadow-panel:
-        0 1px 2px oklch(0.1 0.02 162 / 0.4), 0 16px 40px -20px oklch(0.1 0.02 162 / 0.6);
-      --shadow-raised:
-        0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
+    /* An alpha step, so a hairline stays a hairline over whatever surface is beneath it. */
+    --color-hairline: var(--gray-a6);
 
+    /**
+     * Warning, danger and success, from Radix's own scales.
+     *
+     * A fill and an ink, because the two move in opposite directions between appearances:
+     * the fill stays a faint wash while the ink goes from nearly black to nearly white.
+     * Step 11 is Radix's "text on a tinted background", which is precisely this job — and
+     * it is what makes a pending booking legible in the dark theme without a second rule.
+     */
+    --color-warn: var(--amber-9);
+    --color-warn-ink: var(--amber-11);
+    --color-warn-solid: var(--amber-9);
 
-      /* Fills stay faint washes; the inks flip to the light end so they read on the dark
-         ground. The solids barely move — they carry white text in either theme. */
-      --color-warn: oklch(0.78 0.15 75);
-      --color-warn-ink: oklch(0.85 0.1 75);
-      --color-warn-solid: oklch(0.68 0.16 65);
+    --color-danger: var(--red-9);
+    --color-danger-ink: var(--red-11);
+    --color-danger-solid: var(--red-9);
 
-      --color-danger: oklch(0.65 0.2 27);
-      --color-danger-ink: oklch(0.78 0.14 27);
-      --color-danger-solid: oklch(0.55 0.2 27);
+    --color-good: var(--jade-9);
+    --color-good-ink: var(--jade-11);
 
-      --color-good: oklch(0.68 0.13 155);
-      --color-good-ink: oklch(0.84 0.11 155);
-      --ground-wash:
-        radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
-        radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
-    }
-  }
-
-  /* The same palette for an explicit dark choice on a light system. Spelled out twice
-     rather than shared, because a media query cannot be switched on by an attribute. */
-  :root[data-theme='dark'] {
-    color-scheme: dark;
-
-    --color-brand-50: oklch(0.22 0.028 162);
-    --color-brand-100: oklch(0.26 0.038 162);
-    --color-brand-200: oklch(0.32 0.05 162);
-    --color-brand-300: oklch(0.4 0.062 162);
-    --color-brand-400: oklch(0.5 0.075 162);
-    --color-brand-500: oklch(0.6 0.085 162);
-    --color-brand-600: oklch(0.68 0.092 162);
-    --color-brand-700: oklch(0.74 0.095 162);
-    --color-brand-800: oklch(0.84 0.07 162);
-    --color-brand-900: oklch(0.93 0.04 162);
-    --color-brand-950: oklch(0.97 0.02 162);
-
-    --color-oncolor: oklch(0.19 0.035 162);
-
-    --color-canvas: oklch(0.17 0.018 162);
-    --color-ink: oklch(0.93 0.015 162);
-    --color-ink-muted: oklch(0.72 0.018 162);
-    --color-surface: oklch(0.255 0.022 162);
-
-    --color-hairline: oklch(0.93 0.04 162 / 0.14);
-    --shadow-panel:
-      0 1px 2px oklch(0.1 0.02 162 / 0.4), 0 16px 40px -20px oklch(0.1 0.02 162 / 0.6);
-    --shadow-raised:
-      0 1px 2px oklch(0.1 0.02 162 / 0.5), 0 24px 56px -24px oklch(0.1 0.02 162 / 0.7);
-
-
-    /* Fills stay faint washes; the inks flip to the light end so they read on the dark
-       ground. The solids barely move — they carry white text in either theme. */
-    --color-warn: oklch(0.78 0.15 75);
-    --color-warn-ink: oklch(0.85 0.1 75);
-    --color-warn-solid: oklch(0.68 0.16 65);
-
-    --color-danger: oklch(0.65 0.2 27);
-    --color-danger-ink: oklch(0.78 0.14 27);
-    --color-danger-solid: oklch(0.55 0.2 27);
-
-    --color-good: oklch(0.68 0.13 155);
-    --color-good-ink: oklch(0.84 0.11 155);
-    --ground-wash:
-      radial-gradient(60rem 40rem at 12% -10%, oklch(0.46 0.083 162 / 0.16), transparent 60%),
-      radial-gradient(50rem 36rem at 100% 0%, oklch(0.55 0.09 162 / 0.1), transparent 55%);
+    /* Radix ships six depths; 2 is a resting panel and 4 is something floating over it. */
+    --shadow-panel: var(--shadow-2);
+    --shadow-raised: var(--shadow-4);
   }
 
   html {
@@ -199,55 +132,23 @@
   }
 
   body {
-    @apply bg-canvas text-ink antialiased;
-    background-image: var(--ground-wash);
-    background-attachment: fixed;
-  }
-
-  ::selection {
-    @apply bg-brand-200 text-brand-900;
+    @apply antialiased;
   }
 }
 
 /**
- * Pins a subtree to the light palette whatever the provider chose.
+ * Pins a subtree to the light appearance whatever the provider chose.
  *
- * The public booking page wears the provider's own colour and is read by their clients, not
- * by them. A private preference for a dark dashboard says nothing about how their shop
- * window should look to a stranger — and `brandStyle` works out that colour's contrast
- * against a light ground, so a dark one underneath would quietly undo it.
+ * Only `color-scheme` — the palette itself comes from the nested `<Theme appearance="light">`
+ * in `PublicLayout`. This is what stops the browser painting form controls and scrollbars
+ * dark inside an otherwise light page.
  */
 @utility theme-light {
   color-scheme: light;
-
-  --color-brand-50: oklch(0.97 0.017 162);
-  --color-brand-100: oklch(0.93 0.035 162);
-  --color-brand-200: oklch(0.87 0.055 162);
-  --color-brand-300: oklch(0.77 0.075 162);
-  --color-brand-400: oklch(0.65 0.088 162);
-  --color-brand-500: oklch(0.55 0.09 162);
-  --color-brand-600: oklch(0.46 0.083 162);
-  --color-brand-700: oklch(0.38 0.072 162);
-  --color-brand-800: oklch(0.3 0.058 162);
-  --color-brand-900: oklch(0.24 0.046 162);
-  --color-brand-950: oklch(0.17 0.034 162);
-
-  --color-oncolor: #ffffff;
-  --color-ink: oklch(0.26 0.021 162);
-  --color-ink-muted: oklch(0.52 0.017 162);
-  --color-surface: #ffffff;
-  --color-hairline: oklch(0.38 0.072 162 / 0.12);
-
-  --color-warn: oklch(0.75 0.15 75);
-  --color-warn-ink: oklch(0.42 0.1 75);
-  --color-danger: oklch(0.58 0.2 27);
-  --color-danger-ink: oklch(0.45 0.18 27);
-  --color-good: oklch(0.6 0.13 155);
-  --color-good-ink: oklch(0.45 0.11 155);
 }
 
 @utility panel {
-  /* The shared surface: a translucent sheet over the tinted ground, hairline ring,
-     soft shadow. Everything card-like in the app uses this. */
-  @apply rounded-2xl bg-surface/72 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
+  /* The shared surface: a panel over the washed ground, hairline ring, soft shadow.
+     Everything card-like in the app uses this. */
+  @apply rounded-2xl bg-surface/85 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
 }

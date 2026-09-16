@@ -1,3 +1,4 @@
+import { Theme } from '@radix-ui/themes';
 import type { ReactNode } from 'react';
 import { brandStyle } from '@/lib/utils';
 
@@ -33,11 +34,16 @@ export function PublicLayout({
   logoUrl,
 }: PublicLayoutProps) {
   return (
-    <div
+    // A nested Theme, pinned light and repainted with the provider's own accent.
+    //
+    // The page belongs to the provider's clients rather than to the provider: their private
+    // preference for a dark dashboard says nothing about how their shop window should look
+    // to a stranger, and `brandStyle` works that colour's contrast out against a light
+    // ground. `hasBackground` is off so the washed field behind stays visible.
+    <Theme
+      appearance="light"
+      hasBackground={false}
       style={brandStyle(brandColor)}
-      // `theme-light` pins this page to the light palette. It belongs to the provider's
-      // clients, not to the provider, and their private preference for a dark dashboard is
-      // not a statement about how their shop window should look to a stranger.
       className="theme-light relative flex min-h-dvh flex-col items-center px-4 py-10"
     >
       {/* Painted from the ramp rather than fixed oklch values, so it follows the colour too. */}
@@ -73,6 +79,6 @@ export function PublicLayout({
 
         <p className="mt-6 text-center text-xs text-brand-100/80">Booking powered by Upfront</p>
       </div>
-    </div>
+    </Theme>
   );
 }

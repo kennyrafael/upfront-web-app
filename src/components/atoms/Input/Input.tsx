@@ -1,44 +1,37 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { TextField } from '@radix-ui/themes';
+import { type ComponentPropsWithoutRef, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 export type InputSize = 'sm' | 'md' | 'lg';
 
-export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
+/**
+ * Built on Themes' own prop type rather than on `InputHTMLAttributes`.
+ *
+ * Themes narrows a few of the native props — `size` and `color` mean its own scales — so
+ * deriving from it is what keeps a caller from passing something the component will not
+ * accept and only finding out at runtime.
+ */
+export interface InputProps
+  extends Omit<ComponentPropsWithoutRef<typeof TextField.Root>, 'size' | 'color'> {
   size?: InputSize;
   invalid?: boolean;
 }
 
-const SIZES: Record<InputSize, string> = {
-  sm: 'h-8 px-2.5 text-sm',
-  md: 'h-10 px-3 text-sm',
-  lg: 'h-12 px-4 text-base',
-};
-
-/** Shared with Textarea and the Select trigger so every field reads as one control. */
-export const FIELD_BASE =
-  'block w-full rounded-lg bg-surface/60 text-ink ring-1 ring-inset transition ' +
-  'placeholder:text-ink-muted/60 focus:bg-surface focus:outline-none focus:ring-2 ' +
-  'disabled:cursor-not-allowed disabled:bg-brand-900/4 disabled:text-ink-muted';
-
-export const FIELD_RING = {
-  normal: 'ring-hairline focus:ring-brand-600',
-  invalid: 'ring-danger/60 focus:ring-danger',
-} as const;
+const SIZES: Record<InputSize, '1' | '2' | '3'> = { sm: '1', md: '2', lg: '3' };
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { size = 'md', invalid = false, className, ...props },
   ref,
 ) {
   return (
-    <input
+    <TextField.Root
       ref={ref}
+      size={SIZES[size]}
+      // Themes has no invalid variant; the red tint and the ARIA state are ours, and they
+      // have to agree — a field that only looks wrong is no use to a screen reader.
+      color={invalid ? 'red' : undefined}
       aria-invalid={invalid || undefined}
-      className={cn(
-        FIELD_BASE,
-        invalid ? FIELD_RING.invalid : FIELD_RING.normal,
-        SIZES[size],
-        className,
-      )}
+      className={cn('w-full', className)}
       {...props}
     />
   );

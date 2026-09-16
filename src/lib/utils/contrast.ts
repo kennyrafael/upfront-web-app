@@ -25,22 +25,22 @@ export function tintOf(hex: string, alpha: number): string {
 }
 
 /**
- * The provider's colour, as an override of the whole brand ramp.
+ * The provider's colour, as an override of Radix Themes' accent scale.
  *
- * Tailwind v4 compiles `bg-brand-700` to `var(--color-brand-700)`, so redefining those
- * variables on one element repaints everything inside it — buttons, rings, slot chips —
- * without a second set of components that take a colour prop. That is the only reason the
- * public page can be themed at all without duplicating it.
+ * Themes paints everything accented from `--accent-1` through `--accent-12`, so redefining
+ * those twelve on one element repaints every button, ring and tint inside it. That is the
+ * only reason a booking page can wear an arbitrary hex without a second set of components
+ * that take a colour prop.
  *
- * The two halves of the ramp are built differently, on purpose:
+ * The steps are Radix's meanings, not a lightness ramp: 1–2 are page and subtle backgrounds,
+ * 3–5 component fills, 6–8 borders, **9 the solid fill an action is painted with**, 10 its
+ * hover, 11 low-contrast text and 12 high-contrast text. 9 is the provider's colour exactly;
+ * everything else is derived from it.
  *
- * - **The light steps are mixed toward white** in oklab, which is what keeps a mid-blue from
- *   going grey-purple on its way up. Browsers without `color-mix` ignore those declarations
- *   and fall back to Upfront's green — a plain page, not a broken one.
- * - **The dark steps are pinned to a luminance**, not mixed. Mixing a pale yellow two thirds
- *   into black still leaves a mid olive, and `brand-900` is the body text and the page
- *   backdrop — it has to be dark whatever colour sits at the top of the ramp, or a pale pick
- *   produces a page that cannot be read.
+ * The light steps are mixed toward white in oklab, which keeps a mid-blue from going
+ * grey-purple on the way up. The text steps are pinned to a luminance instead, because
+ * mixing a pale yellow two thirds into black still leaves a mid olive — and 11 and 12 are
+ * read as text on a light ground, so they have to be dark whatever sits at step 9.
  */
 export function brandStyle(hex?: string): CSSProperties | undefined {
   if (!isHex(hex)) return undefined;
@@ -48,23 +48,40 @@ export function brandStyle(hex?: string): CSSProperties | undefined {
   const lighter = (amount: number) => `color-mix(in oklab, ${hex} ${amount}%, white)`;
 
   return {
-    '--color-brand-50': lighter(7),
-    '--color-brand-100': lighter(14),
-    '--color-brand-200': lighter(26),
-    '--color-brand-300': lighter(44),
-    '--color-brand-400': lighter(66),
-    '--color-brand-500': lighter(84),
-    '--color-brand-600': lighter(94),
-    // 700 is the primary action colour, and the one the provider actually picked. Nothing
-    // is done to it: what they chose is what lands on the button.
-    '--color-brand-700': hex,
-    '--color-brand-800': atLuminance(hex, 0.14),
-    '--color-brand-900': atLuminance(hex, 0.07),
-    '--color-brand-950': atLuminance(hex, 0.035),
-    '--color-hairline': tintOf(hex, 0.12),
-    // What gets written *on* the brand colour. Follows the background rather than being
-    // white, so a pale pick stays readable instead of disappearing.
-    '--color-oncolor': readableTextOn(hex),
+    '--accent-1': lighter(2),
+    '--accent-2': lighter(5),
+    '--accent-3': lighter(11),
+    '--accent-4': lighter(18),
+    '--accent-5': lighter(26),
+    '--accent-6': lighter(36),
+    '--accent-7': lighter(50),
+    '--accent-8': lighter(68),
+    '--accent-9': hex,
+    '--accent-10': atLuminance(hex, 0.75),
+    '--accent-11': atLuminance(hex, 0.18),
+    '--accent-12': atLuminance(hex, 0.05),
+
+    // The alpha steps, which Themes uses for its soft fills and borders. Left as the jade
+    // defaults they would tint every soft surface the wrong colour.
+    '--accent-a1': tintOf(hex, 0.02),
+    '--accent-a2': tintOf(hex, 0.05),
+    '--accent-a3': tintOf(hex, 0.11),
+    '--accent-a4': tintOf(hex, 0.18),
+    '--accent-a5': tintOf(hex, 0.26),
+    '--accent-a6': tintOf(hex, 0.36),
+    '--accent-a7': tintOf(hex, 0.5),
+    '--accent-a8': tintOf(hex, 0.68),
+    '--accent-a9': tintOf(hex, 0.92),
+    '--accent-a10': tintOf(hex, 0.95),
+    '--accent-a11': tintOf(hex, 0.98),
+    '--accent-a12': tintOf(hex, 1),
+
+    '--accent-surface': tintOf(hex, 0.06),
+    '--accent-indicator': hex,
+    '--accent-track': hex,
+    // What Themes writes on top of step 9. Follows the colour rather than being white, so a
+    // pale pick stays readable instead of disappearing.
+    '--accent-contrast': readableTextOn(hex),
   } as CSSProperties;
 }
 
@@ -80,12 +97,15 @@ export function isHex(value?: string): value is string {
  */
 function atLuminance(hex: string, target: number): string {
   const { r, g, b } = toRgb(hex);
+  // A ratio rather than an absolute: step 10 asks for "a bit darker than 9", and pinning
+  // that to a fixed luminance would make an already-dark colour lighter.
+  const wanted = target > 0.5 ? luminance(r, g, b) * target : target;
 
   let low = 0;
   let high = 1;
   for (let step = 0; step < 16; step += 1) {
     const middle = (low + high) / 2;
-    if (luminance(r * middle, g * middle, b * middle) > target) high = middle;
+    if (luminance(r * middle, g * middle, b * middle) > wanted) high = middle;
     else low = middle;
   }
 

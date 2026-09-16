@@ -1,24 +1,24 @@
-import { Slot } from '@radix-ui/react-slot';
+import { Button as ThemedButton } from '@radix-ui/themes';
 import { forwardRef } from 'react';
-import { Spinner } from '@/components/atoms/Spinner';
 import { cn } from '@/lib/utils';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './Button.types';
 
-const VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    'bg-brand-700 text-oncolor shadow-sm hover:bg-brand-800 focus-visible:outline-brand-700 active:bg-brand-900',
-  secondary:
-    'bg-surface/70 text-brand-900 ring-1 ring-inset ring-hairline backdrop-blur-sm hover:bg-surface focus-visible:outline-brand-600',
-  ghost: 'text-ink-muted hover:bg-brand-700/8 hover:text-brand-800 focus-visible:outline-brand-600',
-  danger:
-    'bg-danger-solid text-white shadow-sm hover:bg-danger-solid/85 focus-visible:outline-danger',
+/**
+ * Upfront's four intents, expressed in Radix Themes' variant-and-colour vocabulary.
+ *
+ * The mapping exists so the rest of the app keeps saying `variant="danger"` rather than
+ * `variant="solid" color="red"` at sixty call sites — and so that if the house style ever
+ * changes its mind about what "secondary" looks like, it changes here.
+ */
+const VARIANTS: Record<ButtonVariant, { variant: 'solid' | 'soft' | 'ghost'; color?: 'red' }> = {
+  primary: { variant: 'solid' },
+  secondary: { variant: 'soft' },
+  ghost: { variant: 'ghost' },
+  danger: { variant: 'solid', color: 'red' },
 };
 
-const SIZES: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-sm',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-6 text-base',
-};
+/** Themes sizes are 1–4; ours are the three a form actually needs. */
+const SIZES: Record<ButtonSize, '2' | '3' | '4'> = { sm: '2', md: '3', lg: '4' };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
@@ -34,33 +34,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   ref,
 ) {
-  const Component = asChild ? Slot : 'button';
+  const intent = VARIANTS[variant];
 
   return (
-    <Component
+    <ThemedButton
       ref={ref}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors',
-        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
-        'disabled:cursor-not-allowed disabled:opacity-55',
-        VARIANTS[variant],
-        SIZES[size],
-        fullWidth && 'w-full',
-        className,
-      )}
+      asChild={asChild}
+      variant={intent.variant}
+      color={intent.color}
+      size={SIZES[size]}
+      // Themes renders its own spinner and keeps the label's width while it spins, so the
+      // button does not jump. It does not disable the button, which is why `disabled` still
+      // accounts for it.
+      loading={asChild ? undefined : loading}
       disabled={asChild ? undefined : disabled || loading}
+      className={cn(fullWidth && 'w-full', className)}
       {...props}
     >
-      {/* Slot demands exactly one child, so an asChild button forwards the child
-          untouched — a link rendered as a button has nothing to load anyway. */}
-      {asChild ? (
-        children
-      ) : (
-        <>
-          {loading ? <Spinner /> : null}
-          {children}
-        </>
-      )}
-    </Component>
+      {children}
+    </ThemedButton>
   );
 });

@@ -1,3 +1,4 @@
+import { Card as ThemedCard } from '@radix-ui/themes';
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -6,9 +7,21 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   raised?: boolean;
 }
 
+/**
+ * Radix Themes' Card, with the padding taken off.
+ *
+ * Themes pads its card for you; Upfront's cards are built from a header and a body with a
+ * rule between them, so the padding belongs to those rather than to the card. `p-0` is the
+ * whole of the customisation.
+ */
 export function Card({ raised = false, className, ...props }: CardProps) {
   return (
-    <div className={cn('panel', raised && 'shadow-raised bg-surface/85', className)} {...props} />
+    <ThemedCard
+      size="2"
+      variant={raised ? 'classic' : 'surface'}
+      className={cn('p-0', className)}
+      {...props}
+    />
   );
 }
 

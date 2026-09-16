@@ -9,9 +9,9 @@ export interface ComplianceOverviewProps {
 const QUARTER_MONTHS = ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'];
 
 const THRESHOLD_TONE = {
-  ok: { bar: 'bg-brand-700', badge: 'brand' as const, label: 'Within the exemption' },
-  warning: { bar: 'bg-warn-solid', badge: 'warning' as const, label: 'Approaching the ceiling' },
-  exceeded: { bar: 'bg-danger-solid', badge: 'danger' as const, label: 'Ceiling exceeded' },
+  ok: { bar: 'jade' as const, badge: 'brand' as const, label: 'Within the exemption' },
+  warning: { bar: 'amber' as const, badge: 'warning' as const, label: 'Approaching the ceiling' },
+  exceeded: { bar: 'red' as const, badge: 'danger' as const, label: 'Ceiling exceeded' },
 };
 
 const DEADLINE_LABELS = {
@@ -45,7 +45,7 @@ export function ComplianceOverview({ summary }: ComplianceOverviewProps) {
             className="mt-3"
             value={summary.threshold.ratio}
             label="Share of the IVA exemption ceiling used"
-            barClassName={tone.bar}
+            color={tone.bar}
           />
 
           {summary.draftCents > 0 ? (

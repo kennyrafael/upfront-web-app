@@ -1,29 +1,22 @@
-import type { HTMLAttributes } from 'react';
-import { cn } from '@/lib/utils';
+import { Badge as ThemedBadge } from '@radix-ui/themes';
+import type { ComponentPropsWithoutRef } from 'react';
 
 export type BadgeVariant = 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
 
-export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps
+  extends Omit<ComponentPropsWithoutRef<typeof ThemedBadge>, 'color' | 'variant'> {
   variant?: BadgeVariant;
 }
 
-const VARIANTS: Record<BadgeVariant, string> = {
-  neutral: 'bg-brand-900/6 text-ink-muted ring-brand-900/8',
-  brand: 'bg-brand-700/10 text-brand-800 ring-brand-700/15',
-  success: 'bg-good/12 text-good-ink ring-good/15',
-  warning: 'bg-warn/15 text-warn-ink ring-warn/20',
-  danger: 'bg-danger/10 text-danger-ink ring-danger/15',
+/** Upfront's five meanings, in Themes' colour vocabulary. */
+const COLORS: Record<BadgeVariant, 'gray' | 'jade' | 'amber' | 'red'> = {
+  neutral: 'gray',
+  brand: 'jade',
+  success: 'jade',
+  warning: 'amber',
+  danger: 'red',
 };
 
-export function Badge({ variant = 'neutral', className, ...props }: BadgeProps) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
-        VARIANTS[variant],
-        className,
-      )}
-      {...props}
-    />
-  );
+export function Badge({ variant = 'neutral', ...props }: BadgeProps) {
+  return <ThemedBadge color={COLORS[variant]} variant="soft" radius="full" {...props} />;
 }

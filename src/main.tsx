@@ -1,6 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+// Radix Themes' own stylesheet, before ours: ours redefines a handful of its variables
+// and has to win.
+import '@radix-ui/themes/styles.css';
 import './index.css';
 
 const container = document.getElementById('root');
