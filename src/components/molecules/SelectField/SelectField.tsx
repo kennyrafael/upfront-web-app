@@ -8,6 +8,14 @@ export interface SelectFieldProps extends SelectProps {
   error?: string;
   hint?: string;
   containerClassName?: string;
+  /**
+   * Keeps the label for screen readers but takes it off the screen.
+   *
+   * For the case where something above the field already says what it is, and repeating it
+   * would read as two headings for one control — while removing it outright would leave the
+   * select with no accessible name at all.
+   */
+  srOnlyLabel?: boolean;
 }
 
 export function SelectField({
@@ -17,6 +25,7 @@ export function SelectField({
   required,
   id,
   containerClassName,
+  srOnlyLabel = false,
   ...selectProps
 }: SelectFieldProps) {
   const generatedId = useId();
@@ -25,7 +34,7 @@ export function SelectField({
 
   return (
     <div className={cn('flex flex-col gap-1.5', containerClassName)}>
-      <Label htmlFor={fieldId} required={required}>
+      <Label htmlFor={fieldId} required={required} className={cn(srOnlyLabel && 'sr-only')}>
         {label}
       </Label>
       <Select

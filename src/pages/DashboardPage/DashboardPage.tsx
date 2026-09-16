@@ -9,6 +9,7 @@ import {
   CardTitle,
   DashboardLayout,
 } from '@/components';
+import { describeBooking } from '@/lib/api';
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
 import {
   useBookingStore,
@@ -167,7 +168,7 @@ export function DashboardPage() {
                       {booking.client.name}
                     </span>
                     <span className="hidden truncate text-sm text-ink-muted sm:block">
-                      {booking.service.name}
+                      {describeBooking(booking)}
                     </span>
                   </li>
                 ))}

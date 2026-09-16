@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
-import { Button, Dialog, Label, Switch } from '@/components/atoms';
+import { Button, Dialog, Icon, Label, Switch } from '@/components/atoms';
 import { FormField, SelectField, TextareaField } from '@/components/molecules';
 import { type Booking, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
 import {
@@ -28,9 +28,27 @@ const STATUS_LABELS: Record<string, string> = {
   no_show: 'No show',
 };
 
+/**
+ * One chosen service, with an identity of its own.
+ *
+ * The id alone cannot be the identity: the same service may be on an appointment twice, and
+ * two rows that claim to be the same thing make removing one of them ambiguous.
+ */
+interface ChosenService {
+  key: string;
+  serviceId: string;
+}
+
+let nextKey = 0;
+const chosenService = (serviceId: string): ChosenService => ({
+  key: `row-${nextKey++}`,
+  serviceId,
+});
+
 interface Fields {
   clientId: string;
-  serviceId: string;
+  /** In the order they happen, and a service may appear twice. */
+  services: ChosenService[];
   date: string;
   time: string;
   status: string;
@@ -41,7 +59,7 @@ function toFields(booking: Booking | undefined, initialStart: Date | undefined):
   const start = booking ? new Date(booking.startsAt) : (initialStart ?? new Date());
   return {
     clientId: booking?.client.id ?? '',
-    serviceId: booking?.service.id ?? '',
+    services: booking?.items.map((item) => chosenService(item.serviceId)) ?? [],
     date: toDateInputValue(start),
     time: toTimeInputValue(start),
     status: booking?.status ?? 'pending',
@@ -96,6 +114,24 @@ export function BookingFormDialog({
     [services],
   );
 
+  /**
+   * What the provider has chosen, resolved against the catalog.
+   *
+   * By index rather than by id, because the same service can legitimately appear twice —
+   * two of the same treatment in one visit is a real appointment.
+   */
+  const chosen = useMemo(
+    () =>
+      fields.services.flatMap((row) => {
+        const service = services.find((candidate) => candidate.id === row.serviceId);
+        return service ? [{ ...service, key: row.key }] : [];
+      }),
+    [fields.services, services],
+  );
+
+  const totalMinutes = chosen.reduce((sum, service) => sum + service.durationMinutes, 0);
+  const totalCents = chosen.reduce((sum, service) => sum + service.priceCents, 0);
+
   // The API refuses out-of-hours slots unless told otherwise; surface that as an opt-in
   // rather than a dead end, since providers do take the occasional early appointment.
   const outsideHoursRejected = Boolean(error && /working hours/i.test(error));
@@ -109,7 +145,7 @@ export function BookingFormDialog({
 
     const nextErrors: Partial<Record<keyof Fields, string>> = {};
     if (!fields.clientId) nextErrors.clientId = 'Pick a client';
-    if (!fields.serviceId) nextErrors.serviceId = 'Pick a service';
+    if (fields.services.length === 0) nextErrors.services = 'Pick at least one service';
 
     const start = fromDateTimeInputs(fields.date, fields.time);
     if (!start) nextErrors.date = 'Pick a valid date and time';
@@ -119,7 +155,7 @@ export function BookingFormDialog({
 
     const payload = {
       clientId: fields.clientId,
-      serviceId: fields.serviceId,
+      serviceIds: fields.services.map((row) => row.serviceId),
       startsAt: start.toISOString(),
       notes: fields.notes.trim() || undefined,
       allowOutsideHours: allowOutsideHours || undefined,
@@ -141,7 +177,7 @@ export function BookingFormDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={booking ? 'Edit booking' : 'New booking'}
-      description="The end time comes from the service duration; overlaps are rejected."
+      description="The end time comes from the services chosen; overlaps are rejected."
       footer={
         <>
           {booking ? (
@@ -187,16 +223,70 @@ export function BookingFormDialog({
           onValueChange={(value) => setField('clientId', value)}
         />
 
-        <SelectField
-          label="Service"
-          required
-          placeholder="Choose a service"
-          options={serviceOptions}
-          value={fields.serviceId || undefined}
-          error={errors.serviceId}
-          hint="Sets the duration and the price recorded on the booking."
-          onValueChange={(value) => setField('serviceId', value)}
-        />
+        <div>
+          <Label>
+            Services
+            <span aria-hidden="true" className="ml-0.5 text-red-700">
+              *
+            </span>
+          </Label>
+
+          {chosen.length > 0 ? (
+            <ul className="mt-2 flex flex-col gap-1.5">
+              {chosen.map((service) => (
+                <li
+                  key={service.key}
+                  className="flex items-center gap-3 rounded-lg bg-white/60 px-3 py-2 text-sm ring-1 ring-hairline"
+                >
+                  <span className="min-w-0 flex-1 truncate text-brand-900">{service.name}</span>
+                  <span className="shrink-0 text-xs text-ink-muted">
+                    {formatDuration(service.durationMinutes)}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-brand-900">
+                    {formatMoney(service.priceCents, service.currency)}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${service.name}`}
+                    onClick={() =>
+                      setField(
+                        'services',
+                        fields.services.filter((row) => row.key !== service.key),
+                      )
+                    }
+                    className="shrink-0 rounded-md p-1 text-ink-muted transition-colors hover:bg-red-600/8 hover:text-red-800"
+                  >
+                    <Icon name="close" className="size-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-2">
+            <SelectField
+              label="Add a service"
+              srOnlyLabel
+              placeholder={chosen.length > 0 ? 'Add another service' : 'Choose a service'}
+              options={serviceOptions}
+              // Never holds a value: choosing one appends it and the control resets, so the
+              // same service can be added twice in a row.
+              value={undefined}
+              error={errors.services}
+              hint="The appointment runs as long as everything on it, and is priced the same way."
+              onValueChange={(value) =>
+                setField('services', [...fields.services, chosenService(value)])
+              }
+            />
+          </div>
+
+          {chosen.length > 1 ? (
+            <p className="mt-2 text-sm text-ink-muted">
+              Total: <span className="text-brand-900">{formatDuration(totalMinutes)}</span> ·{' '}
+              <span className="tabular-nums text-brand-900">{formatMoney(totalCents)}</span>
+            </p>
+          ) : null}
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField

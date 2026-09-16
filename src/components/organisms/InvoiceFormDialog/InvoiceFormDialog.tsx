@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Spinner } from '@/components/atoms';
 import { FormField, SelectField } from '@/components/molecules';
-import { type Booking, bookingsApi, type Invoice } from '@/lib/api';
+import { type Booking, bookingsApi, describeBooking, type Invoice } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/utils';
 import { useClientStore, useComplianceStore } from '@/stores';
 
@@ -208,7 +208,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
                       onChange={() => toggle(booking.id)}
                     />
                     <span className="min-w-0 flex-1 truncate text-sm text-brand-900">
-                      {booking.service.name}
+                      {describeBooking(booking)}
                     </span>
                     <span className="shrink-0 text-xs text-ink-muted">
                       {formatDate(booking.startsAt)}

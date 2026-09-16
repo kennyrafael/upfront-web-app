@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card, Spinner } from '@/components/atoms';
-import type { Booking, BookingStatus } from '@/lib/api';
+import { type Booking, type BookingStatus, describeBooking } from '@/lib/api';
 import {
   addDays,
   cn,
@@ -262,7 +262,7 @@ function DayColumn({
               {booking.client.name}
             </span>
             <span className="block truncate opacity-80">
-              {formatTime(start)} · {booking.service.name}
+              {formatTime(start)} · {describeBooking(booking)}
             </span>
           </button>
         );

@@ -19,10 +19,20 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 /** What a provider may set by hand. `expired` is the server's to give, not theirs. */
 export const SETTABLE_BOOKING_STATUSES = BOOKING_STATUSES.filter((status) => status !== 'expired');
 
+export interface BookingItem {
+  /** The catalog entry it came from, for preselecting it in the edit form. */
+  serviceId: string;
+  /** Snapshotted when the booking was made, so a renamed service cannot rewrite history. */
+  name: string;
+  priceCents: number;
+  durationMinutes: number;
+}
+
 export interface Booking {
   id: string;
   client: { id: string; name: string; phone?: string };
-  service: { id: string; name: string; durationMinutes: number };
+  /** One or more, in the order they happen. `priceCents` below is their total. */
+  items: BookingItem[];
   /** ISO instants. */
   startsAt: string;
   endsAt: string;
@@ -35,7 +45,8 @@ export interface Booking {
 
 export interface CreateBookingPayload {
   clientId: string;
-  serviceId: string;
+  /** Sent whole on an update too, so adding and removing a service are the same request. */
+  serviceIds: string[];
   startsAt: string;
   status?: BookingStatus;
   notes?: string;
@@ -48,6 +59,11 @@ export type UpdateBookingPayload = Partial<CreateBookingPayload>;
 export interface BookingRange {
   from: string;
   to: string;
+}
+
+/** "Corte de cabelo + Barba" — how an appointment's services read in one line. */
+export function describeBooking(booking: { items: { name: string }[] }): string {
+  return booking.items.map((item) => item.name).join(' + ') || 'Service';
 }
 
 export const bookingsApi = {

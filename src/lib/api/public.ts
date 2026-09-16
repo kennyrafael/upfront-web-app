@@ -50,6 +50,8 @@ export interface PublicBooking {
   /** False once the notice period has gone — at which point cancelling costs the deposit. */
   reschedulable: boolean;
   noticeHours: number;
+  /** The whole appointment, which is more than one service once a provider has added to it. */
+  durationMinutes: number;
   /** The same dressing as the booking page, so the manage link does not look like another site. */
   brandColor?: string;
   logoUrl?: string;
@@ -114,9 +116,18 @@ export const publicApi = {
   provider: (slug: string) =>
     publicRequest<PublicProvider>(`/providers/${encodeURIComponent(slug)}`),
 
-  availability: (slug: string, serviceId: string, from: string, to: string) =>
+  availability: (
+    slug: string,
+    serviceId: string,
+    from: string,
+    to: string,
+    /** Overrides the service's own length, for a booking that has grown past it. */
+    durationMinutes?: number,
+  ) =>
     publicRequest<string[]>(
-      `/providers/${encodeURIComponent(slug)}/availability?serviceId=${serviceId}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+      `/providers/${encodeURIComponent(slug)}/availability?serviceId=${serviceId}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}${
+        durationMinutes ? `&durationMinutes=${durationMinutes}` : ''
+      }`,
     ),
 
   book: (slug: string, payload: CreatePublicBookingPayload) =>

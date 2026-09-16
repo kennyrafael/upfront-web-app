@@ -238,6 +238,10 @@ export const useManageBookingStore = create<ManageBookingState>((set, get) => ({
           booking.serviceId,
           from.toISOString(),
           to.toISOString(),
+          // The booking's own length, not the service's: a provider may have added a second
+          // service to it, and offering slots too short to hold it would show times the
+          // move is then refused for.
+          booking.durationMinutes,
         ),
         status: 'idle',
       });
