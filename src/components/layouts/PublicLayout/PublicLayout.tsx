@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { brandStyle } from '@/lib/utils';
 
 export interface PublicLayoutProps {
   businessName?: string;
@@ -7,12 +8,20 @@ export interface PublicLayoutProps {
   children: ReactNode;
   /** Wider shell for the slot grid, which needs room to breathe. */
   size?: 'md' | 'lg';
+  /** `#RRGGBB` chosen by the provider. Absent means Upfront's green. */
+  brandColor?: string;
+  /** Replaces the business name at the top when the provider has uploaded one. */
+  logoUrl?: string;
 }
 
 /**
  * The shell a client sees. Deliberately not `DashboardLayout` — there is no nav, no
  * account and nothing to sign out of, and the provider's business is the only brand on
  * the page. Upfront's name appears once, small, at the bottom.
+ *
+ * `brandStyle` redefines the brand ramp on this element, so every `brand-*` class below it —
+ * buttons, rings, slot chips — takes the provider's colour without anything being passed
+ * down. Nothing inside needs to know the page is themed.
  */
 export function PublicLayout({
   businessName,
@@ -20,16 +29,34 @@ export function PublicLayout({
   subtitle,
   children,
   size = 'md',
+  brandColor,
+  logoUrl,
 }: PublicLayoutProps) {
   return (
-    <div className="relative flex min-h-dvh flex-col items-center px-4 py-10">
+    <div
+      style={brandStyle(brandColor)}
+      className="relative flex min-h-dvh flex-col items-center px-4 py-10"
+    >
+      {/* Painted from the ramp rather than fixed oklch values, so it follows the colour too. */}
       <div
         aria-hidden="true"
-        className="fixed inset-0 -z-10 bg-brand-900 bg-[radial-gradient(50rem_36rem_at_20%_0%,oklch(0.46_0.083_162/0.55),transparent_60%),radial-gradient(42rem_32rem_at_90%_100%,oklch(0.55_0.09_162/0.4),transparent_55%)]"
+        className="fixed inset-0 -z-10 bg-brand-900"
+        style={{
+          backgroundImage:
+            'radial-gradient(50rem 36rem at 20% 0%, color-mix(in oklab, var(--color-brand-600) 55%, transparent), transparent 60%), radial-gradient(42rem 32rem at 90% 100%, color-mix(in oklab, var(--color-brand-500) 40%, transparent), transparent 55%)',
+        }}
       />
 
       <div className={size === 'lg' ? 'w-full max-w-2xl' : 'w-full max-w-md'}>
-        {businessName ? (
+        {logoUrl ? (
+          <div className="mb-6 flex justify-center">
+            {/* Their mark, at whatever aspect ratio it has. Alt is empty because the business
+                name is announced by the page title right underneath. */}
+            <img src={logoUrl} alt="" className="max-h-16 max-w-56 object-contain" />
+          </div>
+        ) : businessName ? (
+          // White always works here: brandStyle pins brand-900 to a fixed darkness, so the
+          // backdrop behind this is dark whatever colour the provider picked.
           <p className="mb-6 text-center text-2xl font-semibold tracking-tight text-white">
             {businessName}
           </p>

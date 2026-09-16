@@ -1,5 +1,10 @@
 import { useEffect } from 'react';
-import { DashboardLayout, ProviderProfileForm, PublicBookingSettings } from '@/components';
+import {
+  BrandingSettings,
+  DashboardLayout,
+  ProviderProfileForm,
+  PublicBookingSettings,
+} from '@/components';
 import { useProviderStore } from '@/stores';
 
 export function SettingsPage() {
@@ -15,6 +20,10 @@ export function SettingsPage() {
 
       <div className="mt-6">
         <PublicBookingSettings />
+      </div>
+
+      <div className="mt-6">
+        <BrandingSettings />
       </div>
     </DashboardLayout>
   );

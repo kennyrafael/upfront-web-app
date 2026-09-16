@@ -62,7 +62,12 @@ export function ManageBookingPage() {
   const badge = STATUS_LABELS[booking.status] ?? { label: booking.status, variant: 'neutral' };
 
   return (
-    <PublicLayout businessName={booking.businessName} title="Your booking">
+    <PublicLayout
+      businessName={booking.businessName}
+      brandColor={booking.brandColor}
+      logoUrl={booking.logoUrl}
+      title="Your booking"
+    >
       <div className="flex flex-col gap-4">
         <Card className="px-4 py-4">
           <div className="flex items-start justify-between gap-3">

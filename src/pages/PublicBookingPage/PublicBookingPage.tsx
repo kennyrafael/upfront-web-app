@@ -44,7 +44,12 @@ export function PublicBookingPage() {
 
   if (step === 'payment' && result) {
     return (
-      <PublicLayout businessName={provider.businessName} title="Almost there">
+      <PublicLayout
+        businessName={provider.businessName}
+        brandColor={provider.brandColor}
+        logoUrl={provider.logoUrl}
+        title="Almost there"
+      >
         <DepositWaiting
           phone={clientPhone}
           onStartOver={() => {
@@ -60,7 +65,12 @@ export function PublicBookingPage() {
     const paidDeposit = result.deposit?.amountCents;
 
     return (
-      <PublicLayout businessName={provider.businessName} title="You're booked in">
+      <PublicLayout
+        businessName={provider.businessName}
+        brandColor={provider.brandColor}
+        logoUrl={provider.logoUrl}
+        title="You're booked in"
+      >
         <div className="flex flex-col gap-4">
           <Card className="px-4 py-3">
             <p className="text-sm text-ink-muted">Reference</p>
@@ -110,6 +120,8 @@ export function PublicBookingPage() {
   return (
     <PublicLayout
       businessName={provider.businessName}
+      brandColor={provider.brandColor}
+      logoUrl={provider.logoUrl}
       title={headings[step].title}
       subtitle={headings[step].subtitle}
       size={step === 'slot' ? 'lg' : 'md'}

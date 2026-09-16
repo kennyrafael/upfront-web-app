@@ -1,5 +1,6 @@
 export * from './BookingCalendar';
 export * from './BookingFormDialog';
+export * from './BrandingSettings';
 export * from './ClientFormDialog';
 export * from './ClientTable';
 export * from './ComplianceOverview';

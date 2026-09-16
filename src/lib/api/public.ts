@@ -19,6 +19,9 @@ export interface PublicProvider {
   horizonDays: number;
   /** 0 when this provider takes no deposit. Shown before a client commits to anything. */
   depositPercent: number;
+  /** How the provider dressed the page. Absent means Upfront's own colours and their name. */
+  brandColor?: string;
+  logoUrl?: string;
 }
 
 export type DepositStatus = 'pending' | 'paid' | 'refunded' | 'failed' | 'expired';
@@ -47,6 +50,9 @@ export interface PublicBooking {
   /** False once the notice period has gone — at which point cancelling costs the deposit. */
   reschedulable: boolean;
   noticeHours: number;
+  /** The same dressing as the booking page, so the manage link does not look like another site. */
+  brandColor?: string;
+  logoUrl?: string;
 }
 
 export interface CreatePublicBookingPayload {

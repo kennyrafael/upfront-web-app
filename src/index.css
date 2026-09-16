@@ -14,6 +14,11 @@
   --color-brand-900: oklch(0.24 0.046 162);
   --color-brand-950: oklch(0.17 0.034 162);
 
+  /* What gets written on top of the brand colour. A token rather than a literal white,
+     because the public booking page repaints the ramp with the provider's own colour and
+     this has to follow it — see brandStyle in lib/utils/contrast.ts. */
+  --color-oncolor: #ffffff;
+
   /* Ground the whole UI sits on, and the ink used over it. */
   --color-canvas: oklch(0.982 0.006 162);
   --color-ink: oklch(0.26 0.021 162);
