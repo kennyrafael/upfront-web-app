@@ -9,7 +9,7 @@ import {
   toDateInputValue,
   toTimeInputValue,
 } from '@/lib/utils';
-import { useBookingStore, useClientStore, useServiceStore } from '@/stores';
+import { useBookingStore, useClientStore, useEmployeeStore, useServiceStore } from '@/stores';
 
 export interface BookingFormDialogProps {
   open: boolean;
@@ -53,6 +53,7 @@ interface Fields {
   time: string;
   status: string;
   notes: string;
+  employeeId: string;
 }
 
 function toFields(booking: Booking | undefined, initialStart: Date | undefined): Fields {
@@ -64,6 +65,8 @@ function toFields(booking: Booking | undefined, initialStart: Date | undefined):
     time: toTimeInputValue(start),
     status: booking?.status ?? 'pending',
     notes: booking?.notes ?? '',
+    // Every item carries the same person today, so the first one answers for the booking.
+    employeeId: booking?.items[0]?.employeeId ?? '',
   };
 }
 
@@ -76,6 +79,8 @@ export function BookingFormDialog({
   const clients = useClientStore((state) => state.items);
   const loadClients = useClientStore((state) => state.load);
   const services = useServiceStore((state) => state.items);
+  const employees = useEmployeeStore((state) => state.items);
+  const loadEmployees = useEmployeeStore((state) => state.load);
   const loadServices = useServiceStore((state) => state.load);
 
   const create = useBookingStore((state) => state.create);
@@ -97,12 +102,23 @@ export function BookingFormDialog({
       clearError();
       void loadClients();
       void loadServices();
+      void loadEmployees();
     }
   }, [open, booking, initialStart, clearError, loadClients, loadServices]);
 
   const clientOptions = useMemo(
     () => clients.map((client) => ({ value: client.id, label: client.name })),
     [clients],
+  );
+
+  /**
+   * Only worth asking when there is somebody to choose between. A one-person business —
+   * which is most of them — should never see this field, and the server defaults it to the
+   * person booking anyway.
+   */
+  const employeeOptions = useMemo(
+    () => employees.map((employee) => ({ value: employee.id, label: employee.name })),
+    [employees],
   );
 
   const serviceOptions = useMemo(
@@ -158,6 +174,7 @@ export function BookingFormDialog({
       serviceIds: fields.services.map((row) => row.serviceId),
       startsAt: start.toISOString(),
       notes: fields.notes.trim() || undefined,
+      employeeId: fields.employeeId || undefined,
       allowOutsideHours: allowOutsideHours || undefined,
     };
 
@@ -222,6 +239,16 @@ export function BookingFormDialog({
           error={errors.clientId}
           onValueChange={(value) => setField('clientId', value)}
         />
+
+        {employeeOptions.length > 1 ? (
+          <SelectField
+            label="With"
+            placeholder="Whoever is free"
+            options={employeeOptions}
+            value={fields.employeeId || undefined}
+            onValueChange={(value) => setField('employeeId', value)}
+          />
+        ) : null}
 
         <div>
           <Label>

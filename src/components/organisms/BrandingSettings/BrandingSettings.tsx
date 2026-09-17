@@ -223,7 +223,7 @@ export function BrandingSettings() {
         <div>
           <p className="mb-2 text-xs font-medium text-ink-muted">Preview</p>
           <BookingPagePreview
-            businessName={profile?.businessName ?? profile?.name ?? 'Your business'}
+            businessName={profile?.name ?? 'Your business'}
             brandColor={color}
             logoUrl={logo}
           />

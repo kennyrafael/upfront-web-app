@@ -4,7 +4,9 @@ import { Icon, type IconName, Tooltip, TooltipProvider } from '@/components/atom
 import { AccountMenu } from '@/components/organisms/AccountMenu';
 import { NotificationBell } from '@/components/organisms/NotificationBell';
 import { VerifyEmailNotice } from '@/components/organisms/VerifyEmailNotice';
+import type { AuthenticatedUser } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores';
 
 export interface DashboardLayoutProps {
   title?: string;
@@ -22,7 +24,15 @@ export interface DashboardLayoutProps {
  * rather than "about the business", and grouping them is what lets the sidebar stay a list
  * of places to work.
  */
-const NAV_ITEMS: { to: string; label: string; icon: IconName }[] = [
+/**
+ * `roles` names who may see a link, and absent means everybody.
+ *
+ * The server refuses these pages regardless — this only stops the app offering somebody a
+ * door that opens onto a 403. Hiding is a courtesy, never the control.
+ */
+type Role = AuthenticatedUser['role'];
+
+const NAV_ITEMS: { to: string; label: string; icon: IconName; roles?: Role[] }[] = [
   { to: '/', label: 'Overview', icon: 'overview' },
   { to: '/services', label: 'Services', icon: 'services' },
   { to: '/bookings', label: 'Bookings', icon: 'bookings' },
@@ -66,9 +76,12 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
     }
   }, [collapsed]);
 
+  const role = useAuthStore((state) => state.user?.role);
+  const visibleNav = NAV_ITEMS.filter((item) => !item.roles || (role && item.roles.includes(role)));
+
   const nav = (
     <nav className="flex flex-1 flex-col gap-1 p-3">
-      {NAV_ITEMS.map((item) => (
+      {visibleNav.map((item) => (
         // A tooltip only while collapsed, because that is the only time the label is not
         // already on screen. `sr-only` keeps the accessible name either way.
         <Tooltip key={item.to} label={collapsed ? item.label : undefined}>

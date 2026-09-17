@@ -6,8 +6,13 @@ export interface AuthenticatedUser {
   businessId: string;
   email: string;
   name: string;
-  businessName?: string;
+  /** The shop's name. */
+  businessName: string;
   phone?: string;
+  /** What this account may do. Enforced on the server; the UI only stops asking. */
+  role: 'owner' | 'manager' | 'front_desk' | 'staff';
+  /** The person they are, when they perform services. Absent for a front desk. */
+  employeeId?: string;
   /** Publishing a booking page needs this. Nothing else does. */
   emailVerified: boolean;
 }
@@ -34,6 +39,10 @@ export const authApi = {
   signup: (payload: SignupPayload) => api.post<AuthResponse>('/auth/signup', payload),
   login: (payload: LoginPayload) => api.post<AuthResponse>('/auth/login', payload),
   me: () => api.get<AuthenticatedUser>('/auth/me'),
+
+  /** Your own name and number — not the shop's. Those parted company in the split. */
+  updateMe: (payload: { name?: string; phone?: string }) =>
+    api.patch<AuthenticatedUser>('/auth/me', payload),
 
   /**
    * Sends no body and reads no token — the refresh cookie is httpOnly, so the browser

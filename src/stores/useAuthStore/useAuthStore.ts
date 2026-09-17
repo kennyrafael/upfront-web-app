@@ -22,6 +22,8 @@ interface AuthState {
   refresh: () => Promise<string | null>;
   /** Revalidates on boot, falling back to the refresh cookie before giving up. */
   restore: () => Promise<void>;
+  /** Your own name and number. Returns false on failure, with the message in `error`. */
+  updateMe: (payload: { name?: string; phone?: string }) => Promise<boolean>;
   /** After confirming an email address, so the banner disappears without a reload. */
   markVerified: (user: AuthenticatedUser) => void;
   clearError: () => void;
@@ -105,6 +107,17 @@ export const useAuthStore = create<AuthState>()(
           set({ user: await authApi.me() });
         } catch {
           await get().refresh();
+        }
+      },
+
+      updateMe: async (payload) => {
+        set({ status: 'loading', error: null });
+        try {
+          set({ user: await authApi.updateMe(payload), status: 'idle' });
+          return true;
+        } catch (error) {
+          set({ status: 'idle', error: toMessage(error) });
+          return false;
         }
       },
 

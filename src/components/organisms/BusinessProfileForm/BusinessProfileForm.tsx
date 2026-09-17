@@ -7,7 +7,6 @@ import { useBusinessStore } from '@/stores';
 
 interface ProfileFields {
   name: string;
-  businessName: string;
   phone: string;
   nif: string;
 }
@@ -15,7 +14,6 @@ interface ProfileFields {
 function toFields(profile: BusinessProfile | null): ProfileFields {
   return {
     name: profile?.name ?? '',
-    businessName: profile?.businessName ?? '',
     phone: profile?.phone ?? '',
     nif: profile?.nif ?? '',
   };
@@ -28,14 +26,14 @@ export function BusinessProfileForm() {
   const update = useBusinessStore((state) => state.update);
 
   const [fields, setFields] = useState<ProfileFields>(() => toFields(profile));
-  const [workingHours, setWorkingHours] = useState<WorkingHours[]>(profile?.workingHours ?? []);
+  const [hours, setHours] = useState<WorkingHours[]>(profile?.hours ?? []);
   const [nifError, setNifError] = useState<string>();
   const [saved, setSaved] = useState(false);
 
   // The profile arrives after the first render, so the form seeds itself when it lands.
   useEffect(() => {
     setFields(toFields(profile));
-    setWorkingHours(profile?.workingHours ?? []);
+    setHours(profile?.hours ?? []);
   }, [profile]);
 
   function setField(key: keyof ProfileFields, value: string) {
@@ -54,10 +52,9 @@ export function BusinessProfileForm() {
 
     const ok = await update({
       name: fields.name,
-      businessName: fields.businessName || undefined,
       phone: fields.phone || undefined,
       nif: fields.nif || undefined,
-      workingHours,
+      hours,
     });
     setSaved(ok);
   }
@@ -75,15 +72,11 @@ export function BusinessProfileForm() {
         </CardHeader>
         <CardBody className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Your name"
+            label="Business name"
             required
+            hint="What clients see on your booking page."
             value={fields.name}
             onChange={(event) => setField('name', event.target.value)}
-          />
-          <FormField
-            label="Business name"
-            value={fields.businessName}
-            onChange={(event) => setField('businessName', event.target.value)}
           />
           <FormField
             label="Phone"
@@ -104,18 +97,19 @@ export function BusinessProfileForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Working hours</CardTitle>
+          <CardTitle>Shop hours</CardTitle>
           <p className="mt-1 text-sm text-ink-muted">
-            Times are local to {profile?.timezone ?? 'Europe/Lisbon'}. Split a day into two rows to
-            carve out a lunch break.
+            When the door is open, local to {profile?.timezone ?? 'Europe/Lisbon'}. A ceiling rather
+            than an offer — what each person is bookable for is this crossed with their own hours.
+            Split a day into two rows to carve out a lunch break.
           </p>
         </CardHeader>
         <CardBody>
           <WorkingHoursEditor
-            value={workingHours}
+            value={hours}
             disabled={busy}
             onChange={(next) => {
-              setWorkingHours(next);
+              setHours(next);
               setSaved(false);
             }}
           />

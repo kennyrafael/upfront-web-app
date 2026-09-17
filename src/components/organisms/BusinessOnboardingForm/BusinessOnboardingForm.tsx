@@ -29,12 +29,12 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
   const serviceError = useServiceStore((state) => state.error);
 
   const [step, setStep] = useState(0);
-  const [businessName, setBusinessName] = useState(profile?.businessName ?? '');
+  const [businessName, setBusinessName] = useState(profile?.name ?? '');
   const [phone, setPhone] = useState(profile?.phone ?? '');
   const [nif, setNif] = useState(profile?.nif ?? '');
   const [nifError, setNifError] = useState<string>();
   const [workingHours, setWorkingHours] = useState<WorkingHours[]>(
-    profile?.workingHours?.length ? profile.workingHours : DEFAULT_HOURS,
+    profile?.hours?.length ? profile.hours : DEFAULT_HOURS,
   );
   const [serviceName, setServiceName] = useState('');
   const [duration, setDuration] = useState('30');
@@ -51,7 +51,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
     }
     setNifError(undefined);
     const ok = await updateProfile({
-      businessName: businessName || undefined,
+      name: businessName || undefined,
       phone: phone || undefined,
       nif: nif || undefined,
     });
@@ -59,7 +59,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
   }
 
   async function saveHours() {
-    if (await updateProfile({ workingHours })) {
+    if (await updateProfile({ hours: workingHours })) {
       setStep(2);
     }
   }

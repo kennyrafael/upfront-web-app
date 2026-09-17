@@ -5,6 +5,7 @@ export * from './businesses';
 export * from './client';
 export * from './clients';
 export * from './compliance';
+export * from './employees';
 export * from './invoices';
 export * from './pagination';
 export * from './payments';

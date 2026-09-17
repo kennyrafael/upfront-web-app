@@ -12,6 +12,7 @@ import {
 import { describeBooking } from '@/lib/api';
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
 import {
+  useAuthStore,
   useBookingStore,
   useBusinessStore,
   useClientStore,
@@ -21,6 +22,7 @@ import {
 
 export function DashboardPage() {
   const profile = useBusinessStore((state) => state.profile);
+  const me = useAuthStore((state) => state.user);
   const services = useServiceStore((state) => state.items);
   const loadServices = useServiceStore((state) => state.load);
   const clients = useClientStore((state) => state.items);
@@ -42,7 +44,7 @@ export function DashboardPage() {
     .filter((booking) => isSameDay(new Date(booking.startsAt), today))
     .filter((booking) => booking.status !== 'cancelled');
 
-  const workingDays = new Set(profile?.workingHours.map((slot) => slot.weekday) ?? []);
+  const workingDays = new Set(profile?.hours.map((slot) => slot.weekday) ?? []);
   const cheapest = services.reduce<number | null>(
     (min, service) => (min === null ? service.priceCents : Math.min(min, service.priceCents)),
     null,
@@ -50,8 +52,8 @@ export function DashboardPage() {
 
   return (
     <DashboardLayout
-      title={`Welcome, ${profile?.name ?? ''}`}
-      description={[profile?.businessName, profile?.email].filter(Boolean).join(' · ')}
+      title={`Welcome, ${me?.name ?? ''}`}
+      description={[profile?.name, me?.email].filter(Boolean).join(' · ')}
       actions={
         <Button variant="secondary" asChild>
           <Link to="/settings">Edit profile</Link>
@@ -124,7 +126,7 @@ export function DashboardPage() {
                     <li key={weekday} className="flex justify-between gap-4">
                       <span className="text-brand-900">{weekdayLabel(weekday)}</span>
                       <span className="text-right tabular-nums text-ink-muted">
-                        {profile?.workingHours
+                        {profile?.hours
                           .filter((slot) => slot.weekday === weekday)
                           .map((slot) => `${slot.start}–${slot.end}`)
                           .join(', ')}

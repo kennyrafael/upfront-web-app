@@ -60,9 +60,7 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-ink-muted">Prestador</p>
-            <p className="font-medium text-brand-900">
-              {profile?.businessName ?? profile?.name ?? '—'}
-            </p>
+            <p className="font-medium text-brand-900">{profile?.name ?? '—'}</p>
             {profile?.nif ? (
               <p className="text-sm tabular-nums text-ink-muted">NIF {profile.nif}</p>
             ) : (

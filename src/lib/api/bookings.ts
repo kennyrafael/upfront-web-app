@@ -22,6 +22,8 @@ export const SETTABLE_BOOKING_STATUSES = BOOKING_STATUSES.filter((status) => sta
 export interface BookingItem {
   /** The catalog entry it came from, for preselecting it in the edit form. */
   serviceId: string;
+  /** Who performs this line. Per item, because one visit can be two people. */
+  employeeId: string;
   /** Snapshotted when the booking was made, so a renamed service cannot rewrite history. */
   name: string;
   priceCents: number;
@@ -47,6 +49,11 @@ export interface CreateBookingPayload {
   clientId: string;
   /** Sent whole on an update too, so adding and removing a service are the same request. */
   serviceIds: string[];
+  /**
+   * Who performs it. Absent means whoever is booking, or — for a business with one person,
+   * which is most of them — that person.
+   */
+  employeeId?: string;
   startsAt: string;
   status?: BookingStatus;
   notes?: string;

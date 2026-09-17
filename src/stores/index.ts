@@ -5,6 +5,7 @@ export * from './useBookingStore';
 export * from './useBusinessStore';
 export * from './useClientStore';
 export * from './useComplianceStore';
+export * from './useEmployeeStore';
 export * from './usePaymentStore';
 export * from './usePublicBookingStore';
 export * from './useServiceStore';

@@ -7,16 +7,16 @@ export interface WorkingHours {
   end: string;
 }
 
+/** The shop. The person signing in is `AuthenticatedUser` — they stopped being one record. */
 export interface BusinessProfile {
   id: string;
-  email: string;
   name: string;
-  businessName?: string;
   phone?: string;
   nif?: string;
   timezone: string;
   onboardedAt?: string;
-  workingHours: WorkingHours[];
+  /** When the shop is open. A ceiling: availability is this intersected with a person's own. */
+  hours: WorkingHours[];
   slug?: string;
   publicBookingEnabled: boolean;
   autoConfirmPublicBookings: boolean;
@@ -32,11 +32,10 @@ export interface BusinessProfile {
 
 export interface UpdateBusinessPayload {
   name?: string;
-  businessName?: string;
   phone?: string;
   nif?: string;
   timezone?: string;
-  workingHours?: WorkingHours[];
+  hours?: WorkingHours[];
   slug?: string;
   publicBookingEnabled?: boolean;
   autoConfirmPublicBookings?: boolean;

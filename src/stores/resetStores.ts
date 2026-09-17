@@ -3,6 +3,7 @@ import { useBookingStore } from './useBookingStore';
 import { useBusinessStore } from './useBusinessStore';
 import { useClientStore } from './useClientStore';
 import { useComplianceStore } from './useComplianceStore';
+import { useEmployeeStore } from './useEmployeeStore';
 import { usePaymentStore } from './usePaymentStore';
 import { useServiceStore } from './useServiceStore';
 
@@ -18,4 +19,5 @@ export function resetDomainStores(): void {
   useComplianceStore.getState().reset();
   usePaymentStore.getState().reset();
   useAlertStore.getState().reset();
+  useEmployeeStore.getState().reset();
 }
