@@ -145,9 +145,23 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
           </>
         )}
 
+        {/**
+         * No `backdrop-blur` here, unlike the header.
+         *
+         * It was blurring nothing. The rail is a flex sibling of the content rather than
+         * an overlay, and it runs the full height — so what sits behind it is the flat page
+         * background, and blurring a flat colour returns the same flat colour. Removing it
+         * is pixel-for-pixel identical, checked rather than assumed.
+         *
+         * What it did cost is a composited backdrop root on a `position: sticky` element,
+         * which is the combination Chromium has a history of painting at a stale size until
+         * something invalidates the layer — a resize, usually. That matches a first-load
+         * layout bug reported on Opera and not reproducible in Chrome, so the suspect is
+         * removed on the grounds that it earns nothing either way.
+         */}
         <aside
           className={cn(
-            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet/60 backdrop-blur-xl transition-[width] duration-200 lg:flex',
+            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet/60 transition-[width] duration-200 lg:flex',
             collapsed ? 'w-16' : 'w-60',
           )}
         >
