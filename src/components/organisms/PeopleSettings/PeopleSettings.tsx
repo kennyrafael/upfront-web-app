@@ -4,6 +4,7 @@ import { ConfirmDialog, FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import type { Employee, WorkingHours } from '@/lib/api';
 import { useAuthStore, useBusinessStore, useEmployeeStore } from '@/stores';
+import { SkillsPanel } from './SkillsPanel';
 import { TimeOffPanel } from './TimeOffPanel';
 
 /**
@@ -34,6 +35,7 @@ export function PeopleSettings() {
   const [hours, setHours] = useState<WorkingHours[]>([]);
   const [leaving, setLeaving] = useState<Employee | null>(null);
   const [away, setAway] = useState<Employee | null>(null);
+  const [skilling, setSkilling] = useState<Employee | null>(null);
 
   useEffect(() => {
     void load();
@@ -139,6 +141,14 @@ export function PeopleSettings() {
                 >
                   Away
                 </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSkilling(skilling?.id === employee.id ? null : employee)}
+                >
+                  Does
+                </Button>
                 {employee.active ? (
                   <Button
                     type="button"
@@ -162,6 +172,8 @@ export function PeopleSettings() {
             </li>
           ))}
         </ul>
+
+        {skilling ? <SkillsPanel employee={skilling} onClose={() => setSkilling(null)} /> : null}
 
         {away ? (
           <TimeOffPanel employee={away} timezone={timezone} onClose={() => setAway(null)} />

@@ -7,11 +7,25 @@ import { api } from './client';
  * Not the same thing as a login: a junior who never signs in is still an employee with a
  * calendar, and a receptionist who books for everybody has no calendar at all.
  */
+
+/** One service this person performs, and what it costs when they do. */
+export interface EmployeeSkill {
+  serviceId: string;
+  /** Absent means the catalog price. */
+  priceCents?: number;
+  durationMinutes?: number;
+}
 export interface Employee {
   id: string;
   name: string;
   email?: string;
   phone?: string;
+  /**
+   * What they do. **Empty means the whole catalog** — the same rule as hours, so a new
+   * colleague is bookable for everything until somebody narrows them.
+   */
+  services: EmployeeSkill[];
+
   /** When this person is in. Crossed with the shop's hours, never read alone. */
   hours: WorkingHours[];
   active: boolean;
@@ -27,6 +41,7 @@ export interface EmployeePayload {
   email?: string;
   phone?: string;
   hours?: WorkingHours[];
+  services?: EmployeeSkill[];
   color?: string;
   nif?: string;
   payoutIban?: string;
