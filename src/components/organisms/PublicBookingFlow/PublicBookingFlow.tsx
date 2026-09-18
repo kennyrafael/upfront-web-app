@@ -27,6 +27,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
   const status = usePublicBookingStore((state) => state.status);
   const error = usePublicBookingStore((state) => state.error);
   const chooseService = usePublicBookingStore((state) => state.chooseService);
+  const choosePerson = usePublicBookingStore((state) => state.choosePerson);
   const setDay = usePublicBookingStore((state) => state.setDay);
   const selectSlot = usePublicBookingStore((state) => state.selectSlot);
   const back = usePublicBookingStore((state) => state.back);
@@ -119,6 +120,57 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
     );
   }
 
+  if (step === 'person') {
+    /**
+     * "Anyone" first, and deliberately as the prominent option.
+     *
+     * It is the honest default for most clients, it gives the shop the most room to fill the
+     * day, and it is the only answer that lets them move the appointment later without a
+     * phone call. Somebody who cares about who cuts their hair will scan past it anyway.
+     */
+    return (
+      <ul className="flex flex-col gap-2">
+        <li>
+          <button
+            type="button"
+            onClick={() => void choosePerson(null)}
+            className={cn(
+              'w-full rounded-xl bg-sheet/60 px-4 py-3 text-left ring-1 ring-hairline transition-colors',
+              'hover:bg-brand-700/8 focus-visible:outline focus-visible:outline-2',
+              'focus-visible:outline-offset-2 focus-visible:outline-brand-600',
+            )}
+          >
+            <span className="font-medium text-brand-900">Anyone</span>
+            <p className="mt-0.5 text-ink-muted text-sm">
+              Whoever is free. Usually the most times to choose from.
+            </p>
+          </button>
+        </li>
+
+        {provider.people
+          .filter((person) =>
+            (provider.services.find((s) => s.id === serviceId)?.employeeIds ?? []).includes(
+              person.id,
+            ),
+          )
+          .map((person) => (
+            <li key={person.id}>
+              <button
+                type="button"
+                onClick={() => void choosePerson(person.id)}
+                className={cn(
+                  'w-full rounded-xl bg-sheet/60 px-4 py-3 text-left ring-1 ring-hairline transition-colors',
+                  'hover:bg-brand-700/8 focus-visible:outline focus-visible:outline-2',
+                  'focus-visible:outline-offset-2 focus-visible:outline-brand-600',
+                )}
+              >
+                <span className="font-medium text-brand-900">{person.name}</span>
+              </button>
+            </li>
+          ))}
+      </ul>
+    );
+  }
   if (step === 'slot') {
     return (
       <div className="flex flex-col gap-4">
@@ -162,10 +214,10 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         ) : (
           <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {slots.map((slot) => (
-              <li key={slot}>
+              <li key={slot.startsAt}>
                 <button
                   type="button"
-                  onClick={() => selectSlot(slot)}
+                  onClick={() => selectSlot(slot.startsAt)}
                   className={cn(
                     'w-full rounded-lg bg-sheet/60 px-2 py-2 text-sm tabular-nums text-brand-900',
                     'ring-1 ring-hairline transition-colors hover:bg-brand-700/10',
@@ -173,7 +225,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
                     'focus-visible:outline-brand-600',
                   )}
                 >
-                  {zonedTime(slot, provider.timezone)}
+                  {zonedTime(slot.startsAt, provider.timezone)}
                 </button>
               </li>
             ))}

@@ -158,16 +158,16 @@ export function ManageBookingPage() {
             ) : (
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {slots.map((slot) => (
-                  <li key={slot}>
+                  <li key={slot.startsAt}>
                     <button
                       type="button"
                       disabled={status === 'saving'}
                       onClick={async () => {
-                        if (await reschedule(token, slot)) setPicking(false);
+                        if (await reschedule(token, slot.startsAt)) setPicking(false);
                       }}
                       className="w-full rounded-lg bg-sheet/60 px-2 py-2 text-sm tabular-nums text-brand-900 ring-1 ring-hairline transition-colors hover:bg-brand-700/10 disabled:opacity-50"
                     >
-                      {zonedTime(slot, booking.timezone)}
+                      {zonedTime(slot.startsAt, booking.timezone)}
                     </button>
                   </li>
                 ))}

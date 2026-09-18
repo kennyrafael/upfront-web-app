@@ -5,10 +5,11 @@ import {
   type DepositStatus,
   type PublicBooking,
   type PublicProvider,
+  type PublicSlot,
   publicApi,
 } from '@/lib/api';
 
-type Step = 'service' | 'slot' | 'details' | 'payment' | 'done';
+type Step = 'service' | 'person' | 'slot' | 'details' | 'payment' | 'done';
 
 interface BookingResult {
   reference: string;
@@ -22,9 +23,17 @@ interface PublicBookingState {
   provider: PublicProvider | null;
   step: Step;
   serviceId: string | null;
+  /**
+   * Who the client asked for, or null for anyone.
+   *
+   * Null is a real answer, not a missing one: it is what lets the shop move the appointment
+   * to another pair of hands later without a conversation.
+   */
+  employeeId: string | null;
   /** Midnight of the day being browsed, as a local Date used only as a calendar cursor. */
   day: Date;
-  slots: string[];
+  /** Each start, with everybody who could take it — so the page can grey out the rest. */
+  slots: PublicSlot[];
   selectedSlot: string | null;
   result: BookingResult | null;
   /** Kept so the waiting screen can say which phone the MB WAY request went to. */
@@ -35,6 +44,7 @@ interface PublicBookingState {
   error: string | null;
   loadProvider: (slug: string) => Promise<void>;
   chooseService: (serviceId: string) => Promise<void>;
+  choosePerson: (employeeId: string | null) => Promise<void>;
   setDay: (day: Date) => Promise<void>;
   loadSlots: () => Promise<void>;
   selectSlot: (slot: string) => void;
@@ -61,6 +71,7 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   provider: null,
   step: 'service',
   serviceId: null,
+  employeeId: null,
   day: startOfLocalDay(new Date()),
   slots: [],
   selectedSlot: null,
@@ -79,8 +90,26 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
     }
   },
 
+  /**
+   * Service first, then who — the order a client thinks in, and the order that lets the
+   * person step know which of the shop's people are even relevant.
+   *
+   * A one-person shop never sees the step: `provider.people` is empty and this goes straight
+   * to the times, because asking "who with?" when there is one answer is a click to nowhere.
+   */
   chooseService: async (serviceId) => {
-    set({ serviceId, step: 'slot', selectedSlot: null });
+    const { provider } = get();
+    // People who do *this* service, not everybody. Offering the colourist for a haircut
+    // leads to an empty grid with no explanation, which reads as a broken page.
+    const qualified = provider?.services.find((s) => s.id === serviceId)?.employeeIds ?? [];
+    const hasChoice = qualified.length > 1;
+
+    set({ serviceId, employeeId: null, selectedSlot: null, step: hasChoice ? 'person' : 'slot' });
+    if (!hasChoice) await get().loadSlots();
+  },
+
+  choosePerson: async (employeeId) => {
+    set({ employeeId, step: 'slot', selectedSlot: null });
     await get().loadSlots();
   },
 
@@ -90,7 +119,7 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   },
 
   loadSlots: async () => {
-    const { slug, serviceId, day } = get();
+    const { slug, serviceId, day, employeeId } = get();
     if (!slug || !serviceId) return;
 
     set({ status: 'loadingSlots', error: null });
@@ -100,7 +129,14 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
       to.setDate(to.getDate() + 1);
 
       set({
-        slots: await publicApi.availability(slug, serviceId, from.toISOString(), to.toISOString()),
+        slots: await publicApi.availability(
+          slug,
+          serviceId,
+          from.toISOString(),
+          to.toISOString(),
+          undefined,
+          employeeId ?? undefined,
+        ),
         status: 'idle',
       });
     } catch (error) {
@@ -109,15 +145,26 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   },
 
   selectSlot: (slot) => set({ selectedSlot: slot, step: 'details' }),
-
   back: () => {
-    const { step } = get();
+    const { step, provider, serviceId } = get();
+    // People who do *this* service, not everybody. Offering the colourist for a haircut
+    // leads to an empty grid with no explanation, which reads as a broken page.
+    const qualified = provider?.services.find((s) => s.id === serviceId)?.employeeIds ?? [];
+    const hasChoice = qualified.length > 1;
+
     if (step === 'details') set({ step: 'slot', error: null });
-    else if (step === 'slot') set({ step: 'service', serviceId: null, slots: [], error: null });
+    else if (step === 'slot') {
+      // Back from the times lands on the person step when there was one, and on the service
+      // otherwise — so "back" always undoes exactly the last thing the client did.
+      if (hasChoice) set({ step: 'person', slots: [], selectedSlot: null, error: null });
+      else set({ step: 'service', serviceId: null, slots: [], error: null });
+    } else if (step === 'person') {
+      set({ step: 'service', serviceId: null, employeeId: null, error: null });
+    }
   },
 
   book: async (details) => {
-    const { slug, serviceId, selectedSlot } = get();
+    const { slug, serviceId, selectedSlot, employeeId } = get();
     if (!slug || !serviceId || !selectedSlot) return false;
 
     set({ status: 'saving', error: null });
@@ -126,6 +173,9 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
         ...details,
         serviceId,
         startsAt: selectedSlot,
+        // Omitted rather than sent as null when nobody was named: absent is what tells the
+        // server this client did not mind, which is what a later reassignment turns on.
+        ...(employeeId ? { employeeId } : {}),
       });
 
       set({
@@ -187,7 +237,8 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
 interface ManageBookingState {
   booking: PublicBooking | null;
   /** Slots offered for a move, loaded on demand rather than with the booking. */
-  slots: string[];
+  /** Reschedule offers the same shape; the person is fixed, so only the start is used. */
+  slots: PublicSlot[];
   day: Date;
   status: 'idle' | 'loading' | 'loadingSlots' | 'saving';
   error: string | null;

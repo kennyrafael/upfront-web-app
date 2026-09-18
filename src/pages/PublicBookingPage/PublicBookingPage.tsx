@@ -128,6 +128,7 @@ export function PublicBookingPage() {
 
   const headings = {
     service: { title: 'Book an appointment', subtitle: 'What would you like?' },
+    person: { title: 'Who with?', subtitle: 'Anyone, or somebody in particular.' },
     slot: { title: 'Pick a time', subtitle: undefined },
     details: { title: 'Your details', subtitle: undefined },
     payment: { title: '', subtitle: undefined },

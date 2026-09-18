@@ -7,14 +7,30 @@ export interface PublicService {
   durationMinutes: number;
   priceCents: number;
   currency: string;
+  /** Who does this one, so the person step offers nobody who cannot take it. */
+  employeeIds: string[];
 }
 
+/** One bookable start, and everybody who could take it. */
+export interface PublicSlot {
+  startsAt: string;
+  /** Always at least one. Lets the page grey out a time the chosen person cannot do. */
+  employeeIds: string[];
+}
+
+/** Somebody a client can ask for by name. */
+export interface PublicPerson {
+  id: string;
+  name: string;
+}
 export interface PublicProvider {
   slug: string;
   businessName: string;
   /** The provider's own timezone. Every slot on the page is rendered in it. */
   timezone: string;
   services: PublicService[];
+  /** Who works here. Empty for a one-person shop, where asking "who with?" has one answer. */
+  people: PublicPerson[];
   leadTimeHours: number;
   horizonDays: number;
   /** 0 when this provider takes no deposit. Shown before a client commits to anything. */
@@ -59,6 +75,8 @@ export interface PublicBooking {
 
 export interface CreatePublicBookingPayload {
   serviceId: string;
+  /** Who the client asked for. Absent means anyone, which is a real answer. */
+  employeeId?: string;
   startsAt: string;
   name: string;
   phone: string;
@@ -123,11 +141,13 @@ export const publicApi = {
     to: string,
     /** Overrides the service's own length, for a booking that has grown past it. */
     durationMinutes?: number,
+    /** Narrows to one person, when the client asked for somebody in particular. */
+    employeeId?: string,
   ) =>
-    publicRequest<string[]>(
+    publicRequest<PublicSlot[]>(
       `/providers/${encodeURIComponent(slug)}/availability?serviceId=${serviceId}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}${
         durationMinutes ? `&durationMinutes=${durationMinutes}` : ''
-      }`,
+      }${employeeId ? `&employeeId=${employeeId}` : ''}`,
     ),
 
   book: (slug: string, payload: CreatePublicBookingPayload) =>
