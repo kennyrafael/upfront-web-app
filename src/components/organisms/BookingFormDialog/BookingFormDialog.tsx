@@ -18,6 +18,8 @@ export interface BookingFormDialogProps {
   booking?: Booking;
   /** Pre-selected slot when the provider clicked an empty gap in the calendar. */
   initialStart?: Date;
+  /** Preselects who, when the click came from a person's column in the day view. */
+  initialEmployeeId?: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -56,7 +58,11 @@ interface Fields {
   employeeId: string;
 }
 
-function toFields(booking: Booking | undefined, initialStart: Date | undefined): Fields {
+function toFields(
+  booking: Booking | undefined,
+  initialStart: Date | undefined,
+  initialEmployeeId: string | undefined,
+): Fields {
   const start = booking ? new Date(booking.startsAt) : (initialStart ?? new Date());
   return {
     clientId: booking?.client.id ?? '',
@@ -66,7 +72,7 @@ function toFields(booking: Booking | undefined, initialStart: Date | undefined):
     status: booking?.status ?? 'pending',
     notes: booking?.notes ?? '',
     // Every item carries the same person today, so the first one answers for the booking.
-    employeeId: booking?.items[0]?.employeeId ?? '',
+    employeeId: booking?.items[0]?.employeeId ?? initialEmployeeId ?? '',
   };
 }
 
@@ -75,6 +81,7 @@ export function BookingFormDialog({
   onOpenChange,
   booking,
   initialStart,
+  initialEmployeeId,
 }: BookingFormDialogProps) {
   const clients = useClientStore((state) => state.items);
   const loadClients = useClientStore((state) => state.load);
@@ -90,13 +97,15 @@ export function BookingFormDialog({
   const error = useBookingStore((state) => state.error);
   const clearError = useBookingStore((state) => state.clearError);
 
-  const [fields, setFields] = useState<Fields>(() => toFields(booking, initialStart));
+  const [fields, setFields] = useState<Fields>(() =>
+    toFields(booking, initialStart, initialEmployeeId),
+  );
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
   const [allowOutsideHours, setAllowOutsideHours] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setFields(toFields(booking, initialStart));
+      setFields(toFields(booking, initialStart, initialEmployeeId));
       setErrors({});
       setAllowOutsideHours(false);
       clearError();
@@ -104,7 +113,7 @@ export function BookingFormDialog({
       void loadServices();
       void loadEmployees();
     }
-  }, [open, booking, initialStart, clearError, loadClients, loadServices]);
+  }, [open, booking, initialStart, initialEmployeeId, clearError, loadClients, loadServices]);
 
   const clientOptions = useMemo(
     () => clients.map((client) => ({ value: client.id, label: client.name })),

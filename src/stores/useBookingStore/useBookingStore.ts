@@ -12,6 +12,21 @@ interface BookingState {
   items: Booking[];
   /** Monday 00:00 of the week currently on screen. */
   weekStart: Date;
+  /**
+   * Which shape the calendar is in.
+   *
+   * A week of one person, or a day of everybody. Those are the two questions a shop asks,
+   * and a week × five people does not fit on a screen and never will.
+   */
+  view: 'week' | 'day';
+  /** The day the day view is showing. Always inside the loaded week. */
+  day: Date;
+  /** Week view, one person at a time. Undefined means everybody — only useful for one-person shops. */
+  weekEmployeeId?: string;
+  setView: (view: 'week' | 'day') => void;
+  setWeekEmployee: (employeeId?: string) => void;
+  goToDay: (day: Date) => Promise<void>;
+  shiftDay: (days: number) => Promise<void>;
   status: 'idle' | 'loading' | 'saving';
   error: string | null;
   load: () => Promise<void>;
@@ -32,6 +47,29 @@ function toMessage(error: unknown): string {
 export const useBookingStore = create<BookingState>((set, get) => ({
   items: [],
   weekStart: startOfWeek(new Date()),
+  view: 'week',
+  day: new Date(),
+  weekEmployeeId: undefined,
+
+  setView: (view) => set({ view }),
+  setWeekEmployee: (weekEmployeeId) => set({ weekEmployeeId }),
+
+  /**
+   * Moves the day view, reloading only when the day leaves the week already in memory.
+   *
+   * The fetch stays week-shaped whichever view is on screen, so switching between them costs
+   * nothing and the day view always has its data.
+   */
+  goToDay: async (day) => {
+    const week = startOfWeek(day);
+    const sameWeek = week.getTime() === get().weekStart.getTime();
+    set({ day, weekStart: week });
+    if (!sameWeek) await get().load();
+  },
+
+  shiftDay: async (days) => {
+    await get().goToDay(addDays(get().day, days));
+  },
   status: 'idle',
   error: null,
 
@@ -98,5 +136,14 @@ export const useBookingStore = create<BookingState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  reset: () => set({ items: [], weekStart: startOfWeek(new Date()), status: 'idle', error: null }),
+  reset: () =>
+    set({
+      items: [],
+      weekStart: startOfWeek(new Date()),
+      day: new Date(),
+      view: 'week',
+      weekEmployeeId: undefined,
+      status: 'idle',
+      error: null,
+    }),
 }));

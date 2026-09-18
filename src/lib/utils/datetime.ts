@@ -125,3 +125,36 @@ export function relativeTime(value: string | Date): string {
   }
   return format.format(Math.round(amount), 'year');
 }
+
+/**
+ * When somebody is actually bookable: the shop open **and** them in.
+ *
+ * A copy of the rule the API decides with, and deliberately only used to *draw* — the tinted
+ * band behind a calendar column. The server remains the authority on what may be booked;
+ * this exists so the shading matches it rather than showing the shop's whole day behind
+ * somebody who works mornings.
+ *
+ * Empty employee hours mean "follows the shop", the same as on the server.
+ */
+export function intersectHours<T extends { weekday: number; start: string; end: string }>(
+  shop: T[],
+  employee: T[],
+): { weekday: number; start: string; end: string }[] {
+  if (employee.length === 0) return shop;
+
+  const effective: { weekday: number; start: string; end: string }[] = [];
+
+  for (const open of shop) {
+    for (const working of employee) {
+      if (open.weekday !== working.weekday) continue;
+
+      const start = open.start > working.start ? open.start : working.start;
+      const end = open.end < working.end ? open.end : working.end;
+      // String comparison is safe for zero-padded HH:mm, and strict so hours that merely
+      // touch produce no band.
+      if (start < end) effective.push({ weekday: open.weekday, start, end });
+    }
+  }
+
+  return effective;
+}
