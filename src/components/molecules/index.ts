@@ -1,3 +1,4 @@
+export * from './AccentPicker';
 export * from './ConfirmDialog';
 export * from './FieldMessage';
 export * from './FormField';

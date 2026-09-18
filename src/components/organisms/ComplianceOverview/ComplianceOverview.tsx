@@ -9,7 +9,7 @@ export interface ComplianceOverviewProps {
 const QUARTER_MONTHS = ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'];
 
 const THRESHOLD_TONE = {
-  ok: { bar: 'jade' as const, badge: 'brand' as const, label: 'Within the exemption' },
+  ok: { bar: 'jade' as const, badge: 'success' as const, label: 'Within the exemption' },
   warning: { bar: 'amber' as const, badge: 'warning' as const, label: 'Approaching the ceiling' },
   exceeded: { bar: 'red' as const, badge: 'danger' as const, label: 'Ceiling exceeded' },
 };

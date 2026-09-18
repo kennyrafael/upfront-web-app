@@ -35,3 +35,49 @@ export function storeTheme(theme: Theme): void {
     // See readTheme. It applies for this session either way.
   }
 }
+
+/**
+ * The accents a business can dress the dashboard in.
+ *
+ * Six of Radix's twenty-six, not all of them: every one costs a colour scale in the bundle
+ * (see `main.tsx`), and a page of near-identical greens is a worse choice than six that are
+ * obviously different from across a room. `jade` is first because it is Upfront's own, and
+ * the default for anyone who never opens this.
+ *
+ * **Only the accent moves.** Success stays jade, warning amber, danger red — those are
+ * meanings rather than decoration, and a business whose "paid" badge turned orange because
+ * they liked orange would have lost something. It does mean picking red or jade makes the
+ * accent and one semantic colour look alike, which is a fair trade for letting people
+ * choose.
+ */
+export const ACCENTS = ['jade', 'blue', 'purple', 'red', 'orange', 'yellow'] as const;
+export type Accent = (typeof ACCENTS)[number];
+
+export const ACCENT_LABELS: Record<Accent, string> = {
+  jade: 'Green',
+  blue: 'Blue',
+  purple: 'Purple',
+  red: 'Red',
+  orange: 'Orange',
+  yellow: 'Yellow',
+};
+
+const ACCENT_KEY = 'upfront.accent';
+
+export function readAccent(): Accent {
+  try {
+    const stored = localStorage.getItem(ACCENT_KEY);
+    return ACCENTS.includes(stored as Accent) ? (stored as Accent) : 'jade';
+  } catch {
+    // Same as readTheme: a private window throws, and a colour is not worth a crash.
+    return 'jade';
+  }
+}
+
+export function storeAccent(accent: Accent): void {
+  try {
+    localStorage.setItem(ACCENT_KEY, accent);
+  } catch {
+    // It applies for this session either way.
+  }
+}

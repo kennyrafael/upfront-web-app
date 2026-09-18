@@ -72,7 +72,7 @@ export function DashboardPage() {
             {services.length === 0 ? (
               <p className="text-sm text-ink-muted">
                 Nothing in the catalog yet.{' '}
-                <Link to="/services" className="font-medium text-brand-700 hover:underline">
+                <Link to="/services" className="font-medium text-brand-ink hover:underline">
                   Add your first service
                 </Link>
                 .
@@ -113,7 +113,7 @@ export function DashboardPage() {
             {workingDays.size === 0 ? (
               <p className="text-sm text-ink-muted">
                 No hours set.{' '}
-                <Link to="/settings" className="font-medium text-brand-700 hover:underline">
+                <Link to="/settings" className="font-medium text-brand-ink hover:underline">
                   Set your hours
                 </Link>
                 .
@@ -151,7 +151,7 @@ export function DashboardPage() {
             {todaysBookings.length === 0 ? (
               <p className="text-sm text-ink-muted">
                 Nothing booked today.{' '}
-                <Link to="/bookings" className="font-medium text-brand-700 hover:underline">
+                <Link to="/bookings" className="font-medium text-brand-ink hover:underline">
                   Add a booking
                 </Link>
                 .

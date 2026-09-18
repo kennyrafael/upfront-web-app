@@ -189,7 +189,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
             </p>
           ) : loadingBookings ? (
             <p className="flex items-center gap-2 px-3 py-3 text-sm text-ink-muted">
-              <Spinner className="size-3 text-brand-700" /> Loading bookings…
+              <Spinner className="size-3 text-brand-ink" /> Loading bookings…
             </p>
           ) : billable.length === 0 ? (
             <p className="rounded-lg bg-brand-900/4 px-3 py-3 text-sm text-ink-muted">

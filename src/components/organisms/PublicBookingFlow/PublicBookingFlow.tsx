@@ -205,7 +205,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
 
         {status === 'loadingSlots' ? (
           <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-muted">
-            <Spinner className="size-4 text-brand-700" /> Finding free times…
+            <Spinner className="size-4 text-brand-ink" /> Finding free times…
           </p>
         ) : slots.length === 0 ? (
           <p className="rounded-lg bg-brand-900/4 px-3 py-6 text-center text-sm text-ink-muted">

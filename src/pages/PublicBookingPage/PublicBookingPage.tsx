@@ -43,7 +43,7 @@ export function PublicBookingPage() {
     return (
       <PublicLayout>
         <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-700" /> Loading…
+          <Spinner className="size-4 text-brand-ink" /> Loading…
         </p>
       </PublicLayout>
     );
@@ -116,7 +116,7 @@ export function PublicBookingPage() {
           {result.manageToken ? (
             <Link
               to={`/booking/${result.manageToken}`}
-              className="text-sm font-medium text-brand-700 underline-offset-2 hover:underline"
+              className="text-sm font-medium text-brand-ink underline-offset-2 hover:underline"
             >
               View or cancel this booking
             </Link>

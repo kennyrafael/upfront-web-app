@@ -22,6 +22,7 @@
   --color-brand-500: #8bceb6;
   --color-brand-600: #56ba9f;
   --color-brand-700: #29a383;
+  --color-brand-ink: #208368;
   --color-brand-800: #26997b;
   --color-brand-900: #1d3b31;
   --color-brand-950: #1d3b31;
@@ -82,6 +83,19 @@
     --color-brand-800: var(--accent-10);
     --color-brand-900: var(--accent-12);
     --color-brand-950: var(--accent-12);
+
+    /**
+     * Brand **text**, which is not the same colour as a brand fill.
+     *
+     * Step 9 is the one Radix paints buttons with — a saturated block meant to have
+     * something written on top of it, not to be written with. As a link on a pale surface
+     * it was always thin for jade, and once the accent became the business's choice it
+     * broke outright: yellow-9 on white is a highlighter pen. Step 11 is Radix's
+     * "low-contrast text", which is exactly this job and holds in both appearances.
+     *
+     * Fills and washes keep 700. Only the ink moved.
+     */
+    --color-brand-ink: var(--accent-11);
 
     /* What Radix itself writes on top of accent-9, so a label on a button is never guesswork. */
     --color-oncolor: var(--accent-contrast);

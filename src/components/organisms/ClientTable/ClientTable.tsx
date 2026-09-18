@@ -20,7 +20,7 @@ export function ClientTable({ onEdit }: ClientTableProps) {
   if (status === 'loading' && items.length === 0) {
     return (
       <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-        <Spinner className="text-brand-700" /> Loading clients…
+        <Spinner className="text-brand-ink" /> Loading clients…
       </Card>
     );
   }

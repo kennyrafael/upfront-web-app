@@ -86,7 +86,7 @@ export function CompliancePage() {
         <ComplianceOverview summary={summary} />
       ) : status === 'loading' ? (
         <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-          <Spinner className="text-brand-700" /> Loading your compliance position…
+          <Spinner className="text-brand-ink" /> Loading your compliance position…
         </Card>
       ) : null}
 

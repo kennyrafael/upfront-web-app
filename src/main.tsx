@@ -21,13 +21,21 @@ import { App } from './App';
  * not a case of that: it overrides `--accent-1` through `-12` with the provider's own hex,
  * so it needs no scale of its own.
  */
-// The accent, the neutral beside it, and the literal `--gray-*` that neutral remaps.
+// The default accent, the neutral beside it, and the literal `--gray-*` that neutral
+// remaps. `jade` earns its place twice over: it is also `--color-good`, which stays green
+// whatever accent a business picks.
 import '@radix-ui/themes/tokens/colors/jade.css';
 import '@radix-ui/themes/tokens/colors/sage.css';
 import '@radix-ui/themes/tokens/colors/gray.css';
-// Danger and warning, the only two semantic colours the house components reach for.
+// Danger and warning, which are meanings rather than decoration and never follow the accent.
 import '@radix-ui/themes/tokens/colors/red.css';
 import '@radix-ui/themes/tokens/colors/amber.css';
+// The other accents a business can choose — see `ACCENTS` in lib/utils/theme.ts, which this
+// list must match. Four scales for six choices, since jade and red are already here.
+import '@radix-ui/themes/tokens/colors/blue.css';
+import '@radix-ui/themes/tokens/colors/purple.css';
+import '@radix-ui/themes/tokens/colors/orange.css';
+import '@radix-ui/themes/tokens/colors/yellow.css';
 // Everything that is not a scale — spacing, radii, shadows, type — and the accent and gray
 // mappings, which must land after the scales they point at.
 import '@radix-ui/themes/tokens/base.css';

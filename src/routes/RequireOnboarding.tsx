@@ -30,7 +30,7 @@ export function RequireOnboarding({ children }: RequireOnboardingProps) {
       children
     ) : (
       <div className="flex min-h-dvh items-center justify-center">
-        <Spinner className="size-6 text-brand-700" label="Loading your workspace" />
+        <Spinner className="size-6 text-brand-ink" label="Loading your workspace" />
       </div>
     );
   }

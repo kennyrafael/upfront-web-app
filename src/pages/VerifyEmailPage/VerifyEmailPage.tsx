@@ -46,7 +46,7 @@ export function VerifyEmailPage() {
     return (
       <AuthLayout title="Confirming your email">
         <p className="flex items-center justify-center gap-2 py-6 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-700" /> One moment…
+          <Spinner className="size-4 text-brand-ink" /> One moment…
         </p>
       </AuthLayout>
     );

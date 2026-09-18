@@ -44,7 +44,7 @@ export function ForgotPasswordPage() {
             Nothing arrived? Check spam, then{' '}
             <button
               type="button"
-              className="font-medium text-brand-700 underline-offset-2 hover:underline"
+              className="font-medium text-brand-ink underline-offset-2 hover:underline"
               onClick={() => setSent(false)}
             >
               try another address

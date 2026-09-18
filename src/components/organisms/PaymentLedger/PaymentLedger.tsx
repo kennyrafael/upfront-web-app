@@ -31,7 +31,7 @@ export function PaymentLedger({ onRecord }: PaymentLedgerProps) {
   if (status === 'loading' && entries.length === 0) {
     return (
       <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-        <Spinner className="text-brand-700" /> Loading the ledger…
+        <Spinner className="text-brand-ink" /> Loading the ledger…
       </Card>
     );
   }

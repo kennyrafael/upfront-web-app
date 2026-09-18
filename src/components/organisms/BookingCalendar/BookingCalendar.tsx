@@ -189,7 +189,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
     <Card className="overflow-hidden">
       {status === 'loading' ? (
         <div className="flex items-center gap-2 border-b border-hairline px-4 py-2 text-xs text-ink-muted">
-          <Spinner className="size-3 text-brand-700" /> Loading…
+          <Spinner className="size-3 text-brand-ink" /> Loading…
         </div>
       ) : null}
 

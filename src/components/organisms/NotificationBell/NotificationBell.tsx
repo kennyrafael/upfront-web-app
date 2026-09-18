@@ -84,7 +84,7 @@ export function NotificationBell() {
       <div className="max-h-96 overflow-y-auto">
         {loading && items.length === 0 ? (
           <p className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-ink-muted">
-            <Spinner className="size-4 text-brand-700" /> Loading…
+            <Spinner className="size-4 text-brand-ink" /> Loading…
           </p>
         ) : items.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-ink-muted">

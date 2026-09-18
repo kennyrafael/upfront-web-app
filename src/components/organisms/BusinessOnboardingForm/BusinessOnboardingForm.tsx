@@ -101,7 +101,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
               className={cn(
                 'flex size-6 shrink-0 items-center justify-center rounded-full font-medium transition-colors',
                 index <= step
-                  ? 'bg-brand-700 text-white'
+                  ? 'bg-brand-700 text-oncolor'
                   : 'bg-brand-900/8 text-ink-muted ring-1 ring-hairline',
               )}
             >

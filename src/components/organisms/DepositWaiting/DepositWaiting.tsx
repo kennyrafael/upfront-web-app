@@ -93,7 +93,7 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
       </Card>
 
       <p className="flex items-center justify-center gap-2 text-sm text-ink-muted">
-        <Spinner className="size-4 text-brand-700" />
+        <Spinner className="size-4 text-brand-ink" />
         Waiting for your approval —{' '}
         <span className="tabular-nums">{formatCountdown(remaining)}</span> left
       </p>

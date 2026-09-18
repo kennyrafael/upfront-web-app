@@ -2,6 +2,7 @@ import { DropdownMenu, SegmentedControl } from '@radix-ui/themes';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Icon, type IconName } from '@/components/atoms';
+import { AccentPicker } from '@/components/molecules';
 import type { Theme } from '@/lib/utils';
 import { resetDomainStores, useAuthStore, useThemeStore } from '@/stores';
 
@@ -26,6 +27,8 @@ export function AccountMenu() {
   const logout = useAuthStore((state) => state.logout);
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
+  const accent = useThemeStore((state) => state.accent);
+  const setAccent = useThemeStore((state) => state.setAccent);
   const [open, setOpen] = useState(false);
 
   return (
@@ -94,6 +97,11 @@ export function AccountMenu() {
               </SegmentedControl.Item>
             ))}
           </SegmentedControl.Root>
+
+          {/* Under light/dark rather than beside it: they are both "how this looks", and
+              the accent is the one people change once and never again. */}
+          <p className="mt-3 mb-1.5 px-1 text-xs font-medium text-ink-muted">Colour</p>
+          <AccentPicker value={accent} onChange={setAccent} />
         </div>
 
         <DropdownMenu.Separator />

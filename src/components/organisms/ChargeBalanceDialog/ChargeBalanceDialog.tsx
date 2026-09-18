@@ -104,7 +104,7 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
     >
       {!state ? (
         <div className="flex items-center gap-2 text-ink-muted text-sm">
-          <Spinner className="size-4 text-brand-700" /> Checking what is owed…
+          <Spinner className="size-4 text-brand-ink" /> Checking what is owed…
         </div>
       ) : settled ? (
         <p className="rounded-lg bg-brand-700/10 px-3 py-2 text-brand-900 text-sm">

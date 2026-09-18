@@ -126,7 +126,7 @@ export function BusinessProfileForm() {
         <Button type="submit" loading={busy}>
           Save changes
         </Button>
-        {saved ? <span className="text-sm text-brand-700">Saved.</span> : null}
+        {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
       </div>
     </form>
   );

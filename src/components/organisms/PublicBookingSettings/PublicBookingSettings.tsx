@@ -236,7 +236,7 @@ export function PublicBookingSettings() {
                   Copy link
                 </Button>
               ) : null}
-              {saved ? <span className="text-sm text-brand-700">Saved.</span> : null}
+              {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
             </div>
           </>
         ) : null}

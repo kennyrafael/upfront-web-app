@@ -42,6 +42,13 @@ export function PublicLayout({
     // ground. `hasBackground` is off so the washed field behind stays visible.
     <Theme
       appearance="light"
+      // Pinned, and not only for tidiness. `brandStyle` returns nothing when the provider
+      // has set no colour, and without an accent of its own this Theme would then inherit
+      // the root's — which is the *viewer's* dashboard choice, read from their own browser.
+      // A provider who liked yellow would find their booking page yellow when they looked
+      // at it and green to everybody else. "Absent means Upfront's green" has to be stated
+      // to be true.
+      accentColor="jade"
       hasBackground={false}
       style={brandStyle(brandColor)}
       className="theme-light relative flex min-h-dvh flex-col items-center px-4 py-10"

@@ -33,7 +33,7 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
   if (status === 'loading' && invoices.length === 0) {
     return (
       <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-        <Spinner className="text-brand-700" /> Loading recibos…
+        <Spinner className="text-brand-ink" /> Loading recibos…
       </Card>
     );
   }
