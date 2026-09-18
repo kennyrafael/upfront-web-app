@@ -24,7 +24,7 @@ import { RequireOnboarding } from './RequireOnboarding';
 
 function GuestOnly({ children }: { children: ReactNode }) {
   const accessToken = useAuthStore((state) => state.accessToken);
-  return accessToken ? <Navigate to="/" replace /> : <>{children}</>;
+  return accessToken ? <Navigate to="/" replace /> : children;
 }
 
 /** Signed in, onboarded, and inside the app shell. */

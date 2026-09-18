@@ -27,7 +27,7 @@ export function RequireOnboarding({ children }: RequireOnboardingProps) {
     // A failed load falls through to the app rather than trapping the provider on a
     // spinner; the page itself will surface the error.
     return error ? (
-      <>{children}</>
+      children
     ) : (
       <div className="flex min-h-dvh items-center justify-center">
         <Spinner className="size-6 text-brand-700" label="Loading your workspace" />

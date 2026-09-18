@@ -116,7 +116,16 @@ export function BookingFormDialog({
       void loadServices();
       void loadEmployees();
     }
-  }, [open, booking, initialStart, initialEmployeeId, clearError, loadClients, loadServices]);
+  }, [
+    open,
+    booking,
+    initialStart,
+    initialEmployeeId,
+    clearError,
+    loadClients,
+    loadServices,
+    loadEmployees,
+  ]);
 
   const clientOptions = useMemo(
     () => clients.map((client) => ({ value: client.id, label: client.name })),
