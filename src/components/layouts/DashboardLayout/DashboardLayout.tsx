@@ -37,8 +37,15 @@ const NAV_ITEMS: { to: string; label: string; icon: IconName; roles?: Role[] }[]
   { to: '/services', label: 'Services', icon: 'services' },
   { to: '/bookings', label: 'Bookings', icon: 'bookings' },
   { to: '/clients', label: 'Clients', icon: 'clients' },
-  { to: '/payments', label: 'Payments', icon: 'payments' },
-  { to: '/compliance', label: 'Compliance', icon: 'compliance' },
+  // A front desk takes money — that is the job. Staff are not on the payments desk.
+  {
+    to: '/payments',
+    label: 'Payments',
+    icon: 'payments',
+    roles: ['owner', 'manager', 'front_desk'],
+  },
+  // A recibo is issued against one person's NIF, so the whole of compliance is theirs.
+  { to: '/compliance', label: 'Compliance', icon: 'compliance', roles: ['owner'] },
 ];
 
 /**
