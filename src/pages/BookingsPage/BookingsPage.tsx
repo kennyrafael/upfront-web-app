@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BookingCalendar, BookingFormDialog, Button, DashboardLayout, Select } from '@/components';
+import {
+  BookingCalendar,
+  BookingFormDialog,
+  Button,
+  ChargeBalanceDialog,
+  DashboardLayout,
+  Select,
+} from '@/components';
 import type { Booking } from '@/lib/api';
 import { formatDayHeading, formatWeekRange, startOfWeek } from '@/lib/utils';
 import { useAuthStore, useBookingStore, useBusinessStore, useEmployeeStore } from '@/stores';
@@ -28,6 +35,7 @@ export function BookingsPage() {
   const [editing, setEditing] = useState<Booking>();
   const [initialStart, setInitialStart] = useState<Date>();
   const [initialEmployeeId, setInitialEmployeeId] = useState<string>();
+  const [charging, setCharging] = useState<Booking>();
 
   useEffect(() => {
     void load();
@@ -169,6 +177,15 @@ export function BookingsPage() {
         booking={editing}
         initialStart={initialStart}
         initialEmployeeId={initialEmployeeId}
+        onCompleted={setCharging}
+      />
+
+      {/* Opened by "mark completed" rather than sitting in a menu: the client is standing
+          there for about a minute, and that is the window this whole feature lives in. */}
+      <ChargeBalanceDialog
+        open={Boolean(charging)}
+        onOpenChange={(next) => !next && setCharging(undefined)}
+        booking={charging}
       />
     </DashboardLayout>
   );

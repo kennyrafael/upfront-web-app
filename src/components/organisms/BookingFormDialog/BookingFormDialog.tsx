@@ -20,6 +20,8 @@ export interface BookingFormDialogProps {
   initialStart?: Date;
   /** Preselects who, when the click came from a person's column in the day view. */
   initialEmployeeId?: string;
+  /** Called when this save is what marked the booking completed. Carries the booking as it was. */
+  onCompleted?: (booking: Booking) => void;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -82,6 +84,7 @@ export function BookingFormDialog({
   booking,
   initialStart,
   initialEmployeeId,
+  onCompleted,
 }: BookingFormDialogProps) {
   const clients = useClientStore((state) => state.items);
   const loadClients = useClientStore((state) => state.load);
@@ -191,7 +194,20 @@ export function BookingFormDialog({
       ? await update(booking.id, { ...payload, status: fields.status as Booking['status'] })
       : await create(payload);
 
-    if (ok) onOpenChange(false);
+    if (!ok) return;
+
+    /**
+     * Marking it completed is the moment to ask for the money, so the prompt opens from
+     * here rather than waiting behind a menu somewhere.
+     *
+     * Only on the transition, not on every save of an already-completed booking: reopening
+     * a finished appointment to fix a note should not put a payment dialog in the way.
+     */
+    const justCompleted =
+      Boolean(booking) && booking?.status !== 'completed' && fields.status === 'completed';
+
+    onOpenChange(false);
+    if (justCompleted && booking) onCompleted?.(booking);
   }
 
   const busy = status === 'saving';

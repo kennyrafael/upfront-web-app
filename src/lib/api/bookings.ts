@@ -91,4 +91,37 @@ export const bookingsApi = {
   update: (id: string, payload: UpdateBookingPayload) =>
     api.patch<Booking>(`/bookings/${id}`, payload),
   remove: (id: string) => api.delete<void>(`/bookings/${id}`),
+
+  /** What is owed, and whether a push is already waiting. Read when the prompt opens. */
+  balance: (id: string) => api.get<BookingBalance>(`/bookings/${id}/balance`),
+
+  /**
+   * Pushes an MB Way request to the client standing in front of you.
+   *
+   * Amount and phone both optional: the amount defaults to what is owed, the number to the
+   * one on file.
+   */
+  chargeBalance: (id: string, payload: { amountCents?: number; phone?: string }) =>
+    api.post<ChargeBalanceResult>(`/bookings/${id}/charge-balance`, payload),
+
+  /** Withdraws a request still waiting, so the amount can be corrected and resent. */
+  cancelBalance: (id: string) =>
+    api.delete<{ cancelled: number }>(`/bookings/${id}/charge-balance`),
 };
+
+/** What is owed on one booking, and whether a request is already on somebody's phone. */
+export interface BookingBalance {
+  priceCents: number;
+  paidCents: number;
+  outstandingCents: number;
+  pending?: { paymentId: string; amountCents: number; requestedAt: string };
+  /** The number on file, so the form opens with it filled in. */
+  clientPhone?: string;
+}
+
+export interface ChargeBalanceResult {
+  paymentId: string;
+  amountCents: number;
+  /** Echoed back, so it can be read aloud before the client's phone buzzes. */
+  phone: string;
+}
