@@ -9,7 +9,7 @@ import {
   Label,
   Switch,
 } from '@/components/atoms';
-import { FormField } from '@/components/molecules';
+import { FormField, SelectField } from '@/components/molecules';
 import { businessesApi } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
@@ -26,6 +26,7 @@ export function PublicBookingSettings() {
   const [leadTime, setLeadTime] = useState(String(profile?.bookingLeadTimeHours ?? 2));
   const [horizon, setHorizon] = useState(String(profile?.bookingHorizonDays ?? 60));
   const [deposit, setDeposit] = useState(String(profile?.depositPercent ?? 0));
+  const [mode, setMode] = useState(profile?.paymentMode ?? 'deposit');
   const [notice, setNotice] = useState(String(profile?.cancellationNoticeHours ?? 24));
   const [slugError, setSlugError] = useState<string>();
   const [enabling, setEnabling] = useState(false);
@@ -36,6 +37,7 @@ export function PublicBookingSettings() {
     setLeadTime(String(profile?.bookingLeadTimeHours ?? 2));
     setHorizon(String(profile?.bookingHorizonDays ?? 60));
     setDeposit(String(profile?.depositPercent ?? 0));
+    setMode(profile?.paymentMode ?? 'deposit');
     setNotice(String(profile?.cancellationNoticeHours ?? 24));
   }, [profile]);
 
@@ -70,6 +72,7 @@ export function PublicBookingSettings() {
       bookingLeadTimeHours: Number(leadTime),
       bookingHorizonDays: Number(horizon),
       depositPercent: Number(deposit),
+      paymentMode: mode,
       cancellationNoticeHours: Number(notice),
     });
 
@@ -144,19 +147,49 @@ export function PublicBookingSettings() {
                 }}
               />
             </div>
-
             <div className="rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
-              <FormField
-                label="Deposit"
-                inputMode="numeric"
-                hint="Percent of the price, taken by MB WAY when a client books. 0 takes none."
-                value={deposit}
-                onChange={(event) => {
-                  setDeposit(event.target.value);
+              <SelectField
+                label="What clients pay when they book"
+                options={[
+                  { value: 'none', label: 'Nothing — they pay you in person' },
+                  { value: 'deposit', label: 'A deposit' },
+                  { value: 'full', label: 'The whole price' },
+                ]}
+                value={mode}
+                onValueChange={(value) => {
+                  setMode(value as typeof mode);
                   setSaved(false);
                 }}
               />
-              {Number(deposit) > 0 ? (
+
+              {mode === 'full' ? (
+                /* Said before they switch it on, not discovered after the first complaint.
+                   "Never refunded" is a fair rule for a deposit and an indefensible one for
+                   a whole service price. */
+                <p className="mt-2 rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
+                  Taking the whole price means refunding most of it when somebody cancels in time.
+                  The deposit below is the part you keep — and there is always a small minimum, so a
+                  cancellation never leaves you out of pocket.
+                </p>
+              ) : null}
+
+              {mode === 'none' ? null : (
+                <FormField
+                  label={mode === 'full' ? 'Non-refundable part' : 'Deposit'}
+                  inputMode="numeric"
+                  hint={
+                    mode === 'full'
+                      ? 'Percent of the price you keep if they cancel. The rest goes back.'
+                      : 'Percent of the price, taken by MB WAY when a client books. 0 takes none.'
+                  }
+                  value={deposit}
+                  onChange={(event) => {
+                    setDeposit(event.target.value);
+                    setSaved(false);
+                  }}
+                />
+              )}
+              {mode !== 'none' && Number(deposit) > 0 ? (
                 <FormField
                   label="Notice to move an appointment"
                   inputMode="numeric"

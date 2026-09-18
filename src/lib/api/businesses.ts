@@ -23,6 +23,8 @@ export interface BusinessProfile {
   bookingLeadTimeHours: number;
   bookingHorizonDays: number;
   depositPercent: number;
+  /** What a client pays at booking: nothing, a deposit, or the whole price. */
+  paymentMode: 'none' | 'deposit' | 'full';
   cancellationNoticeHours: number;
   /** `#RRGGBB`. Absent means Upfront's own green. */
   brandColor?: string;
@@ -43,6 +45,7 @@ export interface UpdateBusinessPayload {
   bookingHorizonDays?: number;
   cancellationNoticeHours?: number;
   depositPercent?: number;
+  paymentMode?: 'none' | 'deposit' | 'full';
   brandColor?: string;
 }
 
