@@ -45,3 +45,45 @@ export const employeesApi = {
    */
   deactivate: (id: string) => api.delete<Employee>(`/employees/${id}`),
 };
+
+/** A stretch somebody is away. Instants, because availability is. */
+export interface TimeOff {
+  id: string;
+  employeeId: string;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  reason?: string;
+}
+
+/**
+ * An appointment that is now inside time off just recorded.
+ *
+ * Reported rather than cancelled: a sick day marked at 09:00 does not undo the 14:00
+ * already in the book, and who to call is a decision for a person.
+ */
+export interface ClashingBooking {
+  id: string;
+  startsAt: string;
+  clientName?: string;
+}
+
+export interface TimeOffPayload {
+  startsAt: string;
+  endsAt: string;
+  allDay?: boolean;
+  reason?: string;
+}
+
+export const timeOffApi = {
+  list: (employeeId: string, from: string, to: string) =>
+    api.get<TimeOff[]>(
+      `/employees/${employeeId}/time-off?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+    ),
+  add: (employeeId: string, payload: TimeOffPayload) =>
+    api.post<{ timeOff: TimeOff; clashes: ClashingBooking[] }>(
+      `/employees/${employeeId}/time-off`,
+      payload,
+    ),
+  remove: (id: string) => api.delete<void>(`/employees/time-off/${id}`),
+};

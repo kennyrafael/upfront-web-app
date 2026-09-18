@@ -3,7 +3,8 @@ import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Switch } from '@/
 import { ConfirmDialog, FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import type { Employee, WorkingHours } from '@/lib/api';
-import { useAuthStore, useEmployeeStore } from '@/stores';
+import { useAuthStore, useBusinessStore, useEmployeeStore } from '@/stores';
+import { TimeOffPanel } from './TimeOffPanel';
 
 /**
  * Who works here.
@@ -24,6 +25,7 @@ export function PeopleSettings() {
   const deactivate = useEmployeeStore((state) => state.deactivate);
 
   const myEmployeeId = useAuthStore((state) => state.user?.employeeId);
+  const timezone = useBusinessStore((state) => state.profile?.timezone) ?? 'Europe/Lisbon';
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -31,6 +33,7 @@ export function PeopleSettings() {
   const [editing, setEditing] = useState<Employee | null>(null);
   const [hours, setHours] = useState<WorkingHours[]>([]);
   const [leaving, setLeaving] = useState<Employee | null>(null);
+  const [away, setAway] = useState<Employee | null>(null);
 
   useEffect(() => {
     void load();
@@ -128,6 +131,14 @@ export function PeopleSettings() {
                 >
                   Hours
                 </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAway(away?.id === employee.id ? null : employee)}
+                >
+                  Away
+                </Button>
                 {employee.active ? (
                   <Button
                     type="button"
@@ -151,6 +162,10 @@ export function PeopleSettings() {
             </li>
           ))}
         </ul>
+
+        {away ? (
+          <TimeOffPanel employee={away} timezone={timezone} onClose={() => setAway(null)} />
+        ) : null}
 
         {editing ? (
           <div className="flex flex-col gap-3 rounded-xl bg-sheet/50 p-3 ring-1 ring-hairline">

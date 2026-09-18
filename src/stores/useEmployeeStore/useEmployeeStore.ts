@@ -1,5 +1,14 @@
 import { create } from 'zustand';
-import { ApiError, type Employee, type EmployeePayload, employeesApi } from '@/lib/api';
+import {
+  ApiError,
+  type ClashingBooking,
+  type Employee,
+  type EmployeePayload,
+  employeesApi,
+  type TimeOff,
+  type TimeOffPayload,
+  timeOffApi,
+} from '@/lib/api';
 
 interface EmployeeState {
   items: Employee[];
@@ -15,6 +24,24 @@ interface EmployeeState {
     payload: Partial<EmployeePayload> & { active?: boolean },
   ) => Promise<boolean>;
   deactivate: (id: string) => Promise<boolean>;
+  /**
+   * Who is away, by employee id, for the window last asked for.
+   *
+   * Keyed rather than flat because the panel only ever shows one person at a time, and a
+   * flat list would have to be refiltered on every render for no gain.
+   */
+  timeOff: Record<string, TimeOff[]>;
+  /**
+   * Appointments the last time-off entry landed on top of.
+   *
+   * Held so the UI can say so. Nothing was cancelled — this is the one place availability is
+   * knowingly broken, and the person who recorded it is the one who decides what to do.
+   */
+  lastClashes: ClashingBooking[];
+  loadTimeOff: (employeeId: string) => Promise<void>;
+  addTimeOff: (employeeId: string, payload: TimeOffPayload) => Promise<boolean>;
+  removeTimeOff: (employeeId: string, id: string) => Promise<boolean>;
+  clearClashes: () => void;
   clearError: () => void;
   reset: () => void;
 }
@@ -84,6 +111,57 @@ export const useEmployeeStore = create<EmployeeState>((set, get) => ({
     }
   },
 
+  timeOff: {},
+  lastClashes: [],
+
+  /** Three months out: far enough for a summer holiday, short enough to stay one request. */
+  loadTimeOff: async (employeeId) => {
+    const from = new Date();
+    const to = new Date(from.getTime() + 90 * 24 * 60 * 60_000);
+    try {
+      const away = await timeOffApi.list(employeeId, from.toISOString(), to.toISOString());
+      set((state) => ({ timeOff: { ...state.timeOff, [employeeId]: away } }));
+    } catch (error) {
+      set({ error: toMessage(error) });
+    }
+  },
+
+  addTimeOff: async (employeeId, payload) => {
+    set({ status: 'saving', error: null, lastClashes: [] });
+    try {
+      const { clashes } = await timeOffApi.add(employeeId, payload);
+      set({ status: 'idle', lastClashes: clashes });
+      await get().loadTimeOff(employeeId);
+      return true;
+    } catch (error) {
+      set({ status: 'idle', error: toMessage(error) });
+      return false;
+    }
+  },
+
+  removeTimeOff: async (employeeId, id) => {
+    set({ status: 'saving', error: null });
+    try {
+      await timeOffApi.remove(id);
+      set({ status: 'idle' });
+      await get().loadTimeOff(employeeId);
+      return true;
+    } catch (error) {
+      set({ status: 'idle', error: toMessage(error) });
+      return false;
+    }
+  },
+
+  clearClashes: () => set({ lastClashes: [] }),
+
   clearError: () => set({ error: null }),
-  reset: () => set({ items: [], includeInactive: false, status: 'idle', error: null }),
+  reset: () =>
+    set({
+      items: [],
+      includeInactive: false,
+      status: 'idle',
+      error: null,
+      timeOff: {},
+      lastClashes: [],
+    }),
 }));
