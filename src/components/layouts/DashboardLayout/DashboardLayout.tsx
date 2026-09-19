@@ -4,6 +4,7 @@ import { Icon, type IconName, Tooltip, TooltipProvider } from '@/components/atom
 import { AccountMenu } from '@/components/organisms/AccountMenu';
 import { NotificationBell } from '@/components/organisms/NotificationBell';
 import { VerifyEmailNotice } from '@/components/organisms/VerifyEmailNotice';
+import { useCopy } from '@/lib';
 import type { AuthenticatedUser } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores';
@@ -31,21 +32,23 @@ export interface DashboardLayoutProps {
  * door that opens onto a 403. Hiding is a courtesy, never the control.
  */
 type Role = AuthenticatedUser['role'];
+type NavKey = 'overview' | 'services' | 'bookings' | 'clients' | 'payments' | 'compliance';
 
-const NAV_ITEMS: { to: string; label: string; icon: IconName; roles?: Role[] }[] = [
-  { to: '/', label: 'Overview', icon: 'overview' },
-  { to: '/services', label: 'Services', icon: 'services' },
-  { to: '/bookings', label: 'Bookings', icon: 'bookings' },
-  { to: '/clients', label: 'Clients', icon: 'clients' },
+/** `labelKey` rather than a label: the list is module-level and the language is not. */
+const NAV_ITEMS: { to: string; labelKey: NavKey; icon: IconName; roles?: Role[] }[] = [
+  { to: '/', labelKey: 'overview', icon: 'overview' },
+  { to: '/services', labelKey: 'services', icon: 'services' },
+  { to: '/bookings', labelKey: 'bookings', icon: 'bookings' },
+  { to: '/clients', labelKey: 'clients', icon: 'clients' },
   // A front desk takes money — that is the job. Staff are not on the payments desk.
   {
     to: '/payments',
-    label: 'Payments',
+    labelKey: 'payments',
     icon: 'payments',
     roles: ['owner', 'manager', 'front_desk'],
   },
   // A recibo is issued against one person's NIF, so the whole of compliance is theirs.
-  { to: '/compliance', label: 'Compliance', icon: 'compliance', roles: ['owner'] },
+  { to: '/compliance', labelKey: 'compliance', icon: 'compliance', roles: ['owner'] },
 ];
 
 /**
@@ -71,6 +74,7 @@ function readCollapsed(): boolean {
 }
 
 export function DashboardLayout({ title, description, actions, children }: DashboardLayoutProps) {
+  const copy = useCopy();
   const [collapsed, setCollapsed] = useState(readCollapsed);
   /** Separate from `collapsed`: on a phone the sidebar is a drawer, not a narrow rail. */
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -91,7 +95,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
       {visibleNav.map((item) => (
         // A tooltip only while collapsed, because that is the only time the label is not
         // already on screen. `sr-only` keeps the accessible name either way.
-        <Tooltip key={item.to} label={collapsed ? item.label : undefined}>
+        <Tooltip key={item.to} label={collapsed ? copy.nav[item.labelKey] : undefined}>
           <NavLink
             to={item.to}
             end={item.to === '/'}
@@ -107,7 +111,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
             }
           >
             <Icon name={item.icon} />
-            <span className={cn(collapsed && 'sr-only')}>{item.label}</span>
+            <span className={cn(collapsed && 'sr-only')}>{copy.nav[item.labelKey]}</span>
           </NavLink>
         </Tooltip>
       ))}
@@ -137,7 +141,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
                   onClick={() => setDrawerOpen(false)}
                   className="rounded-lg p-2 text-ink-muted hover:bg-brand-700/8"
                 >
-                  <Icon name="close" label="Close menu" />
+                  <Icon name="close" label={copy.nav.closeMenu} />
                 </button>
               </div>
               {nav}
@@ -174,7 +178,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
             {!collapsed && (
               <span className="px-2 font-semibold tracking-tight text-brand-800">Upfront</span>
             )}
-            <Tooltip label={collapsed ? 'Expand menu' : 'Collapse menu'}>
+            <Tooltip label={collapsed ? copy.nav.expandMenu : copy.nav.collapseMenu}>
               <button
                 type="button"
                 onClick={() => setCollapsed((value) => !value)}
@@ -183,7 +187,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
                 <Icon
                   name={collapsed ? 'expand' : 'collapse'}
                   className="size-4"
-                  label={collapsed ? 'Expand menu' : 'Collapse menu'}
+                  label={collapsed ? copy.nav.expandMenu : copy.nav.collapseMenu}
                 />
               </button>
             </Tooltip>
@@ -199,7 +203,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
               onClick={() => setDrawerOpen(true)}
               className="rounded-lg p-2 text-brand-800 hover:bg-brand-700/8 lg:hidden"
             >
-              <Icon name="menu" label="Open menu" />
+              <Icon name="menu" label={copy.nav.openMenu} />
             </button>
             <span className="font-semibold tracking-tight text-brand-800 lg:hidden">Upfront</span>
 

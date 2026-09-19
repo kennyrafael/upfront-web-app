@@ -10,6 +10,7 @@ import {
   Select,
   Spinner,
 } from '@/components';
+import { useCopy } from '@/lib';
 import type { Invoice } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { useBusinessStore, useComplianceStore } from '@/stores';
@@ -24,6 +25,7 @@ function yearOptions(): { value: string; label: string }[] {
 }
 
 export function CompliancePage() {
+  const copy = useCopy();
   const load = useComplianceStore((state) => state.load);
   const year = useComplianceStore((state) => state.year);
   const setYear = useComplianceStore((state) => state.setYear);
@@ -46,15 +48,15 @@ export function CompliancePage() {
 
   return (
     <DashboardLayout
-      title="Compliance"
-      description="Recibos verdes, your IVA position and what is due next."
+      title={copy.compliance.title}
+      description={copy.compliance.lede}
       actions={
         <>
           <Button
             variant="secondary"
             onClick={async () => setCsv((await exportCsv()) ?? undefined)}
           >
-            Export CSV
+            {copy.compliance.exportCsv}
           </Button>
           <Button
             onClick={() => {
@@ -62,7 +64,7 @@ export function CompliancePage() {
               setFormOpen(true);
             }}
           >
-            New recibo
+            {copy.compliance.newRecibo}
           </Button>
         </>
       }
@@ -86,7 +88,7 @@ export function CompliancePage() {
         <ComplianceOverview summary={summary} />
       ) : status === 'loading' ? (
         <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-          <Spinner className="text-brand-ink" /> Loading your compliance position…
+          <Spinner className="text-brand-ink" /> {copy.compliance.loading}
         </Card>
       ) : null}
 

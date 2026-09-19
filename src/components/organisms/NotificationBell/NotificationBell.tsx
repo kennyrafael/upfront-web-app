@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon, Popover, Spinner } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { cn, relativeTime } from '@/lib/utils';
 import { useAlertStore } from '@/stores';
 
@@ -16,6 +17,7 @@ const POLL_MS = 60_000;
 export function NotificationBell() {
   const navigate = useNavigate();
 
+  const copy = useCopy();
   const items = useAlertStore((state) => state.items);
   const dismiss = useAlertStore((state) => state.dismiss);
   const unread = useAlertStore((state) => state.unread);
@@ -60,7 +62,7 @@ export function NotificationBell() {
       trigger={
         <button
           type="button"
-          aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+          aria-label={copy.notifications.withCount(unread)}
           className="relative rounded-lg p-2 text-ink-muted transition-colors hover:bg-brand-700/8 hover:text-brand-800"
         >
           <Icon name="bell" className="size-5" />
@@ -74,10 +76,10 @@ export function NotificationBell() {
       }
     >
       <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
-        <p className="font-medium text-brand-900">Notifications</p>
+        <p className="font-medium text-brand-900">{copy.notifications.title}</p>
         {items.some((alert) => !alert.readAt) ? (
           <span className="flex items-center gap-1 text-xs text-ink-muted">
-            <Icon name="check" className="size-3.5" /> Marked as read
+            <Icon name="check" className="size-3.5" /> {copy.notifications.markedRead}
           </span>
         ) : null}
       </div>
@@ -85,12 +87,10 @@ export function NotificationBell() {
       <div className="max-h-96 overflow-y-auto">
         {loading && items.length === 0 ? (
           <p className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-ink-muted">
-            <Spinner className="size-4 text-brand-ink" /> Loading…
+            <Spinner className="size-4 text-brand-ink" /> {copy.common.loading}
           </p>
         ) : items.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-ink-muted">
-            Nothing yet. Bookings, cancellations and deposits show up here.
-          </p>
+          <p className="px-4 py-8 text-center text-sm text-ink-muted">{copy.notifications.empty}</p>
         ) : (
           <ul>
             {items.map((alert) => (
@@ -137,7 +137,7 @@ export function NotificationBell() {
                     reader reading out a column of buttons that all sound identical. */}
                 <button
                   type="button"
-                  aria-label={`Dismiss: ${alert.title}`}
+                  aria-label={copy.notifications.dismiss(alert.title)}
                   onClick={() => void dismiss(alert.id)}
                   className="mt-3 mr-2 shrink-0 rounded-md p-1.5 text-ink-muted transition-colors hover:bg-brand-700/8 hover:text-brand-900"
                 >

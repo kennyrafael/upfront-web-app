@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 
@@ -13,6 +14,7 @@ import { useAuthStore } from '@/stores';
  */
 export function VerifyEmailNotice() {
   const user = useAuthStore((state) => state.user);
+  const copy = useCopy();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -21,15 +23,12 @@ export function VerifyEmailNotice() {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warn/12 px-4 py-3 ring-1 ring-warn/25">
       <div>
-        <p className="text-sm font-medium text-warn-ink">Confirm your email address</p>
-        <p className="text-xs text-warn-ink/80">
-          We sent a link to {user.email}. Confirming lets you publish your booking page and makes
-          sure payment notices reach you.
-        </p>
+        <p className="text-sm font-medium text-warn-ink">{copy.verifyEmail.confirm}</p>
+        <p className="text-xs text-warn-ink/80">{copy.verifyEmail.body(user.email)}</p>
       </div>
 
       {sent ? (
-        <span className="text-xs font-medium text-warn-ink">Sent — check your inbox.</span>
+        <span className="text-xs font-medium text-warn-ink">{copy.verifyEmail.sent}</span>
       ) : (
         <Button
           size="sm"
@@ -45,7 +44,7 @@ export function VerifyEmailNotice() {
             }
           }}
         >
-          Send it again
+          {copy.verifyEmail.sendAgain}
         </Button>
       )}
     </div>

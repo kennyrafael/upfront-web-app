@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Button, ClientFormDialog, ClientTable, DashboardLayout, Input } from '@/components';
+import { useCopy } from '@/lib';
 import type { ClientRecord } from '@/lib/api';
 import { useClientStore } from '@/stores';
 
 export function ClientsPage() {
+  const copy = useCopy();
   const load = useClientStore((state) => state.load);
   const search = useClientStore((state) => state.search);
   const setSearch = useClientStore((state) => state.setSearch);
@@ -23,15 +25,15 @@ export function ClientsPage() {
 
   return (
     <DashboardLayout
-      title="Clients"
-      description="Everyone you book, and what you need to remember about them."
-      actions={<Button onClick={openCreate}>New client</Button>}
+      title={copy.clients.title}
+      description={copy.clients.lede}
+      actions={<Button onClick={openCreate}>{copy.clients.newClient}</Button>}
     >
       <div className="mb-4 max-w-sm">
         <Input
           type="search"
-          placeholder="Search name, phone or email"
-          aria-label="Search clients"
+          placeholder={copy.clients.search}
+          aria-label={copy.clients.searchLabel}
           value={search}
           onChange={(event) => void setSearch(event.target.value)}
         />

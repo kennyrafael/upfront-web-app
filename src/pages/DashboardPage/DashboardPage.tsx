@@ -9,6 +9,7 @@ import {
   CardTitle,
   DashboardLayout,
 } from '@/components';
+import { useCopy } from '@/lib';
 import { describeBooking } from '@/lib/api';
 import { formatMoney, formatTime, isSameDay, weekdayLabel } from '@/lib/utils';
 import {
@@ -21,6 +22,7 @@ import {
 } from '@/stores';
 
 export function DashboardPage() {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const me = useAuthStore((state) => state.user);
   const services = useServiceStore((state) => state.items);
@@ -52,20 +54,20 @@ export function DashboardPage() {
 
   return (
     <DashboardLayout
-      title={`Welcome, ${me?.name ?? ''}`}
+      title={copy.dashboard.welcome(me?.name ?? '')}
       description={[profile?.name, me?.email].filter(Boolean).join(' · ')}
       actions={
         <Button variant="secondary" asChild>
-          <Link to="/settings">Edit profile</Link>
+          <Link to="/settings">{copy.dashboard.editProfile}</Link>
         </Button>
       }
     >
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex items-center justify-between gap-4">
-            <CardTitle>Service catalog</CardTitle>
+            <CardTitle>{copy.dashboard.serviceCatalog}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/services">Manage</Link>
+              <Link to="/services">{copy.dashboard.manage}</Link>
             </Button>
           </CardHeader>
           <CardBody>
@@ -73,7 +75,7 @@ export function DashboardPage() {
               <p className="text-sm text-ink-muted">
                 Nothing in the catalog yet.{' '}
                 <Link to="/services" className="font-medium text-brand-ink hover:underline">
-                  Add your first service
+                  {copy.dashboard.addFirstService}
                 </Link>
                 .
               </p>
@@ -84,8 +86,10 @@ export function DashboardPage() {
                     {services.length}
                   </span>
                   <span className="text-sm text-ink-muted">
-                    bookable {services.length === 1 ? 'service' : 'services'}
-                    {cheapest !== null ? `, from ${formatMoney(cheapest)}` : ''}
+                    {copy.dashboard.bookableFrom(
+                      services.length,
+                      cheapest === null ? null : formatMoney(cheapest),
+                    )}
                   </span>
                 </div>
                 <ul className="mt-4 flex flex-wrap gap-2">
@@ -107,14 +111,14 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Working week</CardTitle>
+            <CardTitle>{copy.dashboard.workingWeek}</CardTitle>
           </CardHeader>
           <CardBody>
             {workingDays.size === 0 ? (
               <p className="text-sm text-ink-muted">
                 No hours set.{' '}
                 <Link to="/settings" className="font-medium text-brand-ink hover:underline">
-                  Set your hours
+                  {copy.dashboard.setYourHours}
                 </Link>
                 .
               </p>
@@ -142,17 +146,17 @@ export function DashboardPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex items-center justify-between gap-4">
-            <CardTitle>Today</CardTitle>
+            <CardTitle>{copy.dashboard.today}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/bookings">Open calendar</Link>
+              <Link to="/bookings">{copy.dashboard.openCalendar}</Link>
             </Button>
           </CardHeader>
           <CardBody>
             {todaysBookings.length === 0 ? (
               <p className="text-sm text-ink-muted">
-                Nothing booked today.{' '}
+                {copy.dashboard.nothingToday}{' '}
                 <Link to="/bookings" className="font-medium text-brand-ink hover:underline">
-                  Add a booking
+                  {copy.dashboard.addABooking}
                 </Link>
                 .
               </p>
@@ -181,9 +185,9 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader className="flex items-center justify-between gap-4">
-            <CardTitle>Clients</CardTitle>
+            <CardTitle>{copy.dashboard.clients}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/clients">Manage</Link>
+              <Link to="/clients">{copy.dashboard.manage}</Link>
             </Button>
           </CardHeader>
           <CardBody>
@@ -191,7 +195,7 @@ export function DashboardPage() {
               <span className="text-3xl font-semibold tabular-nums text-brand-900">
                 {clients.length}
               </span>
-              <span className="text-sm text-ink-muted">on the books</span>
+              <span className="text-sm text-ink-muted">{copy.dashboard.onTheBooks}</span>
             </div>
           </CardBody>
         </Card>
@@ -200,29 +204,35 @@ export function DashboardPage() {
       {payments ? (
         <Card className="mt-4">
           <CardHeader className="flex items-center justify-between gap-4">
-            <CardTitle>Money</CardTitle>
+            <CardTitle>{copy.dashboard.money}</CardTitle>
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/payments">Open ledger</Link>
+              <Link to="/payments">{copy.dashboard.openLedger}</Link>
             </Button>
           </CardHeader>
           <CardBody className="grid gap-4 sm:grid-cols-3">
             <div>
-              <p className="text-xs uppercase tracking-wide text-ink-muted">Collected</p>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">
+                {copy.dashboard.collected}
+              </p>
               <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
                 {formatMoney(payments.collectedCents)}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-ink-muted">Outstanding</p>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">
+                {copy.dashboard.outstanding}
+              </p>
               <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
                 {formatMoney(payments.outstanding.totalCents)}
               </p>
               <p className="text-xs text-ink-muted">
-                {payments.outstanding.count} booking{payments.outstanding.count === 1 ? '' : 's'}
+                {copy.dashboard.bookingCount(payments.outstanding.count)}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-ink-muted">Pending</p>
+              <p className="text-xs uppercase tracking-wide text-ink-muted">
+                {copy.dashboard.pending}
+              </p>
               <p className="mt-0.5 text-2xl font-semibold tabular-nums text-brand-900">
                 {formatMoney(payments.pendingCents)}
               </p>

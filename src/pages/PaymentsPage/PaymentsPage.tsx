@@ -9,6 +9,7 @@ import {
   PaymentDialog,
   PaymentLedger,
 } from '@/components';
+import { useCopy } from '@/lib';
 import type { LedgerEntry, PaymentMethod } from '@/lib/api';
 import { cn, formatMoney } from '@/lib/utils';
 import { type LedgerFilter, usePaymentStore } from '@/stores';
@@ -28,6 +29,7 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 export function PaymentsPage() {
+  const copy = useCopy();
   const load = usePaymentStore((state) => state.load);
   const summary = usePaymentStore((state) => state.summary);
   const filter = usePaymentStore((state) => state.filter);
@@ -48,15 +50,12 @@ export function PaymentsPage() {
     : undefined;
 
   return (
-    <DashboardLayout
-      title="Payments"
-      description="What you have collected, and what is still owed."
-    >
+    <DashboardLayout title={copy.payments.title} description={copy.payments.lede}>
       {summary ? (
         <div className="grid gap-4 sm:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>Collected</CardTitle>
+              <CardTitle>{copy.payments.collected}</CardTitle>
             </CardHeader>
             <CardBody>
               <p className="text-3xl font-semibold tabular-nums text-brand-900">
@@ -87,7 +86,7 @@ export function PaymentsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Outstanding</CardTitle>
+              <CardTitle>{copy.payments.outstanding}</CardTitle>
             </CardHeader>
             <CardBody>
               <p className="text-3xl font-semibold tabular-nums text-brand-900">
@@ -102,15 +101,13 @@ export function PaymentsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Pending</CardTitle>
+              <CardTitle>{copy.payments.pending}</CardTitle>
             </CardHeader>
             <CardBody>
               <p className="text-3xl font-semibold tabular-nums text-brand-900">
                 {formatMoney(summary.pendingCents)}
               </p>
-              <p className="mt-1 text-sm text-ink-muted">
-                Recorded but not collected — a transfer on its way, say.
-              </p>
+              <p className="mt-1 text-sm text-ink-muted">{copy.payments.pendingHint}</p>
             </CardBody>
           </Card>
         </div>

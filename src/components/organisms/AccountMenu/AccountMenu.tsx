@@ -7,10 +7,11 @@ import { LOCALE_NAMES, LOCALES, type Locale, useCopy, useLocale } from '@/lib';
 import type { Theme } from '@/lib/utils';
 import { resetDomainStores, useAuthStore, useThemeStore } from '@/stores';
 
-const THEME_OPTIONS: { value: Theme; label: string; icon: IconName }[] = [
-  { value: 'light', label: 'Light', icon: 'sun' },
-  { value: 'dark', label: 'Dark', icon: 'moon' },
-  { value: 'system', label: 'System', icon: 'display' },
+/** Keyed, not labelled: this list is module-level and the language is not. */
+const THEME_OPTIONS: { value: Theme; key: 'light' | 'dark' | 'system'; icon: IconName }[] = [
+  { value: 'light', key: 'light', icon: 'sun' },
+  { value: 'dark', key: 'dark', icon: 'moon' },
+  { value: 'system', key: 'system', icon: 'display' },
 ];
 
 const ITEM_CLASS = 'flex w-full cursor-pointer items-center gap-3';
@@ -62,13 +63,13 @@ export function AccountMenu() {
               taking this one to the business details rather than the page top. */}
           <Link to="/settings#profile" className={ITEM_CLASS}>
             <Icon name="profile" className="size-4" />
-            Your profile
+            {copy.account.yourProfile}
           </Link>
         </DropdownMenu.Item>
         <DropdownMenu.Item asChild>
           <Link to="/settings" className={ITEM_CLASS}>
             <Icon name="settings" className="size-4" />
-            Settings
+            {copy.account.settings}
           </Link>
         </DropdownMenu.Item>
 
@@ -83,7 +84,9 @@ export function AccountMenu() {
          * menu from seeing those keys.
          */}
         <div className="px-1 py-1.5">
-          <p className="mb-1.5 px-1 text-xs font-medium text-ink-muted">Appearance</p>
+          <p className="mb-1.5 px-1 text-xs font-medium text-ink-muted">
+            {copy.account.appearance}
+          </p>
           <SegmentedControl.Root
             value={theme}
             onValueChange={(value) => setTheme(value as Theme)}
@@ -95,7 +98,7 @@ export function AccountMenu() {
               <SegmentedControl.Item key={option.value} value={option.value}>
                 <span className="flex items-center gap-1.5">
                   <Icon name={option.icon} className="size-3.5" />
-                  {option.label}
+                  {copy.account[option.key]}
                 </span>
               </SegmentedControl.Item>
             ))}
@@ -103,7 +106,9 @@ export function AccountMenu() {
 
           {/* Under light/dark rather than beside it: they are both "how this looks", and
               the accent is the one people change once and never again. */}
-          <p className="mt-3 mb-1.5 px-1 text-xs font-medium text-ink-muted">Colour</p>
+          <p className="mt-3 mb-1.5 px-1 text-xs font-medium text-ink-muted">
+            {copy.account.colour}
+          </p>
           <AccentPicker value={accent} onChange={setAccent} />
 
           {/* Language sits with appearance rather than in Settings: all three are "how this
@@ -136,7 +141,7 @@ export function AccountMenu() {
           }}
         >
           <Icon name="logout" className="size-4" />
-          Sign out
+          {copy.account.signOut}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

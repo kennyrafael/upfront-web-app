@@ -7,10 +7,12 @@ import {
   ServiceFormDialog,
   Switch,
 } from '@/components';
+import { useCopy } from '@/lib';
 import type { ServiceItem } from '@/lib/api';
 import { useServiceStore } from '@/stores';
 
 export function ServicesPage() {
+  const copy = useCopy();
   const load = useServiceStore((state) => state.load);
   const includeInactive = useServiceStore((state) => state.includeInactive);
   const setIncludeInactive = useServiceStore((state) => state.setIncludeInactive);
@@ -35,9 +37,9 @@ export function ServicesPage() {
 
   return (
     <DashboardLayout
-      title="Services"
-      description="What you offer, how long it takes and what it costs."
-      actions={<Button onClick={openCreate}>New service</Button>}
+      title={copy.services.title}
+      description={copy.services.lede}
+      actions={<Button onClick={openCreate}>{copy.services.newService}</Button>}
     >
       <div className="mb-4 flex items-center gap-3">
         <Switch
@@ -46,7 +48,7 @@ export function ServicesPage() {
           onCheckedChange={(checked) => void setIncludeInactive(checked)}
         />
         <Label htmlFor="include-archived" className="font-normal text-ink-muted">
-          Show archived
+          {copy.services.showArchived}
         </Label>
       </div>
 

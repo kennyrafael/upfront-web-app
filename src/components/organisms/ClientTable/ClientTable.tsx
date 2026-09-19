@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button, Card, Spinner } from '@/components/atoms';
 import { ConfirmDialog } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { ClientRecord } from '@/lib/api';
 import { useClientStore } from '@/stores';
 
@@ -14,13 +15,14 @@ export function ClientTable({ onEdit }: ClientTableProps) {
   const status = useClientStore((state) => state.status);
   const remove = useClientStore((state) => state.remove);
 
+  const copy = useCopy();
   const [pendingDelete, setPendingDelete] = useState<ClientRecord>();
   const [deleteError, setDeleteError] = useState<string>();
 
   if (status === 'loading' && items.length === 0) {
     return (
       <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-        <Spinner className="text-brand-ink" /> Loading clients…
+        <Spinner className="text-brand-ink" /> {copy.clients.loading}
       </Card>
     );
   }
@@ -29,12 +31,10 @@ export function ClientTable({ onEdit }: ClientTableProps) {
     return (
       <Card className="px-5 py-12 text-center">
         <p className="font-medium text-brand-900">
-          {search ? 'No clients match that search' : 'No clients yet'}
+          {search ? copy.clients.noMatch : copy.clients.emptyTitle}
         </p>
         <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
-          {search
-            ? 'Try a name, phone number or email.'
-            : 'Add the people you book. A name is enough to start.'}
+          {search ? copy.clients.noMatchHint : copy.clients.emptyBody}
         </p>
       </Card>
     );
@@ -47,9 +47,9 @@ export function ClientTable({ onEdit }: ClientTableProps) {
           <table className="w-full min-w-2xl border-collapse text-sm">
             <thead>
               <tr className="border-b border-hairline text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="px-5 py-3 font-medium">Client</th>
-                <th className="px-5 py-3 font-medium">Phone</th>
-                <th className="px-5 py-3 font-medium">Email</th>
+                <th className="px-5 py-3 font-medium">{copy.clients.columnClient}</th>
+                <th className="px-5 py-3 font-medium">{copy.common.phone}</th>
+                <th className="px-5 py-3 font-medium">{copy.common.email}</th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
@@ -70,7 +70,7 @@ export function ClientTable({ onEdit }: ClientTableProps) {
                   <td className="px-5 py-3">
                     <div className="actions-row flex justify-end gap-2">
                       <Button variant="ghost" size="sm" onClick={() => onEdit(client)}>
-                        Edit
+                        {copy.common.edit}
                       </Button>
                       <Button
                         variant="ghost"
@@ -80,7 +80,7 @@ export function ClientTable({ onEdit }: ClientTableProps) {
                           setPendingDelete(client);
                         }}
                       >
-                        Delete
+                        {copy.common.delete}
                       </Button>
                     </div>
                   </td>
@@ -94,13 +94,10 @@ export function ClientTable({ onEdit }: ClientTableProps) {
       <ConfirmDialog
         open={Boolean(pendingDelete)}
         onOpenChange={(open) => !open && setPendingDelete(undefined)}
-        title={`Delete ${pendingDelete?.name ?? 'client'}?`}
+        title={copy.clients.deleteTitle(pendingDelete?.name ?? copy.clients.thisClient)}
         // The API refuses while bookings reference the client, and says how many.
-        description={
-          deleteError ??
-          'This removes the client permanently. Clients with bookings cannot be deleted.'
-        }
-        confirmLabel="Delete"
+        description={deleteError ?? copy.clients.deleteConfirm}
+        confirmLabel={copy.common.delete}
         destructive
         loading={status === 'saving'}
         onConfirm={async () => {
