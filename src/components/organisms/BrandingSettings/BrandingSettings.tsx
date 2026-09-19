@@ -82,9 +82,7 @@ export function BrandingSettings() {
     // Checked here as well as on the server, so an oversized file is refused at once
     // rather than after being uploaded.
     if (file.size > MAX_LOGO_KB * 1024) {
-      setError(
-        `That image is ${Math.round(file.size / 1024)}KB. Please keep it under ${MAX_LOGO_KB}KB.`,
-      );
+      setError(copy.branding.tooBig(Math.round(file.size / 1024), MAX_LOGO_KB));
       return;
     }
 

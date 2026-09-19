@@ -2,13 +2,12 @@ import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
 import { useCopy } from '@/lib';
+import { PASSWORD_MIN, passwordProblem } from '@/lib/utils';
 import { useAuthStore } from '@/stores';
 
 export interface SignupFormProps {
   onSuccess: () => void;
 }
-
-const MIN_PASSWORD_LENGTH = 8;
 
 export function SignupForm({ onSuccess }: SignupFormProps) {
   const copy = useCopy();
@@ -26,8 +25,11 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      setPasswordError(`Use at least ${MIN_PASSWORD_LENGTH} characters`);
+    const problem = passwordProblem(password);
+    if (problem) {
+      setPasswordError(
+        problem === 'short' ? copy.auth.passwordShort(PASSWORD_MIN) : copy.auth.passwordLong,
+      );
       return;
     }
     setPasswordError(undefined);
@@ -86,7 +88,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         autoComplete="new-password"
         required
         error={passwordError}
-        hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
+        hint={copy.auth.passwordHint(PASSWORD_MIN)}
         value={password}
         onChange={(event) => setPassword(event.target.value)}
       />

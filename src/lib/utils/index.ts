@@ -4,5 +4,6 @@ export * from './datetime';
 export * from './download';
 export * from './format';
 export * from './intl';
+export * from './password';
 export * from './theme';
 export * from './zoned';

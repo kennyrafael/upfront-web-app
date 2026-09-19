@@ -3,6 +3,7 @@ import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atom
 import { FormField } from '@/components/molecules';
 import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
+import { PASSWORD_MIN } from '@/lib/utils';
 import { useAuthStore } from '@/stores';
 
 type Outcome = { tone: 'ok' | 'bad'; text: string } | null;
@@ -130,7 +131,9 @@ export function SignInSettings() {
         <form className="flex flex-col gap-4" onSubmit={submitPassword} noValidate>
           <div>
             <h3 className="text-sm font-medium text-brand-900">{copy.settings.changePassword}</h3>
-            <p className="mt-0.5 text-xs text-ink-muted">{copy.settings.passwordRules}</p>
+            <p className="mt-0.5 text-xs text-ink-muted">
+              {copy.settings.passwordRules(PASSWORD_MIN)}
+            </p>
           </div>
 
           <FormField

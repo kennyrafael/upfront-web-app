@@ -4,9 +4,7 @@ import { AuthLayout, Button } from '@/components';
 import { FormField } from '@/components/molecules';
 import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
-
-/** Mirrors the API's rule, so the round trip is not wasted telling you what it could here. */
-const MIN_LENGTH = 10;
+import { PASSWORD_MIN, passwordProblem } from '@/lib/utils';
 
 export function ResetPasswordPage() {
   const copy = useCopy();
@@ -22,8 +20,11 @@ export function ResetPasswordPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password.length < MIN_LENGTH) {
-      setError(`Use at least ${MIN_LENGTH} characters.`);
+    const problem = passwordProblem(password);
+    if (problem) {
+      setError(
+        problem === 'short' ? copy.auth.passwordShort(PASSWORD_MIN) : copy.auth.passwordLong,
+      );
       return;
     }
     if (password !== confirmation) {
@@ -78,7 +79,7 @@ export function ResetPasswordPage() {
           required
           autoFocus
           autoComplete="new-password"
-          hint={`At least ${MIN_LENGTH} characters.`}
+          hint={copy.auth.passwordHint(PASSWORD_MIN)}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />

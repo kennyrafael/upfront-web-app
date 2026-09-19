@@ -410,7 +410,8 @@ export const pt = {
     whyPassword: 'Pedida porque alterar este endereço altera a forma de recuperar a conta.',
     sendLink: 'Enviar o link',
     changePassword: 'Alterar a palavra-passe',
-    passwordRules: 'Pelo menos 10 caracteres. Os outros dispositivos terminam sessão.',
+    passwordRules: (min: number) =>
+      `Pelo menos ${min} caracteres. Os outros dispositivos terminam sessão.`,
     currentPassword: 'Palavra-passe atual',
     newPassword: 'Nova palavra-passe',
     passwordChanged: 'Palavra-passe alterada. Todas as outras sessões foram terminadas.',
@@ -538,6 +539,8 @@ export const pt = {
     yourBusiness: 'O seu negócio',
     uploadFailed: 'Não foi possível carregar essa imagem.',
     removeFailed: 'Não foi possível remover o logótipo.',
+    tooBig: (size: number, max: number) =>
+      `Essa imagem tem ${size} KB. Mantenha-a abaixo de ${max} KB.`,
   },
 
   recibos: {
@@ -622,6 +625,9 @@ export const pt = {
     businessName: 'Nome do negócio',
     businessNameHint: 'Opcional — pode adicionar mais tarde.',
     createButton: 'Criar conta',
+    passwordHint: (min: number) => `Pelo menos ${min} caracteres.`,
+    passwordShort: (min: number) => `Use pelo menos ${min} caracteres.`,
+    passwordLong: 'Demasiado longa — com acentos, cabem menos caracteres.',
 
     resetTitle: 'Recuperar a palavra-passe',
     resetSubtitle: 'Enviamos-lhe um link para escolher uma nova.',

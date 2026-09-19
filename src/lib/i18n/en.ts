@@ -377,7 +377,7 @@ export const en: Dictionary = {
     whyPassword: 'Asked for because changing this address changes how the account is recovered.',
     sendLink: 'Send the link',
     changePassword: 'Change your password',
-    passwordRules: 'At least 10 characters. Other devices are signed out.',
+    passwordRules: (min: number) => `At least ${min} characters. Other devices are signed out.`,
     currentPassword: 'Current password',
     newPassword: 'New password',
     passwordChanged: 'Password changed. Everywhere else you were signed in has been signed out.',
@@ -503,6 +503,8 @@ export const en: Dictionary = {
     yourBusiness: 'Your business',
     uploadFailed: 'That image could not be uploaded.',
     removeFailed: 'That logo could not be removed.',
+    tooBig: (size: number, max: number) =>
+      `That image is ${size}KB. Please keep it under ${max}KB.`,
   },
 
   recibos: {
@@ -586,6 +588,9 @@ export const en: Dictionary = {
     businessName: 'Business name',
     businessNameHint: 'Optional — you can add it later.',
     createButton: 'Create account',
+    passwordHint: (min: number) => `At least ${min} characters.`,
+    passwordShort: (min: number) => `Use at least ${min} characters.`,
+    passwordLong: 'Too long — with accents, fewer characters fit.',
 
     resetTitle: 'Reset your password',
     resetSubtitle: 'We will email you a link to choose a new one.',
