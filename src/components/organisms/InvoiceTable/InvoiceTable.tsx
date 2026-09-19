@@ -90,7 +90,7 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
                       <Badge variant={badge.variant}>{badge.label}</Badge>
                     </td>
                     <td className="px-5 py-3">
-                      <div className="flex justify-end gap-1">
+                      <div className="actions-row flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => onView(invoice)}>
                           {invoice.status === 'draft' ? 'Edit' : 'View'}
                         </Button>

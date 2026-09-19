@@ -190,3 +190,64 @@
      Everything card-like in the app uses this. */
   @apply rounded-2xl bg-sheet/85 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
 }
+
+/**
+ * Deliberately **outside** `@layer`.
+ *
+ * Both rules below overrule Radix Themes, and an unlayered rule beats a layered one
+ * whatever its specificity — so putting these in `@layer base` alongside everything else
+ * meant they simply did nothing. That is not a subtle failure to spot either: the overlap
+ * measured identically before and after, which is the only reason it was caught.
+ */
+/**
+ * A row of ghost buttons, with their optical margin taken back.
+ *
+ * Themes gives a ghost button `margin: -4px -8px` so its label lines up with body text
+ * above and below it. Put two side by side and the facing margins eat 16px between them:
+ * measured at 12px of overlap in the tables, which is not a cosmetic problem — part of
+ * "Delete" sits inside "Edit"'s hit area, and the one you get depends on paint order.
+ *
+ * The vertical compensation stays; only the inline margin goes. In a right-aligned
+ * actions cell there is no body text to align with, so it was buying nothing there.
+ */
+.actions-row > button {
+  margin-inline: 0;
+}
+
+/**
+ * The picker icon at the end of the field rather than glued to the value.
+ *
+ * Chrome lays a date or time input out as [value][icon] and leaves the rest empty, so a
+ * full-width field reads "19/09/2026 📅" with a hand's width of nothing after it.
+ *
+ * **Taking it out of flow is the only thing that works.** `margin-inline-start: auto` is
+ * the obvious answer and does nothing here: the indicator is not a flex item of anything
+ * that grows, and Radix already sets `margin-left` on it besides. Positioning it against
+ * the input — which needs `position: relative` of its own, since the input is not
+ * positioned by default — puts it where every other trailing affordance in the form sits.
+ *
+ * Outside `@layer` on purpose: an unlayered rule beats a layered one whatever its
+ * specificity, and Radix Themes ships unlayered.
+ */
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'] {
+  position: relative;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator,
+input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator:hover,
+input[type='time']::-webkit-calendar-picker-indicator:hover,
+input[type='datetime-local']::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

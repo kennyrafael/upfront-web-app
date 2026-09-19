@@ -9,6 +9,7 @@ interface AlertState {
   refreshCount: () => Promise<void>;
   load: () => Promise<void>;
   markAllRead: () => Promise<void>;
+  dismiss: (id: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -44,6 +45,33 @@ export const useAlertStore = create<AlertState>((set, get) => ({
     try {
       await alertsApi.markAllRead();
     } catch {
+      await get().refreshCount();
+    }
+  },
+
+  /**
+   * Removed from the list first, then from the server.
+   *
+   * Dismissing is the one action here with no ambiguity about what the provider meant, and
+   * waiting a round trip to make the row disappear makes a fast action feel broken. If the
+   * call fails the list is reloaded, which puts it back — an alert reappearing is a far
+   * smaller surprise than one that will not go away.
+   */
+  dismiss: async (id) => {
+    const previous = get().items;
+    const alert = previous.find((item) => item.id === id);
+
+    set({
+      items: previous.filter((item) => item.id !== id),
+      // An unread one taking its count with it. Dismissing is reading, in every sense that
+      // matters to a badge.
+      unread: alert && !alert.readAt ? Math.max(0, get().unread - 1) : get().unread,
+    });
+
+    try {
+      await alertsApi.dismiss(id);
+    } catch {
+      await get().load();
       await get().refreshCount();
     }
   },

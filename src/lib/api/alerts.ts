@@ -27,4 +27,5 @@ export const alertsApi = {
   /** Its own call because it is polled; the feed is only fetched when the menu opens. */
   unreadCount: () => api.get<{ unread: number }>('/alerts/unread-count'),
   markAllRead: () => api.post<void>('/alerts/read'),
+  dismiss: (id: string) => api.delete<void>(`/alerts/${id}`),
 };

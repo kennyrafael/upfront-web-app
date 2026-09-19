@@ -68,7 +68,7 @@ export function ClientTable({ onEdit }: ClientTableProps) {
                   <td className="px-5 py-3 tabular-nums text-ink-muted">{client.phone ?? '—'}</td>
                   <td className="px-5 py-3 text-ink-muted">{client.email ?? '—'}</td>
                   <td className="px-5 py-3">
-                    <div className="flex justify-end gap-1">
+                    <div className="actions-row flex justify-end gap-2">
                       <Button variant="ghost" size="sm" onClick={() => onEdit(client)}>
                         Edit
                       </Button>

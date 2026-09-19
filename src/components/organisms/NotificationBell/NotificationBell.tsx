@@ -17,6 +17,7 @@ export function NotificationBell() {
   const navigate = useNavigate();
 
   const items = useAlertStore((state) => state.items);
+  const dismiss = useAlertStore((state) => state.dismiss);
   const unread = useAlertStore((state) => state.unread);
   const loading = useAlertStore((state) => state.loading);
   const refreshCount = useAlertStore((state) => state.refreshCount);
@@ -93,7 +94,13 @@ export function NotificationBell() {
         ) : (
           <ul>
             {items.map((alert) => (
-              <li key={alert.id}>
+              // A row rather than one big button, because it now holds two actions and a
+              // button cannot contain a button. The navigable part keeps the whole width it
+              // had; the dismiss sits beside it.
+              <li
+                key={alert.id}
+                className="flex items-start border-b border-hairline last:border-0"
+              >
                 <button
                   type="button"
                   disabled={!alert.bookingId}
@@ -102,7 +109,7 @@ export function NotificationBell() {
                     if (alert.bookingId) navigate('/bookings');
                   }}
                   className={cn(
-                    'flex w-full gap-3 border-b border-hairline px-4 py-3 text-left last:border-0',
+                    'flex min-w-0 flex-1 gap-3 py-3 pl-4 text-left',
                     alert.bookingId && 'hover:bg-brand-700/5',
                   )}
                 >
@@ -124,6 +131,17 @@ export function NotificationBell() {
                     </span>
                     <span className="mt-0.5 block text-sm text-ink-muted">{alert.body}</span>
                   </span>
+                </button>
+
+                {/* Named after the notice it clears. "Dismiss" nine times over is a screen
+                    reader reading out a column of buttons that all sound identical. */}
+                <button
+                  type="button"
+                  aria-label={`Dismiss: ${alert.title}`}
+                  onClick={() => void dismiss(alert.id)}
+                  className="mt-3 mr-2 shrink-0 rounded-md p-1.5 text-ink-muted transition-colors hover:bg-brand-700/8 hover:text-brand-900"
+                >
+                  <Icon name="close" className="size-3.5" />
                 </button>
               </li>
             ))}

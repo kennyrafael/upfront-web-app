@@ -16,9 +16,25 @@ export function AuthLayout({ title, subtitle, children, footer, size = 'md' }: A
           on short viewports where the form overflows. */}
       <div
         aria-hidden="true"
-        // `backdrop` rather than `brand-900`: the ramp's dark end becomes light under the
-        // dark theme, and this field has to stay deep green in both.
-        className="fixed inset-0 -z-10 bg-backdrop bg-[radial-gradient(50rem_36rem_at_20%_0%,oklch(0.46_0.083_162/0.55),transparent_60%),radial-gradient(42rem_32rem_at_90%_100%,oklch(0.55_0.09_162/0.4),transparent_55%)]"
+        /**
+         * Painted from the accent, not from fixed green.
+         *
+         * It used to be three hardcoded oklch values, which meant a business that chose
+         * purple got a purple app and a green sign-in screen — the one page you look at
+         * before anything else.
+         *
+         * The base is the accent mixed hard into near-black rather than a step from the
+         * ramp. Steps flip between appearances, so `--accent-12` is a near-black green in
+         * light and a pale mint in dark; mixing takes the hue and fixes the darkness, which
+         * is what this field needs in both. The two washes use the mid steps, as the public
+         * booking page already does.
+         */
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundColor: 'color-mix(in oklab, var(--accent-9) 20%, #070b09)',
+          backgroundImage:
+            'radial-gradient(50rem 36rem at 20% 0%, color-mix(in oklab, var(--color-brand-600) 55%, transparent), transparent 60%), radial-gradient(42rem 32rem at 90% 100%, color-mix(in oklab, var(--color-brand-500) 40%, transparent), transparent 55%)',
+        }}
       />
 
       <div className={size === 'lg' ? 'w-full max-w-2xl' : 'w-full max-w-md'}>

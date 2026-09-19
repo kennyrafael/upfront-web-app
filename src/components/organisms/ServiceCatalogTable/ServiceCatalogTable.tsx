@@ -78,7 +78,7 @@ export function ServiceCatalogTable({ onEdit }: ServiceCatalogTableProps) {
                     )}
                   </td>
                   <td className="px-5 py-3">
-                    <div className="flex justify-end gap-1">
+                    <div className="actions-row flex justify-end gap-2">
                       <Button variant="ghost" size="sm" onClick={() => onEdit(service)}>
                         Edit
                       </Button>
