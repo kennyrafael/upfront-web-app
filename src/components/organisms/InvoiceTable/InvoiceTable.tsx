@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Badge, Button, Card, Spinner } from '@/components/atoms';
 import { ConfirmDialog } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { Invoice, InvoiceStatus } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/utils';
 import { useComplianceStore } from '@/stores';
@@ -11,14 +12,15 @@ export interface InvoiceTableProps {
 
 const STATUS_BADGE: Record<
   InvoiceStatus,
-  { variant: 'brand' | 'neutral' | 'danger'; label: string }
+  { variant: 'brand' | 'neutral' | 'danger'; key: 'draft' | 'issued' | 'cancelled' }
 > = {
-  draft: { variant: 'neutral', label: 'Draft' },
-  issued: { variant: 'brand', label: 'Issued' },
-  cancelled: { variant: 'danger', label: 'Cancelled' },
+  draft: { variant: 'neutral', key: 'draft' },
+  issued: { variant: 'brand', key: 'issued' },
+  cancelled: { variant: 'danger', key: 'cancelled' },
 };
 
 export function InvoiceTable({ onView }: InvoiceTableProps) {
+  const copy = useCopy();
   const invoices = useComplianceStore((state) => state.invoices);
   const status = useComplianceStore((state) => state.status);
   const year = useComplianceStore((state) => state.year);
@@ -33,7 +35,7 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
   if (status === 'loading' && invoices.length === 0) {
     return (
       <Card className="flex items-center justify-center gap-2 px-5 py-12 text-sm text-ink-muted">
-        <Spinner className="text-brand-ink" /> Loading recibos…
+        <Spinner className="text-brand-ink" /> {copy.recibos.loading}
       </Card>
     );
   }
@@ -41,11 +43,8 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
   if (invoices.length === 0) {
     return (
       <Card className="px-5 py-12 text-center">
-        <p className="font-medium text-brand-900">No recibos for {year}</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
-          Draft one from completed bookings. Upfront prepares it for you to file — it never files
-          anything itself.
-        </p>
+        <p className="font-medium text-brand-900">{copy.recibos.noneFor(year)}</p>
+        <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">{copy.recibos.noneBody}</p>
       </Card>
     );
   }
@@ -57,11 +56,11 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
           <table className="w-full min-w-3xl border-collapse text-sm">
             <thead>
               <tr className="border-b border-hairline text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="px-5 py-3 font-medium">Number</th>
-                <th className="px-5 py-3 font-medium">Client</th>
-                <th className="px-5 py-3 font-medium">Issue date</th>
-                <th className="px-5 py-3 font-medium">Total</th>
-                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">{copy.recibos.columnNumber}</th>
+                <th className="px-5 py-3 font-medium">{copy.bookings.client}</th>
+                <th className="px-5 py-3 font-medium">{copy.recibos.issueDate}</th>
+                <th className="px-5 py-3 font-medium">{copy.recibos.total}</th>
+                <th className="px-5 py-3 font-medium">{copy.common.status}</th>
                 <th className="px-5 py-3" />
               </tr>
             </thead>
@@ -87,12 +86,12 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
                       {formatMoney(invoice.totalCents)}
                     </td>
                     <td className="px-5 py-3">
-                      <Badge variant={badge.variant}>{badge.label}</Badge>
+                      <Badge variant={badge.variant}>{copy.recibos.statuses[badge.key]}</Badge>
                     </td>
                     <td className="px-5 py-3">
                       <div className="actions-row flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => onView(invoice)}>
-                          {invoice.status === 'draft' ? 'Edit' : 'View'}
+                          {invoice.status === 'draft' ? copy.common.edit : copy.recibos.view}
                         </Button>
                         {invoice.status === 'draft' ? (
                           <>
@@ -101,14 +100,14 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
                               size="sm"
                               onClick={() => setPendingIssue(invoice)}
                             >
-                              Issue
+                              {copy.recibos.issue}
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => setPendingDelete(invoice)}
                             >
-                              Delete
+                              {copy.common.delete}
                             </Button>
                           </>
                         ) : null}
@@ -118,7 +117,7 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
                             size="sm"
                             onClick={() => setPendingCancel(invoice)}
                           >
-                            Cancel
+                            {copy.common.cancel}
                           </Button>
                         ) : null}
                       </div>
@@ -134,9 +133,9 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
       <ConfirmDialog
         open={Boolean(pendingIssue)}
         onOpenChange={(open) => !open && setPendingIssue(undefined)}
-        title="Issue this recibo?"
-        description="It gets the next number for the year and becomes read-only. To undo it later you cancel it — the number stays used."
-        confirmLabel="Issue"
+        title={copy.recibos.issueTitle}
+        description={copy.recibos.issueBody}
+        confirmLabel={copy.recibos.issue}
         loading={status === 'saving'}
         onConfirm={async () => {
           if (pendingIssue && (await issue(pendingIssue.id))) setPendingIssue(undefined);
@@ -146,9 +145,9 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
       <ConfirmDialog
         open={Boolean(pendingCancel)}
         onOpenChange={(open) => !open && setPendingCancel(undefined)}
-        title={`Cancel recibo ${pendingCancel?.number ?? ''}?`}
-        description="The recibo keeps its number and stops counting towards your turnover. Its bookings become billable again."
-        confirmLabel="Cancel recibo"
+        title={copy.recibos.cancelTitle(pendingCancel?.number ?? '')}
+        description={copy.recibos.cancelBody}
+        confirmLabel={copy.recibos.cancelRecibo}
         cancelLabel="Keep it"
         destructive
         loading={status === 'saving'}
@@ -160,9 +159,9 @@ export function InvoiceTable({ onView }: InvoiceTableProps) {
       <ConfirmDialog
         open={Boolean(pendingDelete)}
         onOpenChange={(open) => !open && setPendingDelete(undefined)}
-        title="Delete this draft?"
-        description="Drafts have no number and leave no trace. Its bookings become billable again."
-        confirmLabel="Delete"
+        title={copy.recibos.deleteTitle}
+        description={copy.recibos.deleteBody}
+        confirmLabel={copy.common.delete}
         destructive
         loading={status === 'saving'}
         onConfirm={async () => {

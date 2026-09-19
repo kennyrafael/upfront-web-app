@@ -1,8 +1,8 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Icon, Label, Switch } from '@/components/atoms';
-import { FormField, SelectField, TextareaField } from '@/components/molecules';
+import { Combobox, FormField, SelectField, TextareaField } from '@/components/molecules';
 import { useCopy } from '@/lib';
-import { type Booking, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
+import { type Booking, clientsApi, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
 import {
   formatDuration,
   formatMoney,
@@ -10,7 +10,7 @@ import {
   toDateInputValue,
   toTimeInputValue,
 } from '@/lib/utils';
-import { useBookingStore, useClientStore, useEmployeeStore, useServiceStore } from '@/stores';
+import { useBookingStore, useEmployeeStore, useServiceStore } from '@/stores';
 
 export interface BookingFormDialogProps {
   open: boolean;
@@ -79,8 +79,13 @@ export function BookingFormDialog({
   initialEmployeeId,
   onCompleted,
 }: BookingFormDialogProps) {
-  const clients = useClientStore((state) => state.items);
-  const loadClients = useClientStore((state) => state.load);
+  /**
+   * The chosen client's name, kept here because the picker only knows the rows it last
+   * searched for. Editing a booking starts with its client, who was never fetched.
+   */
+  const [clientLabel, setClientLabel] = useState('');
+  /** `null` until asked. Only a definite "none" shows the warning, never a slow answer. */
+  const [hasClients, setHasClients] = useState<boolean | null>(null);
   const services = useServiceStore((state) => state.items);
   const employees = useEmployeeStore((state) => state.items);
   const loadEmployees = useEmployeeStore((state) => state.load);
@@ -106,25 +111,16 @@ export function BookingFormDialog({
       setErrors({});
       setAllowOutsideHours(false);
       clearError();
-      void loadClients();
+      setClientLabel(booking?.client.name ?? '');
+      void clientsApi
+        .any()
+        .then(setHasClients)
+        // A failed check is not evidence of an empty client list; say nothing.
+        .catch(() => setHasClients(true));
       void loadServices();
       void loadEmployees();
     }
-  }, [
-    open,
-    booking,
-    initialStart,
-    initialEmployeeId,
-    clearError,
-    loadClients,
-    loadServices,
-    loadEmployees,
-  ]);
-
-  const clientOptions = useMemo(
-    () => clients.map((client) => ({ value: client.id, label: client.name })),
-    [clients],
-  );
+  }, [open, booking, initialStart, initialEmployeeId, clearError, loadServices, loadEmployees]);
 
   /**
    * Only worth asking when there is somebody to choose between. A one-person business —
@@ -214,7 +210,7 @@ export function BookingFormDialog({
   }
 
   const busy = status === 'saving';
-  const noClients = clientOptions.length === 0;
+  const noClients = hasClients === false;
   const noServices = serviceOptions.length === 0;
 
   return (
@@ -258,14 +254,27 @@ export function BookingFormDialog({
           </p>
         ) : null}
 
-        <SelectField
+        <Combobox
           label={copy.bookings.client}
           required
-          placeholder={copy.bookings.chooseClient}
-          options={clientOptions}
+          placeholder={copy.bookings.searchClient}
           value={fields.clientId || undefined}
+          selectedLabel={clientLabel}
           error={errors.clientId}
-          onValueChange={(value) => setField('clientId', value)}
+          loadingMessage={copy.common.searching}
+          emptyMessage={copy.bookings.noClientMatch}
+          loadOptions={async (term) =>
+            (await clientsApi.search(term)).map((client) => ({
+              value: client.id,
+              label: client.name,
+              // Two Anas are told apart by their numbers.
+              detail: client.phone,
+            }))
+          }
+          onChange={(option) => {
+            setClientLabel(option.label);
+            setField('clientId', option.value);
+          }}
         />
 
         {employeeOptions.length > 1 ? (

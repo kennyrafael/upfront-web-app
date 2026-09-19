@@ -16,6 +16,7 @@ export const en: Dictionary = {
     done: 'Done',
     optional: 'Optional.',
     loading: 'Loading…',
+    searching: 'Searching…',
     select: 'Select…',
     email: 'Email',
     phone: 'Phone',
@@ -179,6 +180,8 @@ export const en: Dictionary = {
     formLede: 'The end time comes from the services chosen; overlaps are rejected.',
     client: 'Client',
     chooseClient: 'Choose a client',
+    searchClient: 'Search by name or phone',
+    noClientMatch: 'No clients found.',
     with: 'With',
     whoeverIsFree: 'Whoever is free',
     servicesLabel: 'Services',
@@ -499,6 +502,55 @@ export const en: Dictionary = {
     yourBusiness: 'Your business',
     uploadFailed: 'That image could not be uploaded.',
     removeFailed: 'That logo could not be removed.',
+  },
+
+  recibos: {
+    newTitle: 'New recibo verde',
+    editTitle: 'Edit draft recibo',
+    lede: 'Lines come from completed bookings, so the total always matches the work.',
+    createDraft: 'Create draft',
+    saveDraft: 'Save draft',
+    issueDate: 'Issue date',
+    bookingsToBill: 'Bookings to bill',
+    pickClientFirst: 'Pick a client to see their completed bookings.',
+    loadingBookings: 'Loading bookings…',
+    nothingBillable:
+      'Nothing billable for this client. Bookings appear here once they are marked completed and are not already on a recibo.',
+    vatRate: 'IVA rate',
+    vatRateHint: 'Percent. 0 if you are isento.',
+    exemptionReason: 'Exemption reason',
+    subtotal: 'Subtotal',
+    total: 'Total',
+    errorBookings: 'Pick at least one booking',
+    errorNumber: 'Use a number',
+    errorExemption: 'A recibo with no IVA needs a reason',
+
+    loading: 'Loading recibos…',
+    noneFor: (year: number) => `No recibos for ${year}`,
+    noneBody:
+      'Draft one from completed bookings. Upfront prepares it for you to file — it never files anything itself.',
+    columnNumber: 'Number',
+    view: 'View',
+    issue: 'Issue',
+    cancelRecibo: 'Cancel recibo',
+    statuses: { draft: 'Draft', issued: 'Issued', cancelled: 'Cancelled' } as Record<
+      string,
+      string
+    >,
+    issueTitle: 'Issue this recibo?',
+    issueBody:
+      'It gets the next number for the year and becomes read-only. To undo it later you cancel it — the number stays used.',
+    cancelTitle: (number: string) => `Cancel recibo ${number}?`,
+    cancelBody:
+      'The recibo keeps its number and stops counting towards your turnover. Its bookings become billable again.',
+    deleteTitle: 'Delete this draft?',
+    deleteBody: 'Drafts have no number and leave no trace. Its bookings become billable again.',
+
+    previewTitle: (number: string | null) => `Recibo ${number ?? '(draft)'}`,
+    previewLede: 'Copy these values into the Portal das Finanças. Upfront does not submit them.',
+    pdfFailed: 'That PDF could not be produced.',
+    downloadPdf: 'Download PDF',
+    noNif: 'No NIF on file — add one in Settings.',
   },
 
   auth: {

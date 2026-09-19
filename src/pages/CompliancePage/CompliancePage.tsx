@@ -71,7 +71,7 @@ export function CompliancePage() {
     >
       <div className="mb-4 flex w-36 flex-col gap-1.5">
         <Select
-          aria-label="Fiscal year"
+          aria-label={copy.compliance.fiscalYear}
           options={yearOptions()}
           value={String(year)}
           onValueChange={(value) => void setYear(Number(value))}
@@ -124,10 +124,10 @@ export function CompliancePage() {
                 size="sm"
                 onClick={() => void navigator.clipboard?.writeText(csv)}
               >
-                Copy
+                {copy.compliance.copy}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setCsv(undefined)}>
-                Dismiss
+                {copy.compliance.dismiss}
               </Button>
             </div>
           </div>

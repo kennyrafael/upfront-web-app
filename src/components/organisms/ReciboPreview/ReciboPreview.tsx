@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Badge, Button, Dialog, Icon } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { type Invoice, invoicesApi } from '@/lib/api';
 import { formatDate, formatMoney, saveBlob } from '@/lib/utils';
 import { useBusinessStore } from '@/stores';
@@ -15,6 +16,7 @@ export interface ReciboPreviewProps {
  * transcribe it into the AT portal. Upfront never files — this is the hand-off.
  */
 export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProps) {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const [downloading, setDownloading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -36,22 +38,22 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={`Recibo ${invoice.number ?? '(draft)'}`}
-      description="Copy these values into the Portal das Finanças. Upfront does not submit them."
+      title={copy.recibos.previewTitle(invoice.number ?? null)}
+      description={copy.recibos.previewLede}
       className="max-w-xl"
       footer={
         <>
           {failed ? (
             <p role="alert" className="mr-auto self-center text-sm text-danger-ink">
-              That PDF could not be produced.
+              {copy.recibos.pdfFailed}
             </p>
           ) : null}
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
-            Close
+            {copy.common.close}
           </Button>
           <Button loading={downloading} onClick={downloadPdf}>
             <Icon name="download" className="size-4" />
-            Download PDF
+            {copy.recibos.downloadPdf}
           </Button>
         </>
       }
@@ -64,11 +66,11 @@ export function ReciboPreview({ open, onOpenChange, invoice }: ReciboPreviewProp
             {profile?.nif ? (
               <p className="text-sm tabular-nums text-ink-muted">NIF {profile.nif}</p>
             ) : (
-              <p className="text-sm text-warn-ink">No NIF on file — add one in Settings.</p>
+              <p className="text-sm text-warn-ink">{copy.recibos.noNif}</p>
             )}
           </div>
           <Badge variant={invoice.status === 'cancelled' ? 'danger' : 'brand'}>
-            {invoice.status === 'cancelled' ? 'Cancelled' : 'Issued'}
+            {copy.recibos.statuses[invoice.status === 'cancelled' ? 'cancelled' : 'issued']}
           </Badge>
         </div>
 

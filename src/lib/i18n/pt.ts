@@ -31,6 +31,7 @@ export const pt = {
     done: 'Concluído',
     optional: 'Opcional.',
     loading: 'A carregar…',
+    searching: 'A procurar…',
     select: 'Selecionar…',
     email: 'Email',
     phone: 'Telemóvel',
@@ -196,6 +197,8 @@ export const pt = {
     formLede: 'A hora de fim vem dos serviços escolhidos; sobreposições são recusadas.',
     client: 'Cliente',
     chooseClient: 'Escolha um cliente',
+    searchClient: 'Pesquise por nome ou telemóvel',
+    noClientMatch: 'Nenhum cliente encontrado.',
     with: 'Com',
     whoeverIsFree: 'Quem estiver livre',
     servicesLabel: 'Serviços',
@@ -534,6 +537,56 @@ export const pt = {
     yourBusiness: 'O seu negócio',
     uploadFailed: 'Não foi possível carregar essa imagem.',
     removeFailed: 'Não foi possível remover o logótipo.',
+  },
+
+  recibos: {
+    newTitle: 'Novo recibo verde',
+    editTitle: 'Editar rascunho',
+    lede: 'As linhas vêm de marcações concluídas, por isso o total bate sempre com o trabalho feito.',
+    createDraft: 'Criar rascunho',
+    saveDraft: 'Guardar rascunho',
+    issueDate: 'Data de emissão',
+    bookingsToBill: 'Marcações a faturar',
+    pickClientFirst: 'Escolha um cliente para ver as marcações concluídas.',
+    loadingBookings: 'A carregar marcações…',
+    nothingBillable:
+      'Nada a faturar para este cliente. As marcações aparecem aqui depois de concluídas e enquanto não estiverem num recibo.',
+    vatRate: 'Taxa de IVA',
+    vatRateHint: 'Percentagem. 0 se estiver isento.',
+    exemptionReason: 'Motivo da isenção',
+    subtotal: 'Subtotal',
+    total: 'Total',
+    errorBookings: 'Escolha pelo menos uma marcação',
+    errorNumber: 'Use um número',
+    errorExemption: 'Um recibo sem IVA precisa de um motivo',
+
+    loading: 'A carregar recibos…',
+    noneFor: (year: number) => `Sem recibos em ${year}`,
+    noneBody:
+      'Crie um a partir de marcações concluídas. A Upfront prepara-o para o entregar — nunca entrega nada sozinha.',
+    columnNumber: 'Número',
+    view: 'Ver',
+    issue: 'Emitir',
+    cancelRecibo: 'Anular recibo',
+    statuses: { draft: 'Rascunho', issued: 'Emitido', cancelled: 'Anulado' } as Record<
+      string,
+      string
+    >,
+    issueTitle: 'Emitir este recibo?',
+    issueBody:
+      'Recebe o próximo número do ano e deixa de poder ser editado. Para o desfazer mais tarde terá de o anular — o número fica usado.',
+    cancelTitle: (number: string) => `Anular o recibo ${number}?`,
+    cancelBody:
+      'O recibo mantém o número e deixa de contar para a sua faturação. As marcações voltam a poder ser faturadas.',
+    deleteTitle: 'Eliminar este rascunho?',
+    deleteBody:
+      'Os rascunhos não têm número e não deixam rasto. As marcações voltam a poder ser faturadas.',
+
+    previewTitle: (number: string | null) => `Recibo ${number ?? '(rascunho)'}`,
+    previewLede: 'Copie estes valores para o Portal das Finanças. A Upfront não os submete.',
+    pdfFailed: 'Não foi possível gerar esse PDF.',
+    downloadPdf: 'Descarregar PDF',
+    noNif: 'Sem NIF registado — adicione-o nas Definições.',
   },
 
   auth: {

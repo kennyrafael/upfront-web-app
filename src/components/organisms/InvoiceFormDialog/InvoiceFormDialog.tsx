@@ -1,9 +1,10 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Spinner } from '@/components/atoms';
-import { FormField, SelectField } from '@/components/molecules';
-import { type Booking, bookingsApi, describeBooking, type Invoice } from '@/lib/api';
+import { Combobox, FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
+import { type Booking, bookingsApi, clientsApi, describeBooking, type Invoice } from '@/lib/api';
 import { formatDate, formatMoney } from '@/lib/utils';
-import { useClientStore, useComplianceStore } from '@/stores';
+import { useComplianceStore } from '@/stores';
 
 export interface InvoiceFormDialogProps {
   open: boolean;
@@ -35,8 +36,9 @@ function toFields(invoice?: Invoice): Fields {
 }
 
 export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDialogProps) {
-  const clients = useClientStore((state) => state.items);
-  const loadClients = useClientStore((state) => state.load);
+  const copy = useCopy();
+  /** The chosen client's name; the picker only knows the rows it last searched for. */
+  const [clientLabel, setClientLabel] = useState('');
 
   const billedBookingIds = useComplianceStore((state) => state.billedBookingIds);
   const create = useComplianceStore((state) => state.create);
@@ -57,9 +59,9 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
       setSelected(invoice?.lines.map((line) => line.bookingId) ?? []);
       setErrors({});
       clearError();
-      void loadClients();
+      setClientLabel(invoice?.client.name ?? '');
     }
-  }, [open, invoice, clearError, loadClients]);
+  }, [open, invoice, clearError]);
 
   // Bookings are fetched per client, since that is the only set a recibo may draw from.
   useEffect(() => {
@@ -115,11 +117,12 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
     event.preventDefault();
 
     const nextErrors: Partial<Record<keyof Fields | 'bookings', string>> = {};
-    if (!fields.clientId) nextErrors.clientId = 'Pick a client';
-    if (selected.length === 0) nextErrors.bookings = 'Pick at least one booking';
-    if (Number.isNaN(Number(fields.vatAmountRate))) nextErrors.vatAmountRate = 'Use a number';
+    if (!fields.clientId) nextErrors.clientId = copy.bookings.errorClient;
+    if (selected.length === 0) nextErrors.bookings = copy.recibos.errorBookings;
+    if (Number.isNaN(Number(fields.vatAmountRate)))
+      nextErrors.vatAmountRate = copy.recibos.errorNumber;
     if (vatRate === 0 && !fields.vatExemptionReason.trim()) {
-      nextErrors.vatExemptionReason = 'A recibo with no IVA needs a reason';
+      nextErrors.vatExemptionReason = copy.recibos.errorExemption;
     }
 
     setErrors(nextErrors);
@@ -143,36 +146,46 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={invoice ? 'Edit draft recibo' : 'New recibo verde'}
-      description="Lines come from completed bookings, so the total always matches the work."
+      title={invoice ? copy.recibos.editTitle : copy.recibos.newTitle}
+      description={copy.recibos.lede}
       className="max-w-2xl"
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
-            Cancel
+            {copy.common.cancel}
           </Button>
           <Button type="submit" form="invoice-form" loading={busy}>
-            {invoice ? 'Save draft' : 'Create draft'}
+            {invoice ? copy.recibos.saveDraft : copy.recibos.createDraft}
           </Button>
         </>
       }
     >
       <form id="invoice-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField
-            label="Client"
+          <Combobox
+            label={copy.bookings.client}
             required
-            placeholder="Choose a client"
-            options={clients.map((client) => ({ value: client.id, label: client.name }))}
+            placeholder={copy.bookings.searchClient}
             value={fields.clientId || undefined}
+            selectedLabel={clientLabel}
             error={errors.clientId}
-            onValueChange={(value) => {
-              setField('clientId', value);
+            loadingMessage={copy.common.searching}
+            emptyMessage={copy.bookings.noClientMatch}
+            loadOptions={async (term) =>
+              (await clientsApi.search(term)).map((client) => ({
+                value: client.id,
+                label: client.name,
+                detail: client.phone,
+              }))
+            }
+            onChange={(option) => {
+              setClientLabel(option.label);
+              setField('clientId', option.value);
               setSelected([]);
             }}
           />
           <FormField
-            label="Issue date"
+            label={copy.recibos.issueDate}
             type="date"
             required
             value={fields.issueDate}
@@ -181,20 +194,21 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
         </div>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-brand-900">Bookings to bill</legend>
+          <legend className="text-sm font-medium text-brand-900">
+            {copy.recibos.bookingsToBill}
+          </legend>
 
           {!fields.clientId ? (
             <p className="rounded-lg bg-brand-900/4 px-3 py-3 text-sm text-ink-muted">
-              Pick a client to see their completed bookings.
+              {copy.recibos.pickClientFirst}
             </p>
           ) : loadingBookings ? (
             <p className="flex items-center gap-2 px-3 py-3 text-sm text-ink-muted">
-              <Spinner className="size-3 text-brand-ink" /> Loading bookings…
+              <Spinner className="size-3 text-brand-ink" /> {copy.recibos.loadingBookings}
             </p>
           ) : billable.length === 0 ? (
             <p className="rounded-lg bg-brand-900/4 px-3 py-3 text-sm text-ink-muted">
-              Nothing billable for this client. Bookings appear here once they are marked completed
-              and are not already on a recibo.
+              {copy.recibos.nothingBillable}
             </p>
           ) : (
             <ul className="flex max-h-56 flex-col gap-1 overflow-y-auto rounded-xl bg-sheet/50 p-2 ring-1 ring-hairline">
@@ -231,16 +245,16 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="IVA rate"
+            label={copy.recibos.vatRate}
             inputMode="decimal"
-            hint="Percent. 0 if you are isento."
+            hint={copy.recibos.vatRateHint}
             error={errors.vatAmountRate}
             value={fields.vatAmountRate}
             onChange={(event) => setField('vatAmountRate', event.target.value)}
           />
           {vatRate === 0 ? (
             <FormField
-              label="Exemption reason"
+              label={copy.recibos.exemptionReason}
               required
               error={errors.vatExemptionReason}
               value={fields.vatExemptionReason}
@@ -251,7 +265,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
 
         <dl className="flex flex-col gap-1 rounded-xl bg-sheet/50 px-4 py-3 text-sm ring-1 ring-hairline">
           <div className="flex justify-between">
-            <dt className="text-ink-muted">Subtotal</dt>
+            <dt className="text-ink-muted">{copy.recibos.subtotal}</dt>
             <dd className="tabular-nums text-brand-900">{formatMoney(subtotalCents)}</dd>
           </div>
           <div className="flex justify-between">
@@ -259,7 +273,7 @@ export function InvoiceFormDialog({ open, onOpenChange, invoice }: InvoiceFormDi
             <dd className="tabular-nums text-brand-900">{formatMoney(vatCents)}</dd>
           </div>
           <div className="flex justify-between border-t border-hairline pt-1 font-medium">
-            <dt className="text-brand-900">Total</dt>
+            <dt className="text-brand-900">{copy.recibos.total}</dt>
             <dd className="tabular-nums text-brand-900">{formatMoney(subtotalCents + vatCents)}</dd>
           </div>
         </dl>
