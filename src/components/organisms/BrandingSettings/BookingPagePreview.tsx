@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useCopy } from '@/lib';
 import { readableTextOn, tintOf } from '@/lib/utils';
 
 export interface BookingPagePreviewProps {
@@ -21,6 +22,7 @@ export interface BookingPagePreviewProps {
  * mean a request per pixel of movement.
  */
 export function BookingPagePreview({ businessName, brandColor, logoUrl }: BookingPagePreviewProps) {
+  const copy = useCopy();
   const document = useMemo(() => {
     const ink = readableTextOn(brandColor);
     const heading = logoUrl
@@ -69,21 +71,21 @@ export function BookingPagePreview({ businessName, brandColor, logoUrl }: Bookin
 <body>
   <div class="bar">${heading}</div>
   <div class="card">
-    <p class="muted">Choose a service</p>
+    <p class="muted">${escapeText(copy.publicBooking.stepServiceSub)}</p>
     <div class="row"><span>Corte de cabelo</span><span>22,00 €</span></div>
     <div class="row"><span>Coloração</span><span>65,00 €</span></div>
-    <p class="muted">Pick a time</p>
+    <p class="muted">${escapeText(copy.publicBooking.stepSlot)}</p>
     <div class="slots">
       <div class="slot">09:00</div><div class="slot on">10:15</div><div class="slot">11:30</div>
     </div>
-    <button class="cta" type="button">Continue to deposit</button>
+    <button class="cta" type="button">${escapeText(copy.publicBooking.continueToDeposit)}</button>
   </div>
 </body></html>`;
-  }, [businessName, brandColor, logoUrl]);
+  }, [businessName, brandColor, logoUrl, copy]);
 
   return (
     <iframe
-      title="Booking page preview"
+      title={copy.branding.previewTitle}
       // No scripts, and nothing of ours reachable from inside it. A preview has no business
       // running anything.
       sandbox=""

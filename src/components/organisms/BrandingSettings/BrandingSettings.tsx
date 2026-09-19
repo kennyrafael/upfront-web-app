@@ -1,5 +1,6 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle, Icon, Label } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { ApiError, businessesApi } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 import { BookingPagePreview } from './BookingPagePreview';
@@ -13,6 +14,7 @@ const SUGGESTIONS = ['#144e36', '#0f5c7a', '#7a2f4e', '#b4551f', '#2d3a8c', '#3f
 const MAX_LOGO_KB = 200;
 
 export function BrandingSettings() {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const update = useBusinessStore((state) => state.update);
   const load = useBusinessStore((state) => state.load);
@@ -96,7 +98,7 @@ export function BrandingSettings() {
       setSaved(true);
     } catch (caught) {
       setLogo(previous);
-      setError(caught instanceof ApiError ? caught.message : 'That image could not be uploaded.');
+      setError(caught instanceof ApiError ? caught.message : copy.branding.uploadFailed);
     } finally {
       setBusy(false);
     }
@@ -110,7 +112,7 @@ export function BrandingSettings() {
       setLogo(undefined);
       await load();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'That logo could not be removed.');
+      setError(caught instanceof ApiError ? caught.message : copy.branding.removeFailed);
     } finally {
       setBusy(false);
     }
@@ -119,16 +121,14 @@ export function BrandingSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>How your booking page looks</CardTitle>
-        <p className="mt-1 text-sm text-ink-muted">
-          This is what your clients see — the dashboard stays as it is.
-        </p>
+        <CardTitle>{copy.branding.title}</CardTitle>
+        <p className="mt-1 text-sm text-ink-muted">{copy.branding.lede}</p>
       </CardHeader>
 
       <CardBody className="grid gap-6 lg:grid-cols-[1fr_18rem]">
         <div className="flex flex-col gap-5">
           <div>
-            <Label htmlFor="brand-color">Accent colour</Label>
+            <Label htmlFor="brand-color">{copy.branding.accentColour}</Label>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <input
                 id="brand-color"
@@ -149,7 +149,7 @@ export function BrandingSettings() {
                   <button
                     key={suggestion}
                     type="button"
-                    aria-label={`Use ${suggestion}`}
+                    aria-label={copy.branding.useColour(suggestion)}
                     onClick={() => {
                       setColor(suggestion);
                       setSaved(false);
@@ -162,16 +162,13 @@ export function BrandingSettings() {
             </div>
             <p className="mt-2 text-xs text-ink-muted">
               {/* Worth saying, because otherwise it reads as the picker ignoring them. */}
-              Text on this colour switches between black and white by itself, so it stays readable
-              whichever colour you choose.
+              {copy.branding.readable}
             </p>
           </div>
 
           <div>
-            <Label>Logo</Label>
-            <p className="mt-0.5 text-xs text-ink-muted">
-              PNG, JPEG or WebP, up to {MAX_LOGO_KB}KB. Without one we use your business name.
-            </p>
+            <Label>{copy.branding.logo}</Label>
+            <p className="mt-0.5 text-xs text-ink-muted">{copy.branding.logoHint(MAX_LOGO_KB)}</p>
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <input
@@ -188,13 +185,13 @@ export function BrandingSettings() {
                 onClick={() => fileInput.current?.click()}
               >
                 <Icon name="upload" className="size-4" />
-                {logo ? 'Replace logo' : 'Upload a logo'}
+                {logo ? copy.branding.replaceLogo : copy.branding.uploadLogo}
               </Button>
 
               {logo ? (
                 <Button variant="ghost" size="sm" disabled={busy} onClick={removeLogo}>
                   <Icon name="trash" className="size-4" />
-                  Remove
+                  {copy.branding.remove}
                 </Button>
               ) : null}
             </div>
@@ -214,16 +211,16 @@ export function BrandingSettings() {
                 if (await update({ brandColor: color })) setSaved(true);
               }}
             >
-              Save appearance
+              {copy.branding.save}
             </Button>
-            {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
+            {saved ? <span className="text-sm text-brand-ink">{copy.settings.saved}</span> : null}
           </div>
         </div>
 
         <div>
-          <p className="mb-2 text-xs font-medium text-ink-muted">Preview</p>
+          <p className="mb-2 text-xs font-medium text-ink-muted">{copy.branding.preview}</p>
           <BookingPagePreview
-            businessName={profile?.name ?? 'Your business'}
+            businessName={profile?.name ?? copy.branding.yourBusiness}
             brandColor={color}
             logoUrl={logo}
           />

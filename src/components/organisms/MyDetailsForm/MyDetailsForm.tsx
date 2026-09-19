@@ -1,14 +1,8 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { useAuthStore } from '@/stores';
-
-const ROLE_LABELS = {
-  owner: 'Owner',
-  manager: 'Manager',
-  front_desk: 'Front desk',
-  staff: 'Staff',
-} as const;
 
 /**
  * Your own name and number.
@@ -20,6 +14,7 @@ const ROLE_LABELS = {
  * Everyone can edit this whatever their role — it is theirs.
  */
 export function MyDetailsForm() {
+  const copy = useCopy();
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
@@ -46,16 +41,14 @@ export function MyDetailsForm() {
       <Card id="me">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle>You</CardTitle>
-            {user ? <Badge>{ROLE_LABELS[user.role]}</Badge> : null}
+            <CardTitle>{copy.settings.youTitle}</CardTitle>
+            {user ? <Badge>{copy.settings.roles[user.role]}</Badge> : null}
           </div>
-          <p className="mt-1 text-sm text-ink-muted">
-            How you appear to colleagues. The business's own name and number are below.
-          </p>
+          <p className="mt-1 text-sm text-ink-muted">{copy.settings.youLede}</p>
         </CardHeader>
         <CardBody className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Your name"
+            label={copy.common.yourName}
             required
             value={name}
             onChange={(event) => {
@@ -64,7 +57,7 @@ export function MyDetailsForm() {
             }}
           />
           <FormField
-            label="Your phone"
+            label={copy.settings.yourPhone}
             type="tel"
             value={phone}
             onChange={(event) => {
@@ -83,9 +76,9 @@ export function MyDetailsForm() {
 
       <div className="flex items-center gap-3">
         <Button type="submit" loading={busy}>
-          Save
+          {copy.common.save}
         </Button>
-        {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
+        {saved ? <span className="text-sm text-brand-ink">{copy.settings.saved}</span> : null}
       </div>
     </form>
   );

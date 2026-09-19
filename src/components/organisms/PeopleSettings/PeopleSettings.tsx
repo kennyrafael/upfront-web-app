@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Switch } from '@/components/atoms';
 import { ConfirmDialog, FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
+import { useCopy } from '@/lib';
 import type { Employee, WorkingHours } from '@/lib/api';
 import { useAuthStore, useBusinessStore, useEmployeeStore } from '@/stores';
 import { SkillsPanel } from './SkillsPanel';
@@ -15,6 +16,7 @@ import { TimeOffPanel } from './TimeOffPanel';
  * wonder why no slots appear.
  */
 export function PeopleSettings() {
+  const copy = useCopy();
   const items = useEmployeeStore((state) => state.items);
   const includeInactive = useEmployeeStore((state) => state.includeInactive);
   const setIncludeInactive = useEmployeeStore((state) => state.setIncludeInactive);
@@ -69,14 +71,11 @@ export function PeopleSettings() {
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle>People</CardTitle>
-            <p className="mt-1 text-sm text-ink-muted">
-              Everyone who performs services. Each person's hours narrow the shop's rather than
-              extending them, so a slot is offered only when both are open.
-            </p>
+            <CardTitle>{copy.people.title}</CardTitle>
+            <p className="mt-1 text-sm text-ink-muted">{copy.people.lede}</p>
           </div>
           <Button type="button" variant="secondary" size="sm" onClick={() => setAdding(!adding)}>
-            {adding ? 'Cancel' : 'Add someone'}
+            {adding ? copy.common.cancel : copy.people.addSomeone}
           </Button>
         </div>
       </CardHeader>
@@ -88,19 +87,19 @@ export function PeopleSettings() {
             onSubmit={handleAdd}
           >
             <FormField
-              label="Name"
+              label={copy.common.name}
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
             <FormField
-              label="Phone"
+              label={copy.common.phone}
               type="tel"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
             />
             <Button type="submit" loading={busy}>
-              Add
+              {copy.people.add}
             </Button>
           </form>
         ) : null}
@@ -114,13 +113,15 @@ export function PeopleSettings() {
               <div className="min-w-0">
                 <p className="flex items-center gap-2 font-medium text-ink">
                   <span className="truncate">{employee.name}</span>
-                  {employee.id === myEmployeeId ? <Badge variant="neutral">You</Badge> : null}
-                  {employee.active ? null : <Badge variant="warning">Left</Badge>}
+                  {employee.id === myEmployeeId ? (
+                    <Badge variant="neutral">{copy.people.you}</Badge>
+                  ) : null}
+                  {employee.active ? null : <Badge variant="warning">{copy.people.left}</Badge>}
                 </p>
                 <p className="text-sm text-ink-muted">
                   {employee.hours.length
-                    ? `${employee.hours.length} time${employee.hours.length === 1 ? '' : 's'} a week`
-                    : 'Follows the shop’s hours'}
+                    ? copy.people.timesAWeek(employee.hours.length)
+                    : copy.people.followsShop}
                 </p>
               </div>
 
@@ -131,7 +132,7 @@ export function PeopleSettings() {
                   size="sm"
                   onClick={() => startEditing(employee)}
                 >
-                  Hours
+                  {copy.people.hours}
                 </Button>
                 <Button
                   type="button"
@@ -139,7 +140,7 @@ export function PeopleSettings() {
                   size="sm"
                   onClick={() => setAway(away?.id === employee.id ? null : employee)}
                 >
-                  Away
+                  {copy.people.away}
                 </Button>
                 <Button
                   type="button"
@@ -147,7 +148,7 @@ export function PeopleSettings() {
                   size="sm"
                   onClick={() => setSkilling(skilling?.id === employee.id ? null : employee)}
                 >
-                  Does
+                  {copy.people.does}
                 </Button>
                 {employee.active ? (
                   <Button
@@ -156,7 +157,7 @@ export function PeopleSettings() {
                     size="sm"
                     onClick={() => setLeaving(employee)}
                   >
-                    They left
+                    {copy.people.theyLeft}
                   </Button>
                 ) : (
                   <Button
@@ -165,7 +166,7 @@ export function PeopleSettings() {
                     size="sm"
                     onClick={() => void update(employee.id, { active: true })}
                   >
-                    Bring back
+                    {copy.people.bringBack}
                   </Button>
                 )}
               </div>
@@ -181,17 +182,14 @@ export function PeopleSettings() {
 
         {editing ? (
           <div className="flex flex-col gap-3 rounded-xl bg-sheet/50 p-3 ring-1 ring-hairline">
-            <p className="text-sm text-ink-muted">
-              When <span className="font-medium text-ink">{editing.name}</span> is in. Leave it
-              empty to follow the shop's hours.
-            </p>
+            <p className="text-sm text-ink-muted">{copy.people.hoursFor(editing.name)}</p>
             <WorkingHoursEditor value={hours} disabled={busy} onChange={setHours} />
             <div className="flex items-center gap-3">
               <Button type="button" loading={busy} onClick={() => void saveHours()}>
-                Save hours
+                {copy.people.saveHours}
               </Button>
               <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
-                Cancel
+                {copy.common.cancel}
               </Button>
             </div>
           </div>
@@ -204,7 +202,7 @@ export function PeopleSettings() {
             onCheckedChange={(next) => void setIncludeInactive(next)}
           />
           <label htmlFor="show-past-people" className="text-sm text-ink-muted">
-            Show people who have left
+            {copy.people.showLeft}
           </label>
         </div>
 
@@ -218,10 +216,10 @@ export function PeopleSettings() {
       <ConfirmDialog
         open={Boolean(leaving)}
         onOpenChange={(open) => !open && setLeaving(null)}
-        title={`Remove ${leaving?.name ?? ''}?`}
+        title={copy.people.removeTitle(leaving?.name ?? '')}
         // Said plainly, because "delete" is what this button looks like and is not what it does.
-        description="They stop appearing in availability and on new bookings. Everything they have already done stays exactly as it is, and you can bring them back."
-        confirmLabel="They left"
+        description={copy.people.removeBody}
+        confirmLabel={copy.people.theyLeft}
         onConfirm={async () => {
           if (leaving) await deactivate(leaving.id);
           setLeaving(null);

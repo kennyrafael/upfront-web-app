@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Checkbox, Input, Label, Switch } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import type { Employee } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
 import { useEmployeeStore, useServiceStore } from '@/stores';
@@ -29,6 +30,7 @@ const toCents = (euros: string) =>
  * that one. So the switch says it out loud, and the list only appears once it is off.
  */
 export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
+  const copy = useCopy();
   const services = useServiceStore((state) => state.items);
   const loadServices = useServiceStore((state) => state.load);
   const update = useEmployeeStore((state) => state.update);
@@ -77,10 +79,7 @@ export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
 
   return (
     <div className="flex flex-col gap-4 rounded-xl bg-sheet/50 p-3 ring-1 ring-hairline">
-      <p className="text-sm text-ink-muted">
-        What <span className="font-medium text-ink">{employee.name}</span> does. Clients are only
-        offered them for services on this list.
-      </p>
+      <p className="text-sm text-ink-muted">{copy.people.skillsFor(employee.name)}</p>
 
       <div className="flex items-center gap-2">
         <Switch
@@ -88,7 +87,7 @@ export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
           checked={everything}
           onCheckedChange={setEverything}
         />
-        <Label htmlFor={`everything-${employee.id}`}>Everything in the catalog</Label>
+        <Label htmlFor={`everything-${employee.id}`}>{copy.people.everything}</Label>
       </div>
 
       {everything ? null : (
@@ -118,7 +117,7 @@ export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
                   <div className="mt-2 grid gap-2 pl-6 sm:grid-cols-2">
                     <div className="flex items-center gap-2">
                       <Label htmlFor={`price-${employee.id}-${service.id}`} className="text-xs">
-                        Price
+                        {copy.common.price}
                       </Label>
                       <Input
                         id={`price-${employee.id}-${service.id}`}
@@ -130,7 +129,7 @@ export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <Label htmlFor={`mins-${employee.id}-${service.id}`} className="text-xs">
-                        Minutes
+                        {copy.people.minutes}
                       </Label>
                       <Input
                         id={`mins-${employee.id}-${service.id}`}
@@ -150,10 +149,10 @@ export function SkillsPanel({ employee, onClose }: SkillsPanelProps) {
 
       <div className="flex items-center gap-3">
         <Button type="button" size="sm" loading={busy} onClick={() => void save()}>
-          Save
+          {copy.common.save}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-          Cancel
+          {copy.common.cancel}
         </Button>
       </div>
     </div>

@@ -10,6 +10,7 @@ import {
   Switch,
 } from '@/components/atoms';
 import { FormField, SelectField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { businessesApi } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
@@ -17,6 +18,7 @@ import { useBusinessStore } from '@/stores';
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
 
 export function PublicBookingSettings() {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const update = useBusinessStore((state) => state.update);
   const load = useBusinessStore((state) => state.load);
@@ -62,7 +64,7 @@ export function PublicBookingSettings() {
 
   async function save() {
     if (slug && !SLUG_PATTERN.test(slug)) {
-      setSlugError('Use 3–40 lowercase letters, numbers or hyphens');
+      setSlugError(copy.bookingPage.slugError);
       return;
     }
     setSlugError(undefined);
@@ -88,21 +90,19 @@ export function PublicBookingSettings() {
     <Card>
       <CardHeader className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <CardTitle>Public booking page</CardTitle>
-          <p className="mt-1 text-sm text-ink-muted">
-            Let clients book themselves, without calling you.
-          </p>
+          <CardTitle>{copy.bookingPage.title}</CardTitle>
+          <p className="mt-1 text-sm text-ink-muted">{copy.bookingPage.lede}</p>
         </div>
-        <Badge variant={enabled ? 'brand' : 'neutral'}>{enabled ? 'Live' : 'Off'}</Badge>
+        <Badge variant={enabled ? 'brand' : 'neutral'}>
+          {enabled ? copy.bookingPage.live : copy.bookingPage.off}
+        </Badge>
       </CardHeader>
 
       <CardBody className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4 rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
           <div>
-            <Label htmlFor="public-booking-enabled">Accept bookings from clients</Label>
-            <p className="text-xs text-ink-muted">
-              Off by default — your calendar is private until you publish it.
-            </p>
+            <Label htmlFor="public-booking-enabled">{copy.bookingPage.accept}</Label>
+            <p className="text-xs text-ink-muted">{copy.bookingPage.acceptHint}</p>
           </div>
           <Switch
             id="public-booking-enabled"
@@ -115,8 +115,8 @@ export function PublicBookingSettings() {
         {enabled ? (
           <>
             <FormField
-              label="Your booking address"
-              hint={bookingUrl ? `Clients visit ${bookingUrl}` : undefined}
+              label={copy.bookingPage.address}
+              hint={bookingUrl ? copy.bookingPage.addressHint(bookingUrl) : undefined}
               error={slugError}
               value={slug}
               onChange={(event) => {
@@ -127,9 +127,9 @@ export function PublicBookingSettings() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
-                label="Minimum notice"
+                label={copy.bookingPage.minimumNotice}
                 inputMode="numeric"
-                hint="Hours. Stops someone booking you in ten minutes."
+                hint={copy.bookingPage.minimumNoticeHint}
                 value={leadTime}
                 onChange={(event) => {
                   setLeadTime(event.target.value);
@@ -137,9 +137,9 @@ export function PublicBookingSettings() {
                 }}
               />
               <FormField
-                label="How far ahead"
+                label={copy.bookingPage.horizon}
                 inputMode="numeric"
-                hint="Days clients can book into the future."
+                hint={copy.bookingPage.horizonHint}
                 value={horizon}
                 onChange={(event) => {
                   setHorizon(event.target.value);
@@ -149,11 +149,11 @@ export function PublicBookingSettings() {
             </div>
             <div className="rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
               <SelectField
-                label="What clients pay when they book"
+                label={copy.bookingPage.whatClientsPay}
                 options={[
-                  { value: 'none', label: 'Nothing — they pay you in person' },
-                  { value: 'deposit', label: 'A deposit' },
-                  { value: 'full', label: 'The whole price' },
+                  { value: 'none', label: copy.bookingPage.payNothing },
+                  { value: 'deposit', label: copy.bookingPage.payDeposit },
+                  { value: 'full', label: copy.bookingPage.payFull },
                 ]}
                 value={mode}
                 onValueChange={(value) => {
@@ -167,20 +167,20 @@ export function PublicBookingSettings() {
                    "Never refunded" is a fair rule for a deposit and an indefensible one for
                    a whole service price. */
                 <p className="mt-2 rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
-                  Taking the whole price means refunding most of it when somebody cancels in time.
-                  The deposit below is the part you keep — and there is always a small minimum, so a
-                  cancellation never leaves you out of pocket.
+                  {copy.bookingPage.fullWarning}
                 </p>
               ) : null}
 
               {mode === 'none' ? null : (
                 <FormField
-                  label={mode === 'full' ? 'Non-refundable part' : 'Deposit'}
+                  label={
+                    mode === 'full' ? copy.bookingPage.nonRefundablePart : copy.bookingPage.deposit
+                  }
                   inputMode="numeric"
                   hint={
                     mode === 'full'
-                      ? 'Percent of the price you keep if they cancel. The rest goes back.'
-                      : 'Percent of the price, taken by MB WAY when a client books. 0 takes none.'
+                      ? copy.bookingPage.nonRefundableHint
+                      : copy.bookingPage.depositHint
                   }
                   value={deposit}
                   onChange={(event) => {
@@ -191,9 +191,9 @@ export function PublicBookingSettings() {
               )}
               {mode !== 'none' && Number(deposit) > 0 ? (
                 <FormField
-                  label="Notice to move an appointment"
+                  label={copy.bookingPage.notice}
                   inputMode="numeric"
-                  hint="Hours. Inside this, a client can move their booking and the deposit goes with them."
+                  hint={copy.bookingPage.noticeHint}
                   value={notice}
                   onChange={(event) => {
                     setNotice(event.target.value);
@@ -204,17 +204,15 @@ export function PublicBookingSettings() {
 
               <p className="mt-2 text-xs text-ink-muted">
                 {Number(deposit) > 0
-                  ? 'Deposits are never refunded. With enough notice a client moves the appointment instead and keeps it; later than that, the slot was lost at your expense and the deposit stays with you. A small minimum applies, so tiny deposits are not eaten by fees.'
-                  : 'No deposit means a slot is held on trust — the usual reason for no-shows.'}
+                  ? copy.bookingPage.depositPolicy
+                  : copy.bookingPage.noDepositPolicy}
               </p>
             </div>
 
             <div className="flex items-center justify-between gap-4 rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
               <div>
-                <Label htmlFor="auto-confirm">Confirm bookings automatically</Label>
-                <p className="text-xs text-ink-muted">
-                  Off means they arrive as pending for you to approve.
-                </p>
+                <Label htmlFor="auto-confirm">{copy.bookingPage.autoConfirm}</Label>
+                <p className="text-xs text-ink-muted">{copy.bookingPage.autoConfirmHint}</p>
               </div>
               <Switch
                 id="auto-confirm"
@@ -226,17 +224,17 @@ export function PublicBookingSettings() {
 
             <div className="flex items-center gap-3">
               <Button onClick={save} loading={status === 'saving'}>
-                Save booking page
+                {copy.bookingPage.save}
               </Button>
               {bookingUrl ? (
                 <Button
                   variant="secondary"
                   onClick={() => void navigator.clipboard?.writeText(bookingUrl)}
                 >
-                  Copy link
+                  {copy.bookingPage.copyLink}
                 </Button>
               ) : null}
-              {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
+              {saved ? <span className="text-sm text-brand-ink">{copy.settings.saved}</span> : null}
             </div>
           </>
         ) : null}

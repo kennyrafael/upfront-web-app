@@ -1,4 +1,5 @@
 import { Button, Input, Label, Select } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import type { WorkingHours } from '@/lib/api';
 import { weekdayOptions } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ const DEFAULT_SLOT = { start: '09:00', end: '18:00' };
  * and a grid would have to special-case that.
  */
 export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEditorProps) {
+  const copy = useCopy();
   function updateSlot(index: number, patch: Partial<WorkingHours>) {
     onChange(value.map((slot, i) => (i === index ? { ...slot, ...patch } : slot)));
   }
@@ -28,8 +30,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
     <div className="flex flex-col gap-3">
       {value.length === 0 ? (
         <p className="rounded-lg bg-brand-900/4 px-3 py-3 text-sm text-ink-muted">
-          No working hours set. Clients can still be booked manually, but availability checks will
-          have nothing to compare against.
+          {copy.hours.noneSet}
         </p>
       ) : null}
 
@@ -44,7 +45,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
           {/* A fixed width, not `flex-1`: a weekday name is short, and letting the column
               grow gave it six hundred pixels for the word "Wednesday". */}
           <div className="flex w-44 flex-col gap-1.5">
-            <Label htmlFor={`slot-${index}-weekday`}>Day</Label>
+            <Label htmlFor={`slot-${index}-weekday`}>{copy.hours.day}</Label>
             <Select
               id={`slot-${index}-weekday`}
               options={weekdayOptions()}
@@ -55,7 +56,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
           </div>
 
           <div className="flex w-28 flex-col gap-1.5">
-            <Label htmlFor={`slot-${index}-start`}>From</Label>
+            <Label htmlFor={`slot-${index}-start`}>{copy.hours.from}</Label>
             <Input
               id={`slot-${index}-start`}
               type="time"
@@ -66,7 +67,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
           </div>
 
           <div className="flex w-28 flex-col gap-1.5">
-            <Label htmlFor={`slot-${index}-end`}>To</Label>
+            <Label htmlFor={`slot-${index}-end`}>{copy.hours.to}</Label>
             <Input
               id={`slot-${index}-end`}
               type="time"
@@ -82,7 +83,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
               so matching their bottoms leaves it sitting low against the line they share. */}
           <div className="flex flex-col gap-1.5">
             <Label aria-hidden="true" className="invisible">
-              Remove
+              {copy.hours.remove}
             </Label>
             <div className="flex h-8 items-center">
               <Button
@@ -92,7 +93,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
                 disabled={disabled}
                 onClick={() => onChange(value.filter((_, i) => i !== index))}
               >
-                Remove
+                {copy.hours.remove}
               </Button>
             </div>
           </div>
@@ -101,7 +102,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
 
       <div>
         <Button type="button" variant="secondary" size="sm" disabled={disabled} onClick={addSlot}>
-          Add hours
+          {copy.hours.addHours}
         </Button>
       </div>
     </div>

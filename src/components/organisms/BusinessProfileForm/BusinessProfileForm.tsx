@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
+import { useCopy } from '@/lib';
 import type { BusinessProfile, WorkingHours } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
@@ -20,6 +21,7 @@ function toFields(profile: BusinessProfile | null): ProfileFields {
 }
 
 export function BusinessProfileForm() {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const status = useBusinessStore((state) => state.status);
   const error = useBusinessStore((state) => state.error);
@@ -45,7 +47,7 @@ export function BusinessProfileForm() {
     event.preventDefault();
 
     if (fields.nif && !/^\d{9}$/.test(fields.nif)) {
-      setNifError('A Portuguese NIF is exactly 9 digits');
+      setNifError(copy.settings.nifError);
       return;
     }
     setNifError(undefined);
@@ -65,30 +67,28 @@ export function BusinessProfileForm() {
     <form className="flex flex-col gap-6" onSubmit={handleSubmit} noValidate>
       <Card id="profile">
         <CardHeader>
-          <CardTitle>Business details</CardTitle>
-          <p className="mt-1 text-sm text-ink-muted">
-            The NIF is what recibos verdes are issued against.
-          </p>
+          <CardTitle>{copy.settings.businessDetails}</CardTitle>
+          <p className="mt-1 text-sm text-ink-muted">{copy.settings.businessDetailsLede}</p>
         </CardHeader>
         <CardBody className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Business name"
+            label={copy.settings.businessName}
             required
-            hint="What clients see on your booking page."
+            hint={copy.settings.businessNameHint}
             value={fields.name}
             onChange={(event) => setField('name', event.target.value)}
           />
           <FormField
-            label="Phone"
+            label={copy.common.phone}
             type="tel"
             value={fields.phone}
             onChange={(event) => setField('phone', event.target.value)}
           />
           <FormField
-            label="NIF"
+            label={copy.settings.nif}
             inputMode="numeric"
             error={nifError}
-            hint="9 digits."
+            hint={copy.settings.nifHint}
             value={fields.nif}
             onChange={(event) => setField('nif', event.target.value)}
           />
@@ -97,11 +97,9 @@ export function BusinessProfileForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Shop hours</CardTitle>
+          <CardTitle>{copy.settings.shopHours}</CardTitle>
           <p className="mt-1 text-sm text-ink-muted">
-            When the door is open, local to {profile?.timezone ?? 'Europe/Lisbon'}. A ceiling rather
-            than an offer — what each person is bookable for is this crossed with their own hours.
-            Split a day into two rows to carve out a lunch break.
+            {copy.settings.shopHoursLede(profile?.timezone ?? 'Europe/Lisbon')}
           </p>
         </CardHeader>
         <CardBody>
@@ -124,9 +122,9 @@ export function BusinessProfileForm() {
 
       <div className="flex items-center gap-3">
         <Button type="submit" loading={busy}>
-          Save changes
+          {copy.settings.saveChanges}
         </Button>
-        {saved ? <span className="text-sm text-brand-ink">Saved.</span> : null}
+        {saved ? <span className="text-sm text-brand-ink">{copy.settings.saved}</span> : null}
       </div>
     </form>
   );

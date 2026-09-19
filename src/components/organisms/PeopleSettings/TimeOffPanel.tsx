@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Label, Switch } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { Employee, TimeOff } from '@/lib/api';
 import { useEmployeeStore } from '@/stores';
 
@@ -72,6 +73,7 @@ function at(iso: string, timezone: string) {
  * is how a feature people need daily becomes one they avoid.
  */
 export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps) {
+  const copy = useCopy();
   const entries = useEmployeeStore((state) => state.timeOff[employee.id]) ?? NONE;
   const clashes = useEmployeeStore((state) => state.lastClashes);
   const status = useEmployeeStore((state) => state.status);
@@ -101,13 +103,13 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
     const endsAt = allDay ? toInstant(endDay, '00:00') : toInstant(endDay, toTime);
 
     if (!startsAt || !endsAt) {
-      setProblem('Pick the days this covers');
+      setProblem(copy.people.pickDays);
       return;
     }
     if (allDay) endsAt.setDate(endsAt.getDate() + 1);
 
     if (endsAt <= startsAt) {
-      setProblem('It has to end after it starts');
+      setProblem(copy.people.endAfterStart);
       return;
     }
     setProblem(undefined);
@@ -128,42 +130,39 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
 
   return (
     <div className="flex flex-col gap-4 rounded-xl bg-sheet/50 p-3 ring-1 ring-hairline">
-      <p className="text-sm text-ink-muted">
-        When <span className="font-medium text-ink">{employee.name}</span> is away. They stop being
-        offered for those times; everybody else is untouched.
-      </p>
+      <p className="text-sm text-ink-muted">{copy.people.awayFor(employee.name)}</p>
 
       <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
         <div className="flex items-center gap-2">
           <Switch id={`all-day-${employee.id}`} checked={allDay} onCheckedChange={setAllDay} />
-          <Label htmlFor={`all-day-${employee.id}`}>Whole days</Label>
+          <Label htmlFor={`all-day-${employee.id}`}>{copy.people.wholeDays}</Label>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <FormField
-            label="From"
+            label={copy.people.from}
             type="date"
             required
             value={fromDate}
             onChange={(event) => setFromDate(event.target.value)}
           />
           <FormField
-            label="To"
+            label={copy.people.to}
             type="date"
-            hint="Leave empty for a single day."
+            hint={copy.people.toHint}
             value={toDate}
             onChange={(event) => setToDate(event.target.value)}
           />
           {allDay ? null : (
             <>
               <FormField
-                label="From time"
+                label={copy.people.fromTime}
                 type="time"
                 value={fromTime}
                 onChange={(event) => setFromTime(event.target.value)}
               />
               <FormField
-                label="To time"
+                label={copy.people.toTime}
                 type="time"
                 value={toTime}
                 onChange={(event) => setToTime(event.target.value)}
@@ -180,10 +179,10 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
 
         <div className="flex items-center gap-3">
           <Button type="submit" size="sm" loading={busy}>
-            Mark away
+            {copy.people.markAway}
           </Button>
           <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Done
+            {copy.common.done}
           </Button>
         </div>
       </form>
@@ -192,10 +191,7 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
         /* Said out loud rather than swallowed. Nothing was cancelled, and somebody has to
            call these clients — the app is not going to decide that for them. */
         <div role="alert" className="rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
-          <p className="font-medium">
-            {clashes.length} appointment{clashes.length === 1 ? '' : 's'} already booked in that
-            time.
-          </p>
+          <p className="font-medium">{copy.people.clashes(clashes.length)}</p>
           <ul className="mt-1 flex flex-col gap-0.5">
             {clashes.map((clash) => (
               <li key={clash.id}>
@@ -204,7 +200,7 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
               </li>
             ))}
           </ul>
-          <p className="mt-1">Nothing was cancelled. Move or cancel them yourself.</p>
+          <p className="mt-1">{copy.people.nothingCancelled}</p>
         </div>
       ) : null}
 
@@ -223,13 +219,13 @@ export function TimeOffPanel({ employee, timezone, onClose }: TimeOffPanelProps)
                 disabled={busy}
                 onClick={() => void remove(employee.id, entry.id)}
               >
-                Remove
+                {copy.hours.remove}
               </Button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-ink-muted">Nothing booked off in the next three months.</p>
+        <p className="text-sm text-ink-muted">{copy.people.noneAhead}</p>
       )}
     </div>
   );

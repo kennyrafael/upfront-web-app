@@ -61,7 +61,7 @@ export function AccountMenu() {
         <DropdownMenu.Item asChild>
           {/* Both land on Settings; the hash is what keeps them from being the same item,
               taking this one to the business details rather than the page top. */}
-          <Link to="/settings#profile" className={ITEM_CLASS}>
+          <Link to="/settings#you" className={ITEM_CLASS}>
             <Icon name="profile" className="size-4" />
             {copy.account.yourProfile}
           </Link>

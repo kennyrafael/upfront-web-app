@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 
@@ -18,6 +19,7 @@ function messageFor(error: unknown, fallback: string): string {
  * take the account with it.
  */
 export function SignInSettings() {
+  const copy = useCopy();
   const user = useAuthStore((state) => state.user);
 
   const [email, setEmail] = useState('');
@@ -45,7 +47,7 @@ export function SignInSettings() {
       setEmail('');
       setEmailPassword('');
     } catch (error) {
-      setEmailOutcome({ tone: 'bad', text: messageFor(error, 'That did not work.') });
+      setEmailOutcome({ tone: 'bad', text: messageFor(error, copy.settings.didNotWork) });
     } finally {
       setEmailBusy(false);
     }
@@ -59,12 +61,12 @@ export function SignInSettings() {
       await authApi.changePassword(currentPassword, newPassword);
       setPasswordOutcome({
         tone: 'ok',
-        text: 'Password changed. Everywhere else you were signed in has been signed out.',
+        text: copy.settings.passwordChanged,
       });
       setCurrentPassword('');
       setNewPassword('');
     } catch (error) {
-      setPasswordOutcome({ tone: 'bad', text: messageFor(error, 'That did not work.') });
+      setPasswordOutcome({ tone: 'bad', text: messageFor(error, copy.settings.didNotWork) });
     } finally {
       setPasswordBusy(false);
     }
@@ -73,23 +75,19 @@ export function SignInSettings() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Signing in</CardTitle>
-        <p className="mt-1 text-sm text-ink-muted">
-          You sign in as <span className="text-brand-900">{user?.email}</span>.
-        </p>
+        <CardTitle>{copy.settings.signingIn}</CardTitle>
+        <p className="mt-1 text-sm text-ink-muted">{copy.settings.signInAs(user?.email ?? '')}</p>
       </CardHeader>
 
       <CardBody className="grid gap-8 md:grid-cols-2">
         <form className="flex flex-col gap-4" onSubmit={submitEmail} noValidate>
           <div>
-            <h3 className="text-sm font-medium text-brand-900">Change your email</h3>
-            <p className="mt-0.5 text-xs text-ink-muted">
-              We send a link to the new address. Nothing changes until you open it.
-            </p>
+            <h3 className="text-sm font-medium text-brand-900">{copy.settings.changeEmail}</h3>
+            <p className="mt-0.5 text-xs text-ink-muted">{copy.settings.changeEmailLede}</p>
           </div>
 
           <FormField
-            label="New email"
+            label={copy.settings.newEmail}
             type="email"
             required
             autoComplete="email"
@@ -97,11 +95,11 @@ export function SignInSettings() {
             onChange={(event) => setEmail(event.target.value)}
           />
           <FormField
-            label="Your password"
+            label={copy.settings.yourPassword}
             type="password"
             required
             autoComplete="current-password"
-            hint="Asked for because changing this address changes how the account is recovered."
+            hint={copy.settings.whyPassword}
             value={emailPassword}
             onChange={(event) => setEmailPassword(event.target.value)}
           />
@@ -125,20 +123,18 @@ export function SignInSettings() {
             loading={emailBusy}
             disabled={!email.trim() || !emailPassword}
           >
-            Send the link
+            {copy.settings.sendLink}
           </Button>
         </form>
 
         <form className="flex flex-col gap-4" onSubmit={submitPassword} noValidate>
           <div>
-            <h3 className="text-sm font-medium text-brand-900">Change your password</h3>
-            <p className="mt-0.5 text-xs text-ink-muted">
-              At least 10 characters. Other devices are signed out.
-            </p>
+            <h3 className="text-sm font-medium text-brand-900">{copy.settings.changePassword}</h3>
+            <p className="mt-0.5 text-xs text-ink-muted">{copy.settings.passwordRules}</p>
           </div>
 
           <FormField
-            label="Current password"
+            label={copy.settings.currentPassword}
             type="password"
             required
             autoComplete="current-password"
@@ -146,7 +142,7 @@ export function SignInSettings() {
             onChange={(event) => setCurrentPassword(event.target.value)}
           />
           <FormField
-            label="New password"
+            label={copy.settings.newPassword}
             type="password"
             required
             autoComplete="new-password"
@@ -173,7 +169,7 @@ export function SignInSettings() {
             loading={passwordBusy}
             disabled={!currentPassword || newPassword.length < 10}
           >
-            Change password
+            {copy.settings.changePassword}
           </Button>
         </form>
       </CardBody>
