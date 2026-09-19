@@ -1,16 +1,18 @@
-const WEEKDAY_LABELS = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-] as const;
+import { dateFormat, numberFormat } from './intl';
+
+/**
+ * A week starting on a Sunday, used only to ask `Intl` what it calls each day.
+ *
+ * 2024-01-07 was a Sunday. Deriving the names beats keeping seven of them per language:
+ * they cannot drift, they capitalise the way each language does, and adding Spanish adds
+ * nothing here at all.
+ */
+const KNOWN_SUNDAY = Date.UTC(2024, 0, 7);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Cents to a localised currency string: 1800 -> "18,00 €". */
 export function formatMoney(cents: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('pt-PT', { style: 'currency', currency }).format(cents / 100);
+  return numberFormat({ style: 'currency', currency }).format(cents / 100);
 }
 
 /** Cents to a bare editable amount: 1800 -> "18.00". */
@@ -33,22 +35,27 @@ export function formatDuration(minutes: number): string {
 }
 
 export function weekdayLabel(weekday: number): string {
-  return WEEKDAY_LABELS[weekday] ?? `Day ${weekday}`;
+  return dateFormat({ weekday: 'long' }, 'UTC').format(new Date(KNOWN_SUNDAY + weekday * DAY_MS));
 }
 
-export const WEEKDAY_OPTIONS = WEEKDAY_LABELS.map((label, index) => ({
-  value: String(index),
-  label,
-}));
+/**
+ * A function now, not a constant.
+ *
+ * It used to be a module-level array, which is exactly the shape that cannot follow a
+ * language change — it would have been built once, in whatever locale happened to be
+ * active at import time, and then been wrong for the rest of the session.
+ */
+export function weekdayOptions(): { value: string; label: string }[] {
+  return [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+    value: String(weekday),
+    label: weekdayLabel(weekday),
+  }));
+}
 
 /** "31 Mar 2026" from an ISO instant — recibo dates are read, not computed with. */
 export function formatDate(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value;
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  }).format(date);
+  return dateFormat({ day: 'numeric', month: 'short', year: 'numeric' }).format(date);
 }
 
 export function formatPercent(ratio: number): string {

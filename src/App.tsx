@@ -1,4 +1,5 @@
 import { Theme } from '@radix-ui/themes';
+import { LocaleProvider } from '@/lib';
 import { AppRoutes } from '@/routes';
 import { useThemeStore } from '@/stores';
 
@@ -24,14 +25,16 @@ export function App() {
   const accent = useThemeStore((state) => state.accent);
 
   return (
-    <Theme
-      accentColor={accent}
-      grayColor="sage"
-      radius="large"
-      panelBackground="translucent"
-      appearance={theme === 'system' ? 'inherit' : theme}
-    >
-      <AppRoutes />
-    </Theme>
+    <LocaleProvider>
+      <Theme
+        accentColor={accent}
+        grayColor="sage"
+        radius="large"
+        panelBackground="translucent"
+        appearance={theme === 'system' ? 'inherit' : theme}
+      >
+        <AppRoutes />
+      </Theme>
+    </LocaleProvider>
   );
 }

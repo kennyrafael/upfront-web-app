@@ -1,5 +1,6 @@
 import { Theme } from '@radix-ui/themes';
 import type { ReactNode } from 'react';
+import { useCopy } from '@/lib';
 import { brandStyle } from '@/lib/utils';
 
 export interface PublicLayoutProps {
@@ -33,6 +34,8 @@ export function PublicLayout({
   brandColor,
   logoUrl,
 }: PublicLayoutProps) {
+  const copy = useCopy().publicBooking;
+
   return (
     // A nested Theme, pinned light and repainted with the provider's own accent.
     //
@@ -84,7 +87,7 @@ export function PublicLayout({
           <div className={title ? 'mt-6' : ''}>{children}</div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-brand-100/80">Booking powered by Upfront</p>
+        <p className="mt-6 text-center text-xs text-brand-100/80">{copy.poweredBy}</p>
       </div>
     </Theme>
   );

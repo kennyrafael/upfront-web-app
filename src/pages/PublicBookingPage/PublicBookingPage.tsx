@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Card, DepositWaiting, PublicBookingFlow, PublicLayout, Spinner } from '@/components';
+import { useCopy } from '@/lib';
 import { formatMoney, zonedDateTime } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
 
 export function PublicBookingPage() {
+  const t = useCopy();
+  const copy = t.publicBooking;
   const { slug = '' } = useParams();
   const navigate = useNavigate();
 
@@ -43,7 +46,7 @@ export function PublicBookingPage() {
     return (
       <PublicLayout>
         <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-ink" /> Loading…
+          <Spinner className="size-4 text-brand-ink" /> {t.common.loading}
         </p>
       </PublicLayout>
     );
@@ -51,10 +54,8 @@ export function PublicBookingPage() {
 
   if (!provider) {
     return (
-      <PublicLayout title="Page not found">
-        <p className="text-sm text-ink-muted">
-          {error ?? 'There is no booking page at this address.'}
-        </p>
+      <PublicLayout title={copy.pageNotFound}>
+        <p className="text-sm text-ink-muted">{error ?? copy.noPageHere}</p>
       </PublicLayout>
     );
   }
@@ -65,7 +66,7 @@ export function PublicBookingPage() {
         businessName={provider.businessName}
         brandColor={provider.brandColor}
         logoUrl={provider.logoUrl}
-        title="Almost there"
+        title={copy.almostThere}
       >
         <DepositWaiting
           phone={clientPhone}
@@ -86,11 +87,11 @@ export function PublicBookingPage() {
         businessName={provider.businessName}
         brandColor={provider.brandColor}
         logoUrl={provider.logoUrl}
-        title="You're booked in"
+        title={copy.bookedIn}
       >
         <div className="flex flex-col gap-4">
           <Card className="px-4 py-3">
-            <p className="text-sm text-ink-muted">Reference</p>
+            <p className="text-sm text-ink-muted">{copy.reference}</p>
             <p className="font-medium tabular-nums text-brand-900">{result.reference}</p>
             {selectedSlot ? (
               <p className="mt-2 text-sm text-brand-900">
@@ -99,7 +100,7 @@ export function PublicBookingPage() {
             ) : null}
             {paidDeposit ? (
               <p className="mt-2 text-sm text-ink-muted">
-                Deposit paid:{' '}
+                {copy.depositPaid}{' '}
                 <span className="font-medium tabular-nums text-brand-900">
                   {formatMoney(paidDeposit, 'EUR')}
                 </span>
@@ -108,9 +109,7 @@ export function PublicBookingPage() {
           </Card>
 
           <p className="text-sm text-ink-muted">
-            {paidDeposit
-              ? `Your slot is held. The rest is due at your appointment.`
-              : `${provider.businessName} will be in touch to confirm. We have sent you the details.`}
+            {paidDeposit ? copy.heldSlot : copy.willConfirm(provider.businessName)}
           </p>
 
           {result.manageToken ? (
@@ -118,7 +117,7 @@ export function PublicBookingPage() {
               to={`/booking/${result.manageToken}`}
               className="text-sm font-medium text-brand-ink underline-offset-2 hover:underline"
             >
-              View or cancel this booking
+              {copy.viewOrCancel}
             </Link>
           ) : null}
         </div>
@@ -127,10 +126,10 @@ export function PublicBookingPage() {
   }
 
   const headings = {
-    service: { title: 'Book an appointment', subtitle: 'What would you like?' },
-    person: { title: 'Who with?', subtitle: 'Anyone, or somebody in particular.' },
-    slot: { title: 'Pick a time', subtitle: undefined },
-    details: { title: 'Your details', subtitle: undefined },
+    service: { title: copy.stepService, subtitle: copy.stepServiceSub },
+    person: { title: copy.stepPerson, subtitle: copy.stepPersonSub },
+    slot: { title: copy.stepSlot, subtitle: undefined },
+    details: { title: copy.stepDetails, subtitle: undefined },
     payment: { title: '', subtitle: undefined },
     done: { title: '', subtitle: undefined },
   } as const;

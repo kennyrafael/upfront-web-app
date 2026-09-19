@@ -1,6 +1,7 @@
 import { type FormEvent, useMemo, useState } from 'react';
 import { Badge, Button, Spinner } from '@/components/atoms';
 import { FormField, TextareaField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { PublicProvider } from '@/lib/api';
 import {
   cn,
@@ -8,6 +9,7 @@ import {
   formatMoney,
   isDifferentZone,
   zonedDate,
+  zonedDateTime,
   zonedTime,
 } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
@@ -19,6 +21,8 @@ export interface PublicBookingFlowProps {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
+  const t = useCopy();
+  const copy = t.publicBooking;
   const step = usePublicBookingStore((state) => state.step);
   const serviceId = usePublicBookingStore((state) => state.serviceId);
   const day = usePublicBookingStore((state) => state.day);
@@ -66,8 +70,8 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
     event.preventDefault();
 
     const errors: { name?: string; phone?: string } = {};
-    if (name.trim().length < 2) errors.name = 'Tell us who the booking is for';
-    if (phone.replace(/\D/g, '').length < 6) errors.phone = 'We need a phone number to reach you';
+    if (name.trim().length < 2) errors.name = copy.nameError;
+    if (phone.replace(/\D/g, '').length < 6) errors.phone = copy.phoneError;
 
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -85,7 +89,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
     if (provider.services.length === 0) {
       return (
         <p className="rounded-lg bg-brand-900/4 px-3 py-4 text-sm text-ink-muted">
-          There is nothing bookable here just yet. Please check back soon.
+          {copy.nothingBookable}
         </p>
       );
     }
@@ -140,10 +144,8 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
               'focus-visible:outline-offset-2 focus-visible:outline-brand-600',
             )}
           >
-            <span className="font-medium text-brand-900">Anyone</span>
-            <p className="mt-0.5 text-ink-muted text-sm">
-              Whoever is free. Usually the most times to choose from.
-            </p>
+            <span className="font-medium text-brand-900">{copy.anyone}</span>
+            <p className="mt-0.5 text-ink-muted text-sm">{copy.anyoneHint}</p>
           </button>
         </li>
 
@@ -176,7 +178,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" onClick={back}>
-            ← Services
+            {copy.backToServices}
           </Button>
           <Badge variant="brand">{service?.name}</Badge>
         </div>
@@ -205,11 +207,11 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
 
         {status === 'loadingSlots' ? (
           <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-muted">
-            <Spinner className="size-4 text-brand-ink" /> Finding free times…
+            <Spinner className="size-4 text-brand-ink" /> {copy.findingTimes}
           </p>
         ) : slots.length === 0 ? (
           <p className="rounded-lg bg-brand-900/4 px-3 py-6 text-center text-sm text-ink-muted">
-            Nothing free on this day. Try another.
+            {copy.nothingFree}
           </p>
         ) : (
           <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -235,10 +237,10 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         {/* Only shown when it could actually mislead: the visitor's clock disagrees. */}
         {zoneDiffers ? (
           <p className="rounded-lg bg-warn/12 px-3 py-2 text-xs text-warn-ink">
-            Times are shown in {provider.timezone}, which is not your device's timezone.
+            {copy.zoneWarning(provider.timezone)}
           </p>
         ) : (
-          <p className="text-center text-xs text-ink-muted">Times shown in {provider.timezone}.</p>
+          <p className="text-center text-xs text-ink-muted">{copy.zoneNote(provider.timezone)}</p>
         )}
 
         {error ? (
@@ -254,7 +256,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
     <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
       <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" type="button" onClick={back}>
-          ← Times
+          {copy.backToTimes}
         </Button>
         <Badge variant="brand">
           {selectedSlot ? zonedTime(selectedSlot, provider.timezone) : ''}
@@ -264,13 +266,12 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
       <div className="rounded-xl bg-sheet/50 px-4 py-3 ring-1 ring-hairline">
         <p className="font-medium text-brand-900">{service?.name}</p>
         <p className="text-sm text-ink-muted">
-          {selectedSlot ? zonedDate(selectedSlot, provider.timezone) : ''} at{' '}
-          {selectedSlot ? zonedTime(selectedSlot, provider.timezone) : ''} ({provider.timezone})
+          {selectedSlot ? zonedDateTime(selectedSlot, provider.timezone) : ''} ({provider.timezone})
         </p>
       </div>
 
       <FormField
-        label="Your name"
+        label={t.common.yourName}
         required
         autoFocus
         autoComplete="name"
@@ -279,27 +280,27 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
         onChange={(event) => setName(event.target.value)}
       />
       <FormField
-        label="Phone"
+        label={t.common.phone}
         type="tel"
         required
         autoComplete="tel"
-        hint="So we can reach you about this appointment."
+        hint={copy.phoneHint}
         error={fieldErrors.phone}
         value={phone}
         onChange={(event) => setPhone(event.target.value)}
       />
       <FormField
-        label="Email"
+        label={t.common.email}
         type="email"
         autoComplete="email"
-        hint="Optional — we will email your confirmation and a reminder."
+        hint={copy.emailHint}
         value={email}
         onChange={(event) => setEmail(event.target.value)}
       />
       <TextareaField
-        label="Anything we should know?"
+        label={copy.notesLabel}
         rows={2}
-        hint="Optional."
+        hint={t.common.optional}
         value={notes}
         onChange={(event) => setNotes(event.target.value)}
       />
@@ -328,18 +329,14 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
           phone buzzes is the kind of surprise that ends in a chargeback. */}
       {deposit > 0 ? (
         <p className="rounded-lg bg-brand-700/8 px-3 py-2 text-sm text-brand-900">
-          A <strong className="font-medium">{formatMoney(deposit, service?.currency)}</strong>{' '}
-          deposit holds this slot. You will approve it in MB WAY on the next screen; the rest is due
-          at your appointment.
+          {copy.depositLead(formatMoney(deposit, service?.currency))} {copy.depositHow}
           {/* The condition, stated before they commit rather than discovered afterwards. */}
-          <span className="mt-1 block">
-            It is not refundable — but you can move your appointment, and it moves with you.
-          </span>
+          <span className="mt-1 block">{copy.depositNotRefundable}</span>
         </p>
       ) : null}
 
       <Button type="submit" fullWidth loading={status === 'saving'}>
-        {deposit > 0 ? 'Continue to deposit' : 'Request this time'}
+        {deposit > 0 ? copy.continueToDeposit : copy.requestThisTime}
       </Button>
     </form>
   );

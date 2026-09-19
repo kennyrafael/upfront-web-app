@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, Icon, type IconName } from '@/components/atoms';
 import { AccentPicker } from '@/components/molecules';
+import { LOCALE_NAMES, LOCALES, type Locale, useCopy, useLocale } from '@/lib';
 import type { Theme } from '@/lib/utils';
 import { resetDomainStores, useAuthStore, useThemeStore } from '@/stores';
 
@@ -29,6 +30,8 @@ export function AccountMenu() {
   const setTheme = useThemeStore((state) => state.setTheme);
   const accent = useThemeStore((state) => state.accent);
   const setAccent = useThemeStore((state) => state.setAccent);
+  const { locale, setLocale } = useLocale();
+  const copy = useCopy();
   const [open, setOpen] = useState(false);
 
   return (
@@ -102,6 +105,23 @@ export function AccountMenu() {
               the accent is the one people change once and never again. */}
           <p className="mt-3 mb-1.5 px-1 text-xs font-medium text-ink-muted">Colour</p>
           <AccentPicker value={accent} onChange={setAccent} />
+
+          {/* Language sits with appearance rather than in Settings: all three are "how this
+              looks to me", they are all per-browser, and none of them is business data. */}
+          <p className="mt-3 mb-1.5 px-1 text-xs font-medium text-ink-muted">{copy.locale.label}</p>
+          <SegmentedControl.Root
+            value={locale}
+            onValueChange={(value) => setLocale(value as Locale)}
+            size="1"
+            className="w-full"
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {LOCALES.map((option) => (
+              <SegmentedControl.Item key={option} value={option}>
+                {LOCALE_NAMES[option]}
+              </SegmentedControl.Item>
+            ))}
+          </SegmentedControl.Root>
         </div>
 
         <DropdownMenu.Separator />

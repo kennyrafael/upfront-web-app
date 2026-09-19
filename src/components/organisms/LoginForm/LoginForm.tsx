@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { useAuthStore } from '@/stores';
 
 export interface LoginFormProps {
@@ -8,6 +9,7 @@ export interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const copy = useCopy();
   const login = useAuthStore((state) => state.login);
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
@@ -25,7 +27,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
       <FormField
-        label="Email"
+        label={copy.common.email}
         type="email"
         name="email"
         autoComplete="email"
@@ -34,7 +36,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         onChange={(event) => setEmail(event.target.value)}
       />
       <FormField
-        label="Password"
+        label={copy.common.password}
         type="password"
         name="password"
         autoComplete="current-password"
@@ -48,7 +50,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         </p>
       ) : null}
       <Button type="submit" fullWidth loading={status === 'loading'}>
-        Sign in
+        {copy.auth.signIn}
       </Button>
     </form>
   );

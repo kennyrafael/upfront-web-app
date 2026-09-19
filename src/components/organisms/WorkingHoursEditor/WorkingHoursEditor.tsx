@@ -1,6 +1,6 @@
 import { Button, Input, Label, Select } from '@/components/atoms';
 import type { WorkingHours } from '@/lib/api';
-import { WEEKDAY_OPTIONS } from '@/lib/utils';
+import { weekdayOptions } from '@/lib/utils';
 
 export interface WorkingHoursEditorProps {
   value: WorkingHours[];
@@ -47,7 +47,7 @@ export function WorkingHoursEditor({ value, onChange, disabled }: WorkingHoursEd
             <Label htmlFor={`slot-${index}-weekday`}>Day</Label>
             <Select
               id={`slot-${index}-weekday`}
-              options={WEEKDAY_OPTIONS}
+              options={weekdayOptions()}
               value={String(slot.weekday)}
               disabled={disabled}
               onValueChange={(weekday) => updateSlot(index, { weekday: Number(weekday) })}

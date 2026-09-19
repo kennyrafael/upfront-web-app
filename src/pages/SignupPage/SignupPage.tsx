@@ -1,18 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout, SignupForm } from '@/components';
+import { useCopy } from '@/lib';
 
 export function SignupPage() {
   const navigate = useNavigate();
+  const copy = useCopy();
 
   return (
     <AuthLayout
-      title="Create your account"
-      subtitle="Set up your provider profile — it takes about a minute."
+      title={copy.auth.createTitle}
+      subtitle={copy.auth.createSubtitle}
       footer={
         <>
-          Already have an account?{' '}
+          {copy.auth.haveAccount}{' '}
           <Link to="/login" className="font-medium text-white underline-offset-2 hover:underline">
-            Sign in
+            {copy.auth.signIn}
           </Link>
         </>
       }

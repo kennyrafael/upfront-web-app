@@ -1,3 +1,5 @@
+import { getFormatLocale } from '../i18n/locale';
+import { dateFormat } from './intl';
 /**
  * Calendar maths in the browser's local timezone.
  *
@@ -69,20 +71,15 @@ export function formatTime(value: string | Date): string {
   return toTimeInputValue(typeof value === 'string' ? new Date(value) : value);
 }
 
-const DAY_FORMAT = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric' });
-const RANGE_FORMAT = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
-const FULL_FORMAT = new Intl.DateTimeFormat('en-GB', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-});
-
+// Built per call rather than held as module constants — a constant is fixed at import
+// time and cannot follow a language change. `dateFormat` caches them per locale, so the
+// cost is the same after the first call.
 export function formatDayHeading(date: Date): string {
-  return DAY_FORMAT.format(date);
+  return dateFormat({ weekday: 'short', day: 'numeric' }).format(date);
 }
 
 export function formatFullDate(date: Date): string {
-  return FULL_FORMAT.format(date);
+  return dateFormat({ weekday: 'long', day: 'numeric', month: 'long' }).format(date);
 }
 
 /** "1 – 7 Jun 2026", collapsing the month when the week does not straddle one. */
@@ -90,10 +87,12 @@ export function formatWeekRange(weekStart: Date): string {
   const weekEnd = addDays(weekStart, 6);
   const year = weekEnd.getFullYear();
 
+  const range = dateFormat({ day: 'numeric', month: 'short' });
+
   if (weekStart.getMonth() === weekEnd.getMonth()) {
-    return `${weekStart.getDate()} – ${RANGE_FORMAT.format(weekEnd)} ${year}`;
+    return `${weekStart.getDate()} – ${range.format(weekEnd)} ${year}`;
   }
-  return `${RANGE_FORMAT.format(weekStart)} – ${RANGE_FORMAT.format(weekEnd)} ${year}`;
+  return `${range.format(weekStart)} – ${range.format(weekEnd)} ${year}`;
 }
 
 /**
@@ -107,7 +106,10 @@ export function relativeTime(value: string | Date): string {
   const then = typeof value === 'string' ? new Date(value) : value;
   const seconds = Math.round((then.getTime() - Date.now()) / 1000);
 
-  const format = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto', style: 'narrow' });
+  const format = new Intl.RelativeTimeFormat(getFormatLocale(), {
+    numeric: 'auto',
+    style: 'narrow',
+  });
 
   const scale: [Intl.RelativeTimeFormatUnit, number][] = [
     ['second', 60],
