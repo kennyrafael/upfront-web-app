@@ -22,7 +22,14 @@ interface PublicBookingState {
   slug: string | null;
   provider: PublicProvider | null;
   step: Step;
-  serviceId: string | null;
+  /**
+   * Everything the client has picked, in the order they picked it.
+   *
+   * A list because one visit is often several services — a cut and a beard trim — and the
+   * shop would rather see one appointment than two wedged together. The server sums the
+   * durations and the prices itself; what is here is only what to ask it for.
+   */
+  serviceIds: string[];
   /**
    * Who the client asked for, or null for anyone.
    *
@@ -43,13 +50,15 @@ interface PublicBookingState {
   status: 'idle' | 'loading' | 'loadingSlots' | 'saving';
   error: string | null;
   loadProvider: (slug: string) => Promise<void>;
-  chooseService: (serviceId: string) => Promise<void>;
+  toggleService: (serviceId: string) => void;
+  /** Done picking. Decides whether the person step has anything to ask. */
+  confirmServices: () => Promise<void>;
   choosePerson: (employeeId: string | null) => Promise<void>;
   setDay: (day: Date) => Promise<void>;
   loadSlots: () => Promise<void>;
   selectSlot: (slot: string) => void;
   back: () => void;
-  book: (details: Omit<CreatePublicBookingPayload, 'serviceId' | 'startsAt'>) => Promise<boolean>;
+  book: (details: Omit<CreatePublicBookingPayload, 'serviceIds' | 'startsAt'>) => Promise<boolean>;
   /** One poll of the deposit's state. The gateway tells the server, never this page. */
   refreshDeposit: () => Promise<void>;
   reset: () => void;
@@ -66,11 +75,27 @@ function startOfLocalDay(date: Date): Date {
   return copy;
 }
 
+/**
+ * Everybody who can perform **every** service in the basket.
+ *
+ * The intersection, not the union, and for the same reason the server takes it: one visit
+ * is one pair of hands, back to back. Empty means nobody here does all of this in one
+ * appointment — which the page has to say before it shows an empty grid of times.
+ */
+export function qualifiedFor(provider: PublicProvider | null, serviceIds: string[]): string[] {
+  if (!provider || serviceIds.length === 0) return [];
+
+  const lists = serviceIds.map(
+    (id) => provider.services.find((service) => service.id === id)?.employeeIds ?? [],
+  );
+  return (lists[0] ?? []).filter((employeeId) => lists.every((list) => list.includes(employeeId)));
+}
+
 export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   slug: null,
   provider: null,
   step: 'service',
-  serviceId: null,
+  serviceIds: [],
   employeeId: null,
   day: startOfLocalDay(new Date()),
   slots: [],
@@ -90,21 +115,33 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
     }
   },
 
+  /** Adds or removes one, keeping the order they were picked in. */
+  toggleService: (serviceId) => {
+    const { serviceIds } = get();
+    set({
+      serviceIds: serviceIds.includes(serviceId)
+        ? serviceIds.filter((id) => id !== serviceId)
+        : [...serviceIds, serviceId],
+      // The people who can do the new basket are not the people who could do the old one,
+      // so a name chosen earlier cannot be carried over unchecked.
+      employeeId: null,
+      selectedSlot: null,
+    });
+  },
+
   /**
-   * Service first, then who — the order a client thinks in, and the order that lets the
+   * Services first, then who — the order a client thinks in, and the order that lets the
    * person step know which of the shop's people are even relevant.
    *
-   * A one-person shop never sees the step: `provider.people` is empty and this goes straight
-   * to the times, because asking "who with?" when there is one answer is a click to nowhere.
+   * A one-person shop never sees the step: only one person can do the basket, so asking
+   * "who with?" is a click to nowhere.
    */
-  chooseService: async (serviceId) => {
-    const { provider } = get();
-    // People who do *this* service, not everybody. Offering the colourist for a haircut
-    // leads to an empty grid with no explanation, which reads as a broken page.
-    const qualified = provider?.services.find((s) => s.id === serviceId)?.employeeIds ?? [];
-    const hasChoice = qualified.length > 1;
+  confirmServices: async () => {
+    const { serviceIds } = get();
+    if (serviceIds.length === 0) return;
 
-    set({ serviceId, employeeId: null, selectedSlot: null, step: hasChoice ? 'person' : 'slot' });
+    const hasChoice = qualifiedFor(get().provider, serviceIds).length > 1;
+    set({ employeeId: null, selectedSlot: null, step: hasChoice ? 'person' : 'slot' });
     if (!hasChoice) await get().loadSlots();
   },
 
@@ -119,8 +156,8 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   },
 
   loadSlots: async () => {
-    const { slug, serviceId, day, employeeId } = get();
-    if (!slug || !serviceId) return;
+    const { slug, serviceIds, day, employeeId } = get();
+    if (!slug || serviceIds.length === 0) return;
 
     set({ status: 'loadingSlots', error: null });
     try {
@@ -131,7 +168,7 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
       set({
         slots: await publicApi.availability(
           slug,
-          serviceId,
+          serviceIds,
           from.toISOString(),
           to.toISOString(),
           undefined,
@@ -146,32 +183,31 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
 
   selectSlot: (slot) => set({ selectedSlot: slot, step: 'details' }),
   back: () => {
-    const { step, provider, serviceId } = get();
-    // People who do *this* service, not everybody. Offering the colourist for a haircut
-    // leads to an empty grid with no explanation, which reads as a broken page.
-    const qualified = provider?.services.find((s) => s.id === serviceId)?.employeeIds ?? [];
-    const hasChoice = qualified.length > 1;
+    const { step, provider, serviceIds } = get();
+    const hasChoice = qualifiedFor(provider, serviceIds).length > 1;
 
     if (step === 'details') set({ step: 'slot', error: null });
     else if (step === 'slot') {
-      // Back from the times lands on the person step when there was one, and on the service
-      // otherwise — so "back" always undoes exactly the last thing the client did.
+      // Back from the times lands on the person step when there was one, and on the
+      // services otherwise — so "back" always undoes exactly the last thing the client did.
       if (hasChoice) set({ step: 'person', slots: [], selectedSlot: null, error: null });
-      else set({ step: 'service', serviceId: null, slots: [], error: null });
+      // The basket survives: going back to change one of three choices should not throw
+      // away the other two.
+      else set({ step: 'service', slots: [], error: null });
     } else if (step === 'person') {
-      set({ step: 'service', serviceId: null, employeeId: null, error: null });
+      set({ step: 'service', employeeId: null, error: null });
     }
   },
 
   book: async (details) => {
-    const { slug, serviceId, selectedSlot, employeeId } = get();
-    if (!slug || !serviceId || !selectedSlot) return false;
+    const { slug, serviceIds, selectedSlot, employeeId } = get();
+    if (!slug || serviceIds.length === 0 || !selectedSlot) return false;
 
     set({ status: 'saving', error: null });
     try {
       const result = await publicApi.book(slug, {
         ...details,
-        serviceId,
+        serviceIds,
         startsAt: selectedSlot,
         // Omitted rather than sent as null when nobody was named: absent is what tells the
         // server this client did not mind, which is what a later reassignment turns on.
@@ -222,7 +258,8 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
       slug: null,
       provider: null,
       step: 'service',
-      serviceId: null,
+      serviceIds: [],
+      employeeId: null,
       day: startOfLocalDay(new Date()),
       slots: [],
       selectedSlot: null,
@@ -286,13 +323,17 @@ export const useManageBookingStore = create<ManageBookingState>((set, get) => ({
       set({
         slots: await publicApi.availability(
           booking.slug,
-          booking.serviceId,
+          booking.serviceIds,
           from.toISOString(),
           to.toISOString(),
-          // The booking's own length, not the service's: a provider may have added a second
-          // service to it, and offering slots too short to hold it would show times the
-          // move is then refused for.
+          // The booking's own length, not the services': a provider may have added to it,
+          // and offering slots too short to hold it would show times the move is then
+          // refused for.
           booking.durationMinutes,
+          // And their own person, because a move keeps the same pair of hands. Without
+          // this the picker offers a time that is free only because a colleague is free,
+          // and the move is refused on submit with nothing on screen to explain it.
+          booking.employeeId,
         ),
         status: 'idle',
       });

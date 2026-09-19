@@ -11,6 +11,7 @@ export const en: Dictionary = {
     save: 'Save',
     cancel: 'Cancel',
     close: 'Close',
+    add: 'Add',
     delete: 'Delete',
     edit: 'Edit',
     done: 'Done',
@@ -132,6 +133,29 @@ export const en: Dictionary = {
     newTitle: 'New service',
     saveButton: 'Save service',
     addButton: 'Add service',
+    category: 'Category',
+    categoryHint: 'Groups the service on your booking page.',
+    noCategory: 'No category',
+    otherCategory: 'Other',
+  },
+
+  categories: {
+    title: 'Categories',
+    lede: 'The headings your services group under, in the order clients see them.',
+    empty: 'No categories yet. Make one to group your services.',
+    newCategory: 'New category',
+    namePlaceholder: 'Hair, Beard, Nails…',
+    serviceCount: (count: number) => (count === 1 ? '1 service' : `${count} services`),
+    renameLabel: (name: string) => `Rename ${name}`,
+    moveUp: (name: string) => `Move ${name} up`,
+    moveDown: (name: string) => `Move ${name} down`,
+    deleteTitle: (name: string) => `Delete ${name}?`,
+    deleteConfirm: (count: number) =>
+      count === 0
+        ? 'The category is empty, so nothing else changes.'
+        : count === 1
+          ? 'The service in it becomes uncategorised. Nothing is lost.'
+          : `The ${count} services in it become uncategorised. Nothing is lost.`,
   },
 
   clients: {
@@ -659,6 +683,11 @@ export const en: Dictionary = {
     anyoneHint: 'Whoever is free. Usually the most times to choose from.',
 
     backToServices: '← Services',
+    pickServices: 'Choose one or more services.',
+    otherServices: 'Other',
+    chosenCount: (count: number): string => (count === 1 ? '1 service' : `${count} services`),
+    continueToTimes: 'See times',
+    nobodyDoesAll: 'Nobody here does all of these back to back. Remove one and book it separately.',
     backToTimes: '← Times',
     findingTimes: 'Finding free times…',
     nothingFree: 'Nothing free on this day. Try another.',

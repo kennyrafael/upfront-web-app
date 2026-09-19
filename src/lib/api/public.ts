@@ -9,6 +9,8 @@ export interface PublicService {
   currency: string;
   /** Who does this one, so the person step offers nobody who cannot take it. */
   employeeIds: string[];
+  /** The heading it groups under. Absent means it shows under "Outros". */
+  categoryId?: string;
 }
 
 /** One bookable start, and everybody who could take it. */
@@ -28,6 +30,8 @@ export interface PublicProvider {
   businessName: string;
   /** The provider's own timezone. Every slot on the page is rendered in it. */
   timezone: string;
+  /** The provider's own headings, in their own order. Empty when they use none. */
+  categories: { id: string; name: string }[];
   services: PublicService[];
   /** Who works here. Empty for a one-person shop, where asking "who with?" has one answer. */
   people: PublicPerson[];
@@ -62,7 +66,10 @@ export interface PublicBooking {
   deposit?: PublicDeposit;
   /** For the reschedule picker, which reuses the ordinary availability endpoint. */
   slug: string;
-  serviceId: string;
+  /** Everything on the appointment, so a move asks for times that fit all of it. */
+  serviceIds: string[];
+  /** Whose it is. The picker narrows to them, because a move keeps the same hands. */
+  employeeId?: string;
   /** False once the notice period has gone — at which point cancelling costs the deposit. */
   reschedulable: boolean;
   noticeHours: number;
@@ -74,7 +81,8 @@ export interface PublicBooking {
 }
 
 export interface CreatePublicBookingPayload {
-  serviceId: string;
+  /** Everything the client is booking in one visit. */
+  serviceIds: string[];
   /** Who the client asked for. Absent means anyone, which is a real answer. */
   employeeId?: string;
   startsAt: string;
@@ -136,16 +144,17 @@ export const publicApi = {
 
   availability: (
     slug: string,
-    serviceId: string,
+    /** Everything being booked. The server needs one gap long enough for all of it. */
+    serviceIds: string[],
     from: string,
     to: string,
-    /** Overrides the service's own length, for a booking that has grown past it. */
+    /** Overrides the services' own length, for a booking that has grown past it. */
     durationMinutes?: number,
     /** Narrows to one person, when the client asked for somebody in particular. */
     employeeId?: string,
   ) =>
     publicRequest<PublicSlot[]>(
-      `/providers/${encodeURIComponent(slug)}/availability?serviceId=${serviceId}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}${
+      `/providers/${encodeURIComponent(slug)}/availability?serviceIds=${serviceIds.join(',')}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}${
         durationMinutes ? `&durationMinutes=${durationMinutes}` : ''
       }${employeeId ? `&employeeId=${employeeId}` : ''}`,
     ),

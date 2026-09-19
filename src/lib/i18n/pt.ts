@@ -26,6 +26,7 @@ export const pt = {
     save: 'Guardar',
     cancel: 'Cancelar',
     close: 'Fechar',
+    add: 'Adicionar',
     delete: 'Eliminar',
     edit: 'Editar',
     done: 'Concluído',
@@ -148,6 +149,29 @@ export const pt = {
     newTitle: 'Novo serviço',
     saveButton: 'Guardar serviço',
     addButton: 'Adicionar serviço',
+    category: 'Categoria',
+    categoryHint: 'Agrupa o serviço na sua página de marcações.',
+    noCategory: 'Sem categoria',
+    otherCategory: 'Outros',
+  },
+
+  categories: {
+    title: 'Categorias',
+    lede: 'Os títulos que agrupam os seus serviços, pela ordem em que aparecem aos clientes.',
+    empty: 'Ainda não há categorias. Crie uma para agrupar os seus serviços.',
+    newCategory: 'Nova categoria',
+    namePlaceholder: 'Cabelo, Barba, Unhas…',
+    serviceCount: (count: number) => (count === 1 ? '1 serviço' : `${count} serviços`),
+    renameLabel: (name: string) => `Mudar o nome de ${name}`,
+    moveUp: (name: string) => `Mover ${name} para cima`,
+    moveDown: (name: string) => `Mover ${name} para baixo`,
+    deleteTitle: (name: string) => `Eliminar ${name}?`,
+    deleteConfirm: (count: number) =>
+      count === 0
+        ? 'A categoria está vazia, por isso não muda mais nada.'
+        : count === 1
+          ? 'O serviço nesta categoria fica sem categoria. Não se perde nada.'
+          : `Os ${count} serviços nesta categoria ficam sem categoria. Não se perde nada.`,
   },
 
   clients: {
@@ -697,6 +721,11 @@ export const pt = {
     anyoneHint: 'Quem estiver livre. Normalmente com mais horas à escolha.',
 
     backToServices: '← Serviços',
+    pickServices: 'Escolha um ou mais serviços.',
+    otherServices: 'Outros',
+    chosenCount: (count: number): string => (count === 1 ? '1 serviço' : `${count} serviços`),
+    continueToTimes: 'Ver horários',
+    nobodyDoesAll: 'Ninguém faz todos estes serviços de seguida. Retire um e marque-o em separado.',
     backToTimes: '← Horas',
     findingTimes: 'A procurar horas livres…',
     nothingFree: 'Nada livre neste dia. Experimente outro.',
