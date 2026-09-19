@@ -127,7 +127,7 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
           <>
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={copy.nav.closeMenu}
               onClick={() => setDrawerOpen(false)}
               // No opacity modifier: Radix's overlay already carries the alpha it wants, and
               // thinning it further leaves the page behind barely dimmed.

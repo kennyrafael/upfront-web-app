@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Icon, Label, Switch } from '@/components/atoms';
 import { FormField, SelectField, TextareaField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { type Booking, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
 import {
   formatDuration,
@@ -23,14 +24,6 @@ export interface BookingFormDialogProps {
   /** Called when this save is what marked the booking completed. Carries the booking as it was. */
   onCompleted?: (booking: Booking) => void;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  completed: 'Completed',
-  cancelled: 'Cancelled',
-  no_show: 'No show',
-};
 
 /**
  * One chosen service, with an identity of its own.
@@ -91,6 +84,7 @@ export function BookingFormDialog({
   const services = useServiceStore((state) => state.items);
   const employees = useEmployeeStore((state) => state.items);
   const loadEmployees = useEmployeeStore((state) => state.load);
+  const copy = useCopy();
   const loadServices = useServiceStore((state) => state.load);
 
   const create = useBookingStore((state) => state.create);
@@ -181,11 +175,11 @@ export function BookingFormDialog({
     event.preventDefault();
 
     const nextErrors: Partial<Record<keyof Fields, string>> = {};
-    if (!fields.clientId) nextErrors.clientId = 'Pick a client';
-    if (fields.services.length === 0) nextErrors.services = 'Pick at least one service';
+    if (!fields.clientId) nextErrors.clientId = copy.bookings.errorClient;
+    if (fields.services.length === 0) nextErrors.services = copy.bookings.errorService;
 
     const start = fromDateTimeInputs(fields.date, fields.time);
-    if (!start) nextErrors.date = 'Pick a valid date and time';
+    if (!start) nextErrors.date = copy.bookings.errorWhen;
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !start) return;
@@ -227,8 +221,8 @@ export function BookingFormDialog({
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={booking ? 'Edit booking' : 'New booking'}
-      description="The end time comes from the services chosen; overlaps are rejected."
+      title={booking ? copy.bookings.editTitle : copy.bookings.newTitle}
+      description={copy.bookings.formLede}
       footer={
         <>
           {booking ? (
@@ -240,11 +234,11 @@ export function BookingFormDialog({
                 if (await remove(booking.id)) onOpenChange(false);
               }}
             >
-              Delete
+              {copy.common.delete}
             </Button>
           ) : null}
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
-            Cancel
+            {copy.common.cancel}
           </Button>
           <Button
             type="submit"
@@ -252,7 +246,7 @@ export function BookingFormDialog({
             loading={busy}
             disabled={noClients || noServices}
           >
-            {booking ? 'Save booking' : 'Add booking'}
+            {booking ? copy.bookings.saveButton : copy.bookings.addButton}
           </Button>
         </>
       }
@@ -260,14 +254,14 @@ export function BookingFormDialog({
       <form id="booking-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         {noClients || noServices ? (
           <p className="rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
-            You need at least one {noClients ? 'client' : 'service'} before you can book.
+            {copy.bookings.needFirst(noClients ? 'client' : 'service')}
           </p>
         ) : null}
 
         <SelectField
-          label="Client"
+          label={copy.bookings.client}
           required
-          placeholder="Choose a client"
+          placeholder={copy.bookings.chooseClient}
           options={clientOptions}
           value={fields.clientId || undefined}
           error={errors.clientId}
@@ -276,8 +270,8 @@ export function BookingFormDialog({
 
         {employeeOptions.length > 1 ? (
           <SelectField
-            label="With"
-            placeholder="Whoever is free"
+            label={copy.bookings.with}
+            placeholder={copy.bookings.whoeverIsFree}
             options={employeeOptions}
             value={fields.employeeId || undefined}
             onValueChange={(value) => setField('employeeId', value)}
@@ -286,7 +280,7 @@ export function BookingFormDialog({
 
         <div>
           <Label>
-            Services
+            {copy.bookings.servicesLabel}
             <span aria-hidden="true" className="ml-0.5 text-danger-ink">
               *
             </span>
@@ -326,15 +320,17 @@ export function BookingFormDialog({
 
           <div className="mt-2">
             <SelectField
-              label="Add a service"
+              label={copy.bookings.addService}
               srOnlyLabel
-              placeholder={chosen.length > 0 ? 'Add another service' : 'Choose a service'}
+              placeholder={
+                chosen.length > 0 ? copy.bookings.addAnotherService : copy.bookings.chooseService
+              }
               options={serviceOptions}
               // Never holds a value: choosing one appends it and the control resets, so the
               // same service can be added twice in a row.
               value={undefined}
               error={errors.services}
-              hint="The appointment runs as long as everything on it, and is priced the same way."
+              hint={copy.bookings.servicesHint}
               onValueChange={(value) =>
                 setField('services', [...fields.services, chosenService(value)])
               }
@@ -343,7 +339,8 @@ export function BookingFormDialog({
 
           {chosen.length > 1 ? (
             <p className="mt-2 text-sm text-ink-muted">
-              Total: <span className="text-brand-900">{formatDuration(totalMinutes)}</span> ·{' '}
+              {copy.bookings.total}{' '}
+              <span className="text-brand-900">{formatDuration(totalMinutes)}</span> ·{' '}
               <span className="tabular-nums text-brand-900">{formatMoney(totalCents)}</span>
             </p>
           ) : null}
@@ -351,7 +348,7 @@ export function BookingFormDialog({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Date"
+            label={copy.bookings.date}
             type="date"
             required
             error={errors.date}
@@ -359,7 +356,7 @@ export function BookingFormDialog({
             onChange={(event) => setField('date', event.target.value)}
           />
           <FormField
-            label="Start time"
+            label={copy.bookings.startTime}
             type="time"
             required
             value={fields.time}
@@ -369,10 +366,10 @@ export function BookingFormDialog({
 
         {booking ? (
           <SelectField
-            label="Status"
+            label={copy.common.status}
             options={SETTABLE_BOOKING_STATUSES.map((value) => ({
               value,
-              label: STATUS_LABELS[value] ?? value,
+              label: copy.bookings.statuses[value] ?? value,
             }))}
             value={fields.status}
             onValueChange={(value) => setField('status', value)}
@@ -380,8 +377,8 @@ export function BookingFormDialog({
         ) : null}
 
         <TextareaField
-          label="Notes"
-          hint="Optional."
+          label={copy.common.notes}
+          hint={copy.common.optional}
           value={fields.notes}
           onChange={(event) => setField('notes', event.target.value)}
         />
@@ -395,10 +392,8 @@ export function BookingFormDialog({
         {outsideHoursRejected ? (
           <div className="flex items-center justify-between rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
             <div>
-              <Label htmlFor="allow-outside-hours">Book outside working hours</Label>
-              <p className="text-xs text-ink-muted">
-                Only skips the hours check, never an overlap.
-              </p>
+              <Label htmlFor="allow-outside-hours">{copy.bookings.outsideHours}</Label>
+              <p className="text-xs text-ink-muted">{copy.bookings.outsideHoursHint}</p>
             </div>
             <Switch
               id="allow-outside-hours"

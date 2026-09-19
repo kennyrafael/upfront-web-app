@@ -16,6 +16,7 @@ export const en: Dictionary = {
     done: 'Done',
     optional: 'Optional.',
     loading: 'Loading…',
+    select: 'Select…',
     email: 'Email',
     phone: 'Phone',
     password: 'Password',
@@ -55,6 +56,8 @@ export const en: Dictionary = {
     system: 'System',
     colour: 'Colour',
     signOut: 'Sign out',
+    account: 'Account',
+    accentColour: 'Accent colour',
   },
 
   notifications: {
@@ -165,6 +168,7 @@ export const en: Dictionary = {
     next: 'Next →',
     today: 'Today',
     whoseWeek: 'Whose week',
+    weekOf: (range: string) => `Week of ${range}`,
     everyone: 'Everyone',
     dayHint: 'One column per person working today. Click an empty slot to book it with them.',
     weekHint:
@@ -195,11 +199,14 @@ export const en: Dictionary = {
     saveButton: 'Save booking',
     addButton: 'Add booking',
 
-    statusPending: 'Pending',
-    statusConfirmed: 'Confirmed',
-    statusCompleted: 'Completed',
-    statusCancelled: 'Cancelled',
-    statusNoShow: 'No show',
+    statuses: {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      no_show: 'No show',
+    } as Record<string, string>,
+    needFirst: (what: 'client' | 'service') => `You need at least one ${what} before you can book.`,
   },
 
   payments: {
@@ -293,6 +300,10 @@ export const en: Dictionary = {
     withinExemption: 'Within the exemption',
     approachingCeiling: 'Approaching the ceiling',
     ceilingExceeded: 'Ceiling exceeded',
+    issuedOf: (limit: string) => `issued of ${limit}`,
+    completedBookings: (count: number) => `completed booking${count === 1 ? '' : 's'}`,
+    waitingToInvoice: (total: string) => `${total} waiting to be invoiced.`,
+    quarters: ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'],
   },
 
   deposit: {

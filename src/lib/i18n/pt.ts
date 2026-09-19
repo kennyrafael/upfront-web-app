@@ -31,6 +31,7 @@ export const pt = {
     done: 'Concluído',
     optional: 'Opcional.',
     loading: 'A carregar…',
+    select: 'Selecionar…',
     email: 'Email',
     phone: 'Telemóvel',
     password: 'Palavra-passe',
@@ -70,6 +71,8 @@ export const pt = {
     system: 'Sistema',
     colour: 'Cor',
     signOut: 'Terminar sessão',
+    account: 'Conta',
+    accentColour: 'Cor de destaque',
   },
 
   notifications: {
@@ -182,6 +185,7 @@ export const pt = {
     next: 'Seguinte →',
     today: 'Hoje',
     whoseWeek: 'Semana de quem',
+    weekOf: (range: string) => `Semana de ${range}`,
     everyone: 'Toda a gente',
     dayHint: 'Uma coluna por pessoa a trabalhar hoje. Clique num espaço livre para marcar.',
     weekHint:
@@ -212,11 +216,25 @@ export const pt = {
     saveButton: 'Guardar marcação',
     addButton: 'Adicionar marcação',
 
-    statusPending: 'Pendente',
-    statusConfirmed: 'Confirmada',
-    statusCompleted: 'Concluída',
-    statusCancelled: 'Anulada',
-    statusNoShow: 'Faltou',
+    /** Indexed by booking status. Module-level maps cannot hold words — see the nav. */
+    statuses: {
+      pending: 'Pendente',
+      confirmed: 'Confirmada',
+      completed: 'Concluída',
+      cancelled: 'Anulada',
+      no_show: 'Faltou',
+    } as Record<string, string>,
+    /**
+     * The return type is annotated, and has to be.
+     *
+     * A ternary between two plain literals infers a union of those two literals, so
+     * `typeof pt` would demand that English return the Portuguese sentences. Template
+     * literals widen to `string` on their own, which is why no other entry needs this.
+     */
+    needFirst: (what: 'client' | 'service'): string =>
+      what === 'client'
+        ? 'Precisa de pelo menos um cliente antes de poder marcar.'
+        : 'Precisa de pelo menos um serviço antes de poder marcar.',
   },
 
   payments: {
@@ -312,6 +330,12 @@ export const pt = {
     withinExemption: 'Dentro da isenção',
     approachingCeiling: 'A aproximar-se do tecto',
     ceilingExceeded: 'Tecto ultrapassado',
+    issuedOf: (limit: string) => `emitidos de ${limit}`,
+    completedBookings: (count: number) =>
+      `${count === 1 ? 'marcação concluída' : 'marcações concluídas'}`,
+    waitingToInvoice: (total: string) => `${total} por faturar.`,
+    /** Quarter labels. Short month names, so `Intl` would be more trouble than four strings. */
+    quarters: ['Jan–Mar', 'Abr–Jun', 'Jul–Set', 'Out–Dez'],
   },
 
   deposit: {

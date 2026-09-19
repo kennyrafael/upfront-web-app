@@ -7,11 +7,13 @@ import {
   DashboardLayout,
   Select,
 } from '@/components';
+import { useCopy } from '@/lib';
 import type { Booking } from '@/lib/api';
 import { formatDayHeading, formatWeekRange, startOfWeek } from '@/lib/utils';
 import { useAuthStore, useBookingStore, useBusinessStore, useEmployeeStore } from '@/stores';
 
 export function BookingsPage() {
+  const copy = useCopy();
   const load = useBookingStore((state) => state.load);
   const weekStart = useBookingStore((state) => state.weekStart);
   const view = useBookingStore((state) => state.view);
@@ -57,7 +59,7 @@ export function BookingsPage() {
 
   const employeeOptions = useMemo(
     () => [
-      { value: 'all', label: 'Everyone' },
+      { value: 'all', label: copy.bookings.everyone },
       ...people.map((employee) => ({ value: employee.id, label: employee.name })),
     ],
     [people],
@@ -75,13 +77,13 @@ export function BookingsPage() {
 
   return (
     <DashboardLayout
-      title="Bookings"
+      title={copy.bookings.title}
       description={
         view === 'week'
-          ? `Week of ${formatWeekRange(weekStart)}${timezone ? ` · ${timezone}` : ''}`
+          ? `${copy.bookings.weekOf(formatWeekRange(weekStart))}${timezone ? ` · ${timezone}` : ''}`
           : `${formatDayHeading(day)}${timezone ? ` · ${timezone}` : ''}`
       }
-      actions={<Button onClick={() => openCreate()}>New booking</Button>}
+      actions={<Button onClick={() => openCreate()}>{copy.bookings.newBooking}</Button>}
     >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {/* Week or day, because those are the two questions: how is one person's week, and
@@ -92,21 +94,21 @@ export function BookingsPage() {
             size="sm"
             onClick={() => setView('week')}
           >
-            Week
+            {copy.bookings.week}
           </Button>
           <Button
             variant={view === 'day' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setView('day')}
           >
-            Day
+            {copy.bookings.day}
           </Button>
         </div>
 
         {view === 'week' ? (
           <>
             <Button variant="secondary" size="sm" onClick={() => void shiftWeek(-1)}>
-              ← Previous
+              {copy.bookings.previous}
             </Button>
             <Button
               variant="secondary"
@@ -114,15 +116,15 @@ export function BookingsPage() {
               disabled={isThisWeek}
               onClick={() => void goToWeek(new Date())}
             >
-              This week
+              {copy.bookings.thisWeek}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => void shiftWeek(1)}>
-              Next →
+              {copy.bookings.next}
             </Button>
 
             {!isStaff && people.length > 1 ? (
               <Select
-                aria-label="Whose week"
+                aria-label={copy.bookings.whoseWeek}
                 options={employeeOptions}
                 value={weekEmployeeId ?? 'all'}
                 onValueChange={(value) => setWeekEmployee(value === 'all' ? undefined : value)}
@@ -132,7 +134,7 @@ export function BookingsPage() {
         ) : (
           <>
             <Button variant="secondary" size="sm" onClick={() => void shiftDay(-1)}>
-              ← Previous
+              {copy.bookings.previous}
             </Button>
             <Button
               variant="secondary"
@@ -140,10 +142,10 @@ export function BookingsPage() {
               disabled={isToday}
               onClick={() => void goToDay(new Date())}
             >
-              Today
+              {copy.bookings.today}
             </Button>
             <Button variant="secondary" size="sm" onClick={() => void shiftDay(1)}>
-              Next →
+              {copy.bookings.next}
             </Button>
           </>
         )}
@@ -166,9 +168,7 @@ export function BookingsPage() {
       />
 
       <p className="mt-3 text-ink-muted text-xs">
-        {view === 'day'
-          ? 'One column per person working today. Click an empty slot to book it with them.'
-          : 'Click an empty slot to book it, or a booking to edit it. Shaded bands are working hours.'}
+        {view === 'day' ? copy.bookings.dayHint : copy.bookings.weekHint}
       </p>
 
       <BookingFormDialog

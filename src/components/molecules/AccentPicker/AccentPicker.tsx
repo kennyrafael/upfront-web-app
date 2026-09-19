@@ -1,3 +1,4 @@
+import { useCopy } from '@/lib';
 import { ACCENT_LABELS, ACCENTS, type Accent } from '@/lib/utils';
 
 export interface AccentPickerProps {
@@ -24,6 +25,7 @@ export interface AccentPickerProps {
  * with nothing.
  */
 export function AccentPicker({ value, onChange }: AccentPickerProps) {
+  const copy = useCopy();
   return (
     <fieldset
       className="flex items-center gap-2 border-0 px-1"
@@ -33,7 +35,7 @@ export function AccentPicker({ value, onChange }: AccentPickerProps) {
         if (event.key.startsWith('Arrow')) event.stopPropagation();
       }}
     >
-      <legend className="sr-only">Accent colour</legend>
+      <legend className="sr-only">{copy.account.accentColour}</legend>
 
       {ACCENTS.map((accent) => (
         <input

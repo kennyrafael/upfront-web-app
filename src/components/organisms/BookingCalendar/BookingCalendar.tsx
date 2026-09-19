@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Card, Spinner } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { type Booking, type BookingStatus, describeBooking } from '@/lib/api';
 import {
   addDays,
@@ -53,6 +54,7 @@ const STATUS_STYLES: Record<BookingStatus, string> = {
 const HIDDEN_FROM_CALENDAR: BookingStatus[] = ['expired'];
 
 export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) {
+  const copy = useCopy();
   const bookings = useBookingStore((state) => state.items);
   const weekStart = useBookingStore((state) => state.weekStart);
   const view = useBookingStore((state) => state.view);
@@ -189,7 +191,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
     <Card className="overflow-hidden">
       {status === 'loading' ? (
         <div className="flex items-center gap-2 border-b border-hairline px-4 py-2 text-xs text-ink-muted">
-          <Spinner className="size-3 text-brand-ink" /> Loading…
+          <Spinner className="size-3 text-brand-ink" /> {copy.common.loading}
         </div>
       ) : null}
 
@@ -286,6 +288,7 @@ function DayColumn({
   onSelect,
   onCreateAt,
 }: DayColumnProps) {
+  const copy = useCopy();
   const slots = useMemo(() => {
     const list: number[] = [];
     for (let minute = range.start; minute < range.end; minute += SLOT_MINUTES) list.push(minute);
@@ -359,8 +362,8 @@ function DayColumn({
                 <>
                   {/* Real text rather than an aria-label on a dot: a plain span has no
                       role to hang one on, and this reads correctly to a screen reader. */}
-                  <span className="sr-only">Booked online: </span>
-                  <span aria-hidden="true" title="Booked by the client online">
+                  <span className="sr-only">{copy.bookings.bookedOnlineShort} </span>
+                  <span aria-hidden="true" title={copy.bookings.bookedOnline}>
                     •{' '}
                   </span>
                 </>

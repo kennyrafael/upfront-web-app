@@ -40,7 +40,7 @@ export function AccountMenu() {
       <DropdownMenu.Trigger>
         <button
           type="button"
-          aria-label="Account"
+          aria-label={copy.account.account}
           className="rounded-full outline-none transition-opacity hover:opacity-80"
         >
           <Avatar name={user?.name} />

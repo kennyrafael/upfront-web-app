@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Dialog, Spinner } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { ApiError, type Booking, type BookingBalance, bookingsApi } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ const toCents = (euros: string) => Math.round(Number(euros.replace(',', '.')) * 
  * demand rather than polling, because nobody wants a dialog that flickers while they talk.
  */
 export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalanceDialogProps) {
+  const copy = useCopy();
   const [state, setState] = useState<BookingBalance>();
   const [amount, setAmount] = useState('');
   const [phone, setPhone] = useState('');
@@ -43,7 +45,7 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
         setAmount(toEuros(next.pending?.amountCents ?? next.outstandingCents));
         setPhone(next.clientPhone ?? '');
       } catch (problem) {
-        setError(problem instanceof ApiError ? problem.message : 'Could not read the balance.');
+        setError(problem instanceof ApiError ? problem.message : copy.balance.errorRead);
       }
     })();
   }, [open, booking]);
@@ -65,7 +67,7 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
       setSentTo(result.phone);
       await refresh();
     } catch (problem) {
-      setError(problem instanceof ApiError ? problem.message : 'Could not send the request.');
+      setError(problem instanceof ApiError ? problem.message : copy.balance.errorSend);
     } finally {
       setBusy(false);
     }
@@ -80,7 +82,7 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
       setSentTo(undefined);
       await refresh();
     } catch (problem) {
-      setError(problem instanceof ApiError ? problem.message : 'Could not withdraw it.');
+      setError(problem instanceof ApiError ? problem.message : copy.balance.errorWithdraw);
     } finally {
       setBusy(false);
     }
@@ -92,23 +94,23 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Take payment"
+      title={copy.balance.title}
       description={
         booking ? `${booking.client.name} · ${formatMoney(booking.priceCents)} total` : undefined
       }
       footer={
         <Button variant="secondary" onClick={() => onOpenChange(false)}>
-          Done
+          {copy.common.done}
         </Button>
       }
     >
       {!state ? (
         <div className="flex items-center gap-2 text-ink-muted text-sm">
-          <Spinner className="size-4 text-brand-ink" /> Checking what is owed…
+          <Spinner className="size-4 text-brand-ink" /> {copy.balance.checking}
         </div>
       ) : settled ? (
         <p className="rounded-lg bg-brand-700/10 px-3 py-2 text-brand-900 text-sm">
-          This is paid in full. Nothing left to collect.
+          {copy.balance.paidInFull}
         </p>
       ) : state.pending ? (
         /* Waiting. The number is repeated because the business read it out a moment ago and
@@ -116,17 +118,16 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
            first thing they ask. */
         <div className="flex flex-col gap-3">
           <p className="rounded-lg bg-warn/12 px-3 py-2 text-sm text-warn-ink">
-            Waiting for {booking?.client.name} to approve{' '}
-            <strong>{formatMoney(state.pending.amountCents)}</strong>
-            {sentTo ? ` on ${sentTo}` : ''}.
+            {copy.balance.waitingFor(
+              booking?.client.name ?? '',
+              formatMoney(state.pending.amountCents),
+            )}
+            {sentTo ? copy.balance.waitingOn(sentTo) : ''}.
           </p>
-          <p className="text-ink-muted text-sm">
-            It appears on their phone as an MB Way request from your business. If they pay in cash
-            instead, record that payment and this is withdrawn automatically.
-          </p>
+          <p className="text-ink-muted text-sm">{copy.balance.pushExplainer}</p>
           <div className="flex items-center gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={() => void refresh()}>
-              Check again
+              {copy.balance.checkAgain}
             </Button>
             <Button
               type="button"
@@ -135,29 +136,31 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
               loading={busy}
               onClick={() => void withdraw()}
             >
-              Withdraw
+              {copy.balance.withdraw}
             </Button>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-ink-muted text-sm">
-            {formatMoney(state.paidCents)} of {formatMoney(state.priceCents)} collected.{' '}
-            <strong className="text-ink">{formatMoney(state.outstandingCents)}</strong> still owed.
+            {copy.balance.collectedOf(formatMoney(state.paidCents), formatMoney(state.priceCents))}{' '}
+            <strong className="text-ink">
+              {copy.balance.stillOwed(formatMoney(state.outstandingCents))}
+            </strong>
           </p>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <FormField
-              label="Amount"
+              label={copy.common.amount}
               inputMode="decimal"
-              hint="More than owed is fine — a tip."
+              hint={copy.balance.amountHint}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
             />
             <FormField
-              label="To this number"
+              label={copy.balance.toThisNumber}
               type="tel"
-              hint="Read it back before sending."
+              hint={copy.balance.readItBack}
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
             />
@@ -165,7 +168,7 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
 
           <div>
             <Button type="button" loading={busy} onClick={() => void send()}>
-              Send the request
+              {copy.balance.sendRequest}
             </Button>
           </div>
         </div>
