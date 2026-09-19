@@ -2,23 +2,26 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Card, PublicLayout, Spinner } from '@/components';
 import { ConfirmDialog } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { formatMoney, zonedDate, zonedDateTime, zonedTime } from '@/lib/utils';
 import { useManageBookingStore } from '@/stores';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const STATUS_LABELS: Record<string, { label: string; variant: 'brand' | 'warning' | 'neutral' }> = {
-  pending: { label: 'Awaiting confirmation', variant: 'warning' },
-  confirmed: { label: 'Confirmed', variant: 'brand' },
-  completed: { label: 'Completed', variant: 'neutral' },
-  cancelled: { label: 'Cancelled', variant: 'neutral' },
-  expired: { label: 'Not held — deposit unpaid', variant: 'neutral' },
-  no_show: { label: 'Missed', variant: 'neutral' },
+/** Only the variants live here now; the words come from the dictionary at render. */
+const STATUS_VARIANTS: Record<string, 'brand' | 'warning' | 'neutral'> = {
+  pending: 'warning',
+  confirmed: 'brand',
+  completed: 'neutral',
+  cancelled: 'neutral',
+  expired: 'neutral',
+  no_show: 'neutral',
 };
 
 export function ManageBookingPage() {
   const { token = '' } = useParams();
 
+  const copy = useCopy();
   const booking = useManageBookingStore((state) => state.booking);
   const status = useManageBookingStore((state) => state.status);
   const error = useManageBookingStore((state) => state.error);
@@ -43,7 +46,7 @@ export function ManageBookingPage() {
     return (
       <PublicLayout>
         <p className="flex items-center justify-center gap-2 py-8 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-ink" /> Loading…
+          <Spinner className="size-4 text-brand-ink" /> {copy.common.loading}
         </p>
       </PublicLayout>
     );
@@ -51,22 +54,23 @@ export function ManageBookingPage() {
 
   if (!booking) {
     return (
-      <PublicLayout title="Booking not found">
-        <p className="text-sm text-ink-muted">
-          {error ?? 'This link is no longer valid. Check the address, or contact the business.'}
-        </p>
+      <PublicLayout title={copy.manageBooking.notFound}>
+        <p className="text-sm text-ink-muted">{error ?? copy.manageBooking.linkInvalid}</p>
       </PublicLayout>
     );
   }
 
-  const badge = STATUS_LABELS[booking.status] ?? { label: booking.status, variant: 'neutral' };
+  const badge = {
+    label: copy.manageBooking.statuses[booking.status] ?? booking.status,
+    variant: STATUS_VARIANTS[booking.status] ?? 'neutral',
+  };
 
   return (
     <PublicLayout
       businessName={booking.businessName}
       brandColor={booking.brandColor}
       logoUrl={booking.logoUrl}
-      title="Your booking"
+      title={copy.manageBooking.yourBooking}
     >
       <div className="flex flex-col gap-4">
         <Card className="px-4 py-4">
@@ -83,11 +87,11 @@ export function ManageBookingPage() {
 
           <dl className="mt-4 flex flex-col gap-1 border-t border-hairline pt-3 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-ink-muted">Reference</dt>
+              <dt className="text-ink-muted">{copy.manageBooking.reference}</dt>
               <dd className="tabular-nums text-brand-900">{booking.reference}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-ink-muted">Name</dt>
+              <dt className="text-ink-muted">{copy.common.name}</dt>
               <dd className="text-brand-900">{booking.clientName}</dd>
             </div>
           </dl>
@@ -120,7 +124,7 @@ export function ManageBookingPage() {
               void loadSlots();
             }}
           >
-            Move to another time
+            {copy.manageBooking.moveToAnother}
           </Button>
         ) : null}
 
@@ -149,11 +153,11 @@ export function ManageBookingPage() {
 
             {status === 'loadingSlots' ? (
               <p className="flex items-center justify-center gap-2 py-6 text-sm text-ink-muted">
-                <Spinner className="size-4 text-brand-ink" /> Finding free times…
+                <Spinner className="size-4 text-brand-ink" /> {copy.publicBooking.findingTimes}
               </p>
             ) : slots.length === 0 ? (
               <p className="rounded-lg bg-brand-900/4 px-3 py-6 text-center text-sm text-ink-muted">
-                Nothing free on this day. Try another.
+                {copy.publicBooking.nothingFree}
               </p>
             ) : (
               <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -178,13 +182,13 @@ export function ManageBookingPage() {
 
         {booking.cancellable ? (
           <Button variant="secondary" fullWidth onClick={() => setConfirming(true)}>
-            Cancel this booking
+            {copy.manageBooking.cancelThis}
           </Button>
         ) : booking.status === 'expired' ? (
           <p className="text-sm text-ink-muted">
-            The deposit was not completed in time, so this slot went back on offer.{' '}
-            <strong className="font-medium text-brand-900">Nothing was charged.</strong> You are
-            welcome to book again.
+            {copy.manageBooking.expiredBody}{' '}
+            <strong className="font-medium text-brand-900">{copy.deposit.nothingCharged}</strong>{' '}
+            {copy.manageBooking.welcomeBack}
           </p>
         ) : booking.status === 'cancelled' ? (
           <p className="text-sm text-ink-muted">
@@ -202,13 +206,13 @@ export function ManageBookingPage() {
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title="Cancel this booking?"
+        title={copy.manageBooking.cancelConfirm}
         description={
           booking.deposit
             ? `Your ${booking.serviceName} on ${zonedDateTime(booking.startsAt, booking.timezone)} will be released, and your ${formatMoney(booking.deposit.amountCents, 'EUR')} deposit will not be returned.${booking.reschedulable ? ' Moving the appointment instead would keep it.' : ''} This cannot be undone.`
             : `Your ${booking.serviceName} on ${zonedDateTime(booking.startsAt, booking.timezone)} will be released. This cannot be undone.`
         }
-        confirmLabel="Yes, cancel it"
+        confirmLabel={copy.manageBooking.cancelYes}
         cancelLabel="Keep it"
         destructive
         loading={status === 'saving'}

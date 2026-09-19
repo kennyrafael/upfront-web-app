@@ -211,6 +211,14 @@ export const en: Dictionary = {
     pendingHint: 'Recorded but not collected — a transfer on its way, say.',
     settled: 'Settled',
 
+    unpaid: 'Unpaid',
+    paid: 'Paid',
+    recordPayment: 'Record',
+    seePayments: 'Payments',
+    filterAll: 'All',
+    filterOwing: 'Owing',
+    filterSettled: 'Settled',
+    acrossBookings: (count: number) => `across ${count} booking${count === 1 ? '' : 's'}`,
     loading: 'Loading the ledger…',
     columnBooking: 'Booking',
     columnDate: 'Date',
@@ -225,6 +233,7 @@ export const en: Dictionary = {
     tryAnotherFilter: 'Try another filter.',
 
     dialogTitle: 'Record payment',
+    dialogTitleFor: (client: string) => `Payments — ${client}`,
     recordedSoFar: 'Recorded so far',
     method: 'Method',
     markPaid: 'Mark paid',
@@ -233,14 +242,17 @@ export const en: Dictionary = {
     pendingExplainer:
       'Records it as pending — it will not count as collected until you mark it paid.',
     errorAmount: 'Use an amount like 18 or 18.50',
-    methodCash: 'Cash',
-    methodCard: 'Card',
-    methodTransfer: 'Bank transfer',
-    methodMbway: 'MB WAY',
-    methodOther: 'Other',
-    statusPending: 'Pending',
-    statusPaid: 'Paid',
-    statusRefunded: 'Refunded',
+    methods: {
+      cash: 'Cash',
+      card: 'Card',
+      transfer: 'Bank transfer',
+      mbway: 'MB WAY',
+      other: 'Other',
+    },
+    paymentStatus: { pending: 'Pending', paid: 'Paid', refunded: 'Refunded' } as Record<
+      string,
+      string
+    >,
   },
 
   balance: {
@@ -285,10 +297,12 @@ export const en: Dictionary = {
 
   deposit: {
     title: 'Deposit to hold your slot',
-    open: 'Open',
+    approveOn: (phone: string) => ` on ${phone} and approve the request.`,
+    openApp: 'Open',
     timeLeft: 'left',
     keepOpen: 'Keep this page open. The rest is due at your appointment.',
     notHeld: 'The slot was not held',
+    expiredBody: 'The deposit was not approved in time, so the time has gone back on offer.',
     nothingCharged: 'Nothing was charged.',
     pickAnother: 'Pick another time',
   },
@@ -307,7 +321,15 @@ export const en: Dictionary = {
     confirmed: 'Confirmed',
     completed: 'Completed',
     cancelled: 'Cancelled',
-    notHeld: 'Not held — deposit unpaid',
+    statuses: {
+      pending: 'Awaiting confirmation',
+      confirmed: 'Confirmed',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      expired: 'Not held — deposit unpaid',
+      no_show: 'Missed',
+    } as Record<string, string>,
+    expiredBody: 'The deposit was not completed in time, so this slot went back on offer.',
   },
 
   auth: {

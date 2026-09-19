@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Dialog } from '@/components/atoms';
 import { FormField, TextareaField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { ClientRecord } from '@/lib/api';
 import { useClientStore } from '@/stores';
 
@@ -31,6 +32,7 @@ function toFields(client?: ClientRecord): Fields {
 }
 
 export function ClientFormDialog({ open, onOpenChange, client }: ClientFormDialogProps) {
+  const copy = useCopy();
   const create = useClientStore((state) => state.create);
   const update = useClientStore((state) => state.update);
   const status = useClientStore((state) => state.status);
@@ -56,9 +58,9 @@ export function ClientFormDialog({ open, onOpenChange, client }: ClientFormDialo
     event.preventDefault();
 
     const nextErrors: Partial<Record<keyof Fields, string>> = {};
-    if (fields.name.trim().length < 2) nextErrors.name = 'Give the client a name';
+    if (fields.name.trim().length < 2) nextErrors.name = copy.clients.errorName;
     if (fields.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fields.email)) {
-      nextErrors.email = 'That does not look like an email address';
+      nextErrors.email = copy.clients.errorEmail;
     }
 
     setErrors(nextErrors);
@@ -81,22 +83,22 @@ export function ClientFormDialog({ open, onOpenChange, client }: ClientFormDialo
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={client ? 'Edit client' : 'New client'}
-      description="Only a name is required — the rest can follow."
+      title={client ? copy.clients.editTitle : copy.clients.newTitle}
+      description={copy.clients.formLede}
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
-            Cancel
+            {copy.common.cancel}
           </Button>
           <Button type="submit" form="client-form" loading={busy}>
-            {client ? 'Save client' : 'Add client'}
+            {client ? copy.clients.saveButton : copy.clients.addButton}
           </Button>
         </>
       }
     >
       <form id="client-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <FormField
-          label="Name"
+          label={copy.common.name}
           required
           autoFocus
           error={errors.name}
@@ -105,13 +107,13 @@ export function ClientFormDialog({ open, onOpenChange, client }: ClientFormDialo
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Phone"
+            label={copy.common.phone}
             type="tel"
             value={fields.phone}
             onChange={(event) => setField('phone', event.target.value)}
           />
           <FormField
-            label="Email"
+            label={copy.common.email}
             type="email"
             error={errors.email}
             value={fields.email}
@@ -119,8 +121,8 @@ export function ClientFormDialog({ open, onOpenChange, client }: ClientFormDialo
           />
         </div>
         <TextareaField
-          label="Notes"
-          hint="Preferences, allergies, anything worth remembering."
+          label={copy.common.notes}
+          hint={copy.clients.notesHint}
           value={fields.notes}
           onChange={(event) => setField('notes', event.target.value)}
         />

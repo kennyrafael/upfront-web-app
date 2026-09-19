@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Badge, Button, Dialog } from '@/components/atoms';
 import { FormField, SelectField, TextareaField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { type LedgerEntry, PAYMENT_METHODS, type PaymentMethod } from '@/lib/api';
 import { amountToCents, centsToAmount, formatDate, formatMoney } from '@/lib/utils';
 import { usePaymentStore } from '@/stores';
@@ -11,21 +12,8 @@ export interface PaymentDialogProps {
   entry: LedgerEntry;
 }
 
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: 'Cash',
-  mbway: 'MB Way',
-  card: 'Card',
-  transfer: 'Bank transfer',
-  other: 'Other',
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  paid: 'Paid',
-  pending: 'Pending',
-  refunded: 'Refunded',
-};
-
 export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps) {
+  const copy = useCopy();
   const create = usePaymentStore((state) => state.create);
   const update = usePaymentStore((state) => state.update);
   const remove = usePaymentStore((state) => state.remove);
@@ -56,7 +44,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
 
     const amountCents = amountToCents(amount);
     if (amountCents === null || amountCents <= 0) {
-      setAmountError('Use an amount like 18 or 18.50');
+      setAmountError(copy.payments.errorAmount);
       return;
     }
     setAmountError(undefined);
@@ -77,16 +65,16 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={`Payments — ${entry.client}`}
+      title={copy.payments.dialogTitleFor(entry.client)}
       description={`${entry.service} · ${formatDate(entry.startsAt)} · ${formatMoney(entry.priceCents)}`}
       className="max-w-lg"
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
-            Close
+            {copy.common.close}
           </Button>
           <Button type="submit" form="payment-form" loading={busy}>
-            Record payment
+            {copy.payments.dialogTitle}
           </Button>
         </>
       }
@@ -94,7 +82,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
       <div className="flex flex-col gap-5">
         {entry.payments.length > 0 ? (
           <section className="flex flex-col gap-2">
-            <h3 className="text-sm font-medium text-brand-900">Recorded so far</h3>
+            <h3 className="text-sm font-medium text-brand-900">{copy.payments.recordedSoFar}</h3>
             <ul className="flex flex-col divide-y divide-hairline/70 rounded-xl bg-sheet/50 px-3 ring-1 ring-hairline">
               {entry.payments.map((payment) => (
                 <li key={payment.id} className="flex items-center gap-3 py-2">
@@ -102,7 +90,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                     {formatMoney(payment.amountCents)}
                   </span>
                   <span className="shrink-0 text-xs text-ink-muted">
-                    {METHOD_LABELS[payment.method]}
+                    {copy.payments.methods[payment.method]}
                   </span>
                   <Badge
                     variant={
@@ -113,7 +101,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                           : 'neutral'
                     }
                   >
-                    {STATUS_LABELS[payment.status]}
+                    {copy.payments.paymentStatus[payment.status]}
                   </Badge>
                   <span className="ml-auto flex shrink-0 gap-1">
                     {payment.status === 'pending' ? (
@@ -123,7 +111,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                         disabled={busy}
                         onClick={() => void update(payment.id, { status: 'paid' })}
                       >
-                        Mark paid
+                        {copy.payments.markPaid}
                       </Button>
                     ) : null}
                     {payment.status === 'paid' ? (
@@ -133,7 +121,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                         disabled={busy}
                         onClick={() => void update(payment.id, { status: 'refunded' })}
                       >
-                        Refund
+                        {copy.payments.refund}
                       </Button>
                     ) : null}
                     <Button
@@ -143,7 +131,7 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
                       disabled={busy}
                       onClick={() => void remove(payment.id)}
                     >
-                      Delete
+                      {copy.common.delete}
                     </Button>
                   </span>
                 </li>
@@ -161,19 +149,19 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
         <form id="payment-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
-              label="Amount"
+              label={copy.common.amount}
               required
               inputMode="decimal"
-              hint="Euros."
+              hint={copy.common.euros}
               error={amountError}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
             />
             <SelectField
-              label="Method"
+              label={copy.payments.method}
               options={PAYMENT_METHODS.map((value) => ({
                 value,
-                label: METHOD_LABELS[value],
+                label: copy.payments.methods[value],
               }))}
               value={method}
               onValueChange={(value) => setMethod(value as PaymentMethod)}
@@ -188,16 +176,16 @@ export function PaymentDialog({ open, onOpenChange, entry }: PaymentDialogProps)
               onChange={(event) => setPending(event.target.checked)}
             />
             <span>
-              <span className="text-sm font-medium text-brand-900">Not collected yet</span>
-              <span className="block text-xs text-ink-muted">
-                Records it as pending — it will not count as collected until you mark it paid.
+              <span className="text-sm font-medium text-brand-900">
+                {copy.payments.notCollectedYet}
               </span>
+              <span className="block text-xs text-ink-muted">{copy.payments.pendingExplainer}</span>
             </span>
           </label>
 
           <TextareaField
-            label="Notes"
-            hint="Optional."
+            label={copy.common.notes}
+            hint={copy.common.optional}
             rows={2}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}

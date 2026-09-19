@@ -228,6 +228,14 @@ export const pt = {
     pendingHint: 'Registado mas ainda não recebido — uma transferência a caminho, por exemplo.',
     settled: 'Liquidado',
 
+    unpaid: 'Por pagar',
+    paid: 'Pago',
+    recordPayment: 'Registar',
+    seePayments: 'Pagamentos',
+    filterAll: 'Todas',
+    filterOwing: 'Em dívida',
+    filterSettled: 'Liquidadas',
+    acrossBookings: (count: number) => `em ${count} ${count === 1 ? 'marcação' : 'marcações'}`,
     loading: 'A carregar os movimentos…',
     columnBooking: 'Marcação',
     columnDate: 'Data',
@@ -242,6 +250,7 @@ export const pt = {
     tryAnotherFilter: 'Experimente outro filtro.',
 
     dialogTitle: 'Registar pagamento',
+    dialogTitleFor: (client: string) => `Pagamentos — ${client}`,
     recordedSoFar: 'Registado até agora',
     method: 'Método',
     markPaid: 'Marcar como pago',
@@ -250,14 +259,19 @@ export const pt = {
     pendingExplainer:
       'Regista como pendente — só conta como recebido depois de o marcar como pago.',
     errorAmount: 'Use um valor como 18 ou 18,50',
-    methodCash: 'Dinheiro',
-    methodCard: 'Cartão',
-    methodTransfer: 'Transferência bancária',
-    methodMbway: 'MB WAY',
-    methodOther: 'Outro',
-    statusPending: 'Pendente',
-    statusPaid: 'Pago',
-    statusRefunded: 'Reembolsado',
+    /** Indexed by `PaymentMethod`, so a component can look one up without a map of its own. */
+    methods: {
+      cash: 'Dinheiro',
+      card: 'Cartão',
+      transfer: 'Transferência bancária',
+      mbway: 'MB WAY',
+      other: 'Outro',
+    },
+    /** Indexed by the payment's own status, for the same reason `methods` is. */
+    paymentStatus: { pending: 'Pendente', paid: 'Pago', refunded: 'Reembolsado' } as Record<
+      string,
+      string
+    >,
   },
 
   balance: {
@@ -302,10 +316,13 @@ export const pt = {
 
   deposit: {
     title: 'Sinal para segurar a hora',
-    open: 'Abrir',
+    /** The whole instruction, because only the language knows where the app name goes. */
+    approveOn: (phone: string) => `na app MB WAY, no ${phone}, e aprove o pedido.`,
+    openApp: 'Abra o',
     timeLeft: 'restantes',
     keepOpen: 'Mantenha esta página aberta. O resto é pago no dia da marcação.',
     notHeld: 'A hora não ficou reservada',
+    expiredBody: 'O sinal não foi aprovado a tempo, por isso a hora voltou a ficar disponível.',
     nothingCharged: 'Não foi cobrado nada.',
     pickAnother: 'Escolher outra hora',
   },
@@ -324,7 +341,16 @@ export const pt = {
     confirmed: 'Confirmada',
     completed: 'Concluída',
     cancelled: 'Anulada',
-    notHeld: 'Não reservada — sinal por pagar',
+    /** Indexed by booking status, so the map in the page holds only variants. */
+    statuses: {
+      pending: 'A aguardar confirmação',
+      confirmed: 'Confirmada',
+      completed: 'Concluída',
+      cancelled: 'Anulada',
+      expired: 'Não reservada — sinal por pagar',
+      no_show: 'Faltou',
+    } as Record<string, string>,
+    expiredBody: 'O sinal não foi concluído a tempo, por isso esta hora voltou a ficar disponível.',
   },
 
   auth: {

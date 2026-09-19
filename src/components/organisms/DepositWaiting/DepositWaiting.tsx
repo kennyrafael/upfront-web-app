@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Spinner } from '@/components/atoms';
+import { useCopy } from '@/lib';
 import { formatMoney } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
 
@@ -28,6 +29,7 @@ export interface DepositWaitingProps {
  * released when the timer runs out and finding that out silently would be worse.
  */
 export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
+  const copy = useCopy();
   const result = usePublicBookingStore((state) => state.result);
   const depositStatus = usePublicBookingStore((state) => state.depositStatus);
   const refreshDeposit = usePublicBookingStore((state) => state.refreshDeposit);
@@ -67,14 +69,14 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
     return (
       <div className="flex flex-col gap-4">
         <Card className="px-4 py-3">
-          <p className="font-medium text-brand-900">The slot was not held</p>
+          <p className="font-medium text-brand-900">{copy.deposit.notHeld}</p>
           <p className="mt-1 text-sm text-ink-muted">
-            The deposit was not approved in time, so the time has gone back on offer.{' '}
-            <strong className="font-medium text-brand-900">Nothing was charged.</strong>
+            {copy.deposit.expiredBody}{' '}
+            <strong className="font-medium text-brand-900">{copy.deposit.nothingCharged}</strong>
           </p>
         </Card>
         <Button fullWidth onClick={onStartOver}>
-          Pick another time
+          {copy.deposit.pickAnother}
         </Button>
       </div>
     );
@@ -83,24 +85,23 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
   return (
     <div className="flex flex-col gap-4">
       <Card className="px-4 py-4">
-        <p className="text-sm text-ink-muted">Deposit to hold your slot</p>
+        <p className="text-sm text-ink-muted">{copy.deposit.title}</p>
         <p className="text-2xl font-semibold tabular-nums text-brand-900">
           {formatMoney(amount, 'EUR')}
         </p>
         <p className="mt-2 text-sm text-brand-900">
-          Open <strong className="font-medium">MB WAY</strong> on {phone} and approve the request.
+          {copy.deposit.openApp} <strong className="font-medium">MB WAY</strong>
+          {copy.deposit.approveOn(phone)}
         </p>
       </Card>
 
       <p className="flex items-center justify-center gap-2 text-sm text-ink-muted">
         <Spinner className="size-4 text-brand-ink" />
         Waiting for your approval —{' '}
-        <span className="tabular-nums">{formatCountdown(remaining)}</span> left
+        <span className="tabular-nums">{formatCountdown(remaining)}</span> {copy.deposit.timeLeft}
       </p>
 
-      <p className="text-center text-xs text-ink-muted">
-        Keep this page open. The rest is due at your appointment.
-      </p>
+      <p className="text-center text-xs text-ink-muted">{copy.deposit.keepOpen}</p>
     </div>
   );
 }

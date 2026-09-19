@@ -10,23 +10,15 @@ import {
   PaymentLedger,
 } from '@/components';
 import { useCopy } from '@/lib';
-import type { LedgerEntry, PaymentMethod } from '@/lib/api';
+import type { LedgerEntry } from '@/lib/api';
 import { cn, formatMoney } from '@/lib/utils';
 import { type LedgerFilter, usePaymentStore } from '@/stores';
 
-const FILTERS: { value: LedgerFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'owing', label: 'Owing' },
-  { value: 'settled', label: 'Settled' },
+const FILTERS: { value: LedgerFilter; key: 'filterAll' | 'filterOwing' | 'filterSettled' }[] = [
+  { value: 'all', key: 'filterAll' },
+  { value: 'owing', key: 'filterOwing' },
+  { value: 'settled', key: 'filterSettled' },
 ];
-
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: 'Cash',
-  mbway: 'MB Way',
-  card: 'Card',
-  transfer: 'Transfer',
-  other: 'Other',
-};
 
 export function PaymentsPage() {
   const copy = useCopy();
@@ -76,7 +68,7 @@ export function PaymentsPage() {
                 <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-muted">
                   {summary.byMethod.map((bucket) => (
                     <li key={bucket.method}>
-                      {METHOD_LABELS[bucket.method]} {formatMoney(bucket.collectedCents)}
+                      {copy.payments.methods[bucket.method]} {formatMoney(bucket.collectedCents)}
                     </li>
                   ))}
                 </ul>
@@ -93,8 +85,7 @@ export function PaymentsPage() {
                 {formatMoney(summary.outstanding.totalCents)}
               </p>
               <p className="mt-1 text-sm text-ink-muted">
-                across {summary.outstanding.count} booking
-                {summary.outstanding.count === 1 ? '' : 's'}
+                {copy.payments.acrossBookings(summary.outstanding.count)}
               </p>
             </CardBody>
           </Card>
@@ -122,7 +113,7 @@ export function PaymentsPage() {
             className={cn(filter !== option.value && 'text-ink-muted')}
             onClick={() => setFilter(option.value)}
           >
-            {option.label}
+            {copy.payments[option.key]}
           </Button>
         ))}
       </div>

@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Dialog, Label, Switch } from '@/components/atoms';
 import { FormField, TextareaField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import type { ServiceItem } from '@/lib/api';
 import { amountToCents, centsToAmount } from '@/lib/utils';
 import { useServiceStore } from '@/stores';
@@ -40,6 +41,7 @@ function toFields(service?: ServiceItem): Fields {
 }
 
 export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDialogProps) {
+  const copy = useCopy();
   const create = useServiceStore((state) => state.create);
   const update = useServiceStore((state) => state.update);
   const status = useServiceStore((state) => state.status);
@@ -67,11 +69,11 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
     const priceCents = amountToCents(fields.amount);
     const nextErrors: Partial<Record<keyof Fields, string>> = {};
 
-    if (fields.name.trim().length < 2) nextErrors.name = 'Give the service a name';
+    if (fields.name.trim().length < 2) nextErrors.name = copy.services.errorName;
     if (!Number.isInteger(duration) || duration < 5 || duration > 480) {
-      nextErrors.durationMinutes = 'Between 5 and 480 minutes';
+      nextErrors.durationMinutes = copy.services.errorDuration;
     }
-    if (priceCents === null) nextErrors.amount = 'Use a number like 18 or 18.50';
+    if (priceCents === null) nextErrors.amount = copy.services.errorPrice;
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || priceCents === null) return;
@@ -94,22 +96,22 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={service ? 'Edit service' : 'New service'}
-      description="Duration and price are what bookings and recibos will be built from."
+      title={service ? copy.services.editTitle : copy.services.newTitle}
+      description={copy.services.formLede}
       footer={
         <>
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
-            Cancel
+            {copy.common.cancel}
           </Button>
           <Button type="submit" form="service-form" loading={busy}>
-            {service ? 'Save service' : 'Add service'}
+            {service ? copy.services.saveButton : copy.services.addButton}
           </Button>
         </>
       }
     >
       <form id="service-form" className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <FormField
-          label="Name"
+          label={copy.common.name}
           required
           autoFocus
           error={errors.name}
@@ -117,26 +119,26 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
           onChange={(event) => setField('name', event.target.value)}
         />
         <TextareaField
-          label="Description"
-          hint="Optional — shown to you, not yet to clients."
+          label={copy.services.description}
+          hint={copy.services.descriptionHint}
           value={fields.description}
           onChange={(event) => setField('description', event.target.value)}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField
-            label="Duration"
+            label={copy.common.duration}
             required
             inputMode="numeric"
-            hint="Minutes."
+            hint={copy.services.durationHint}
             error={errors.durationMinutes}
             value={fields.durationMinutes}
             onChange={(event) => setField('durationMinutes', event.target.value)}
           />
           <FormField
-            label="Price"
+            label={copy.common.price}
             required
             inputMode="decimal"
-            hint="Euros, e.g. 18.50."
+            hint={copy.services.priceHint}
             error={errors.amount}
             value={fields.amount}
             onChange={(event) => setField('amount', event.target.value)}
@@ -145,8 +147,8 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
 
         <div className="flex items-center justify-between rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
           <div>
-            <Label htmlFor="service-active">Bookable</Label>
-            <p className="text-xs text-ink-muted">Archived services stay on past bookings.</p>
+            <Label htmlFor="service-active">{copy.services.bookable}</Label>
+            <p className="text-xs text-ink-muted">{copy.services.archivedHint}</p>
           </div>
           <Switch
             id="service-active"
