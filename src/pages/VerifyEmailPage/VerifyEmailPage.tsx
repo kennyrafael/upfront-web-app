@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AuthLayout, Button, Spinner } from '@/components';
+import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 
 export function VerifyEmailPage() {
+  const copy = useCopy();
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';
 
@@ -21,7 +23,6 @@ export function VerifyEmailPage() {
   useEffect(() => {
     if (!token) {
       setState('failed');
-      setMessage('That link is incomplete. Open it exactly as it was sent.');
       return;
     }
     if (attempted.current) return;
@@ -35,18 +36,18 @@ export function VerifyEmailPage() {
         setState('done');
       } catch (error) {
         setState('failed');
-        setMessage(
-          error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',
-        );
+        // The server's own words when it has some; ours are chosen at render, in whatever
+        // language is showing then.
+        setMessage(error instanceof ApiError ? error.message : undefined);
       }
     })();
   }, [token, markVerified, signedIn]);
 
   if (state === 'working') {
     return (
-      <AuthLayout title="Confirming your email">
+      <AuthLayout title={copy.auth.confirmingEmail}>
         <p className="flex items-center justify-center gap-2 py-6 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-ink" /> One moment…
+          <Spinner className="size-4 text-brand-ink" /> {copy.auth.oneMoment}
         </p>
       </AuthLayout>
     );
@@ -54,14 +55,14 @@ export function VerifyEmailPage() {
 
   if (state === 'failed') {
     return (
-      <AuthLayout title="That link did not work">
+      <AuthLayout title={copy.auth.linkDidNotWork}>
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-ink-muted">{message}</p>
           <p className="text-sm text-ink-muted">
-            Links expire after a day and work only once. Sign in and we will send another.
+            {!token ? copy.auth.linkCut : (message ?? copy.auth.somethingWrong)}
           </p>
+          <p className="text-sm text-ink-muted">{copy.auth.linksExpire}</p>
           <Link to={signedIn ? '/settings' : '/login'}>
-            <Button fullWidth>{signedIn ? 'Go to settings' : 'Sign in'}</Button>
+            <Button fullWidth>{signedIn ? copy.auth.goToSettings : copy.auth.signIn}</Button>
           </Link>
         </div>
       </AuthLayout>
@@ -69,13 +70,11 @@ export function VerifyEmailPage() {
   }
 
   return (
-    <AuthLayout title="Email confirmed">
+    <AuthLayout title={copy.auth.emailConfirmed}>
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-ink-muted">
-          Thank you — you can now publish your booking page and take deposits.
-        </p>
+        <p className="text-sm text-ink-muted">{copy.auth.thanks}</p>
         <Link to={signedIn ? '/settings' : '/login'}>
-          <Button fullWidth>{signedIn ? 'Publish your page' : 'Sign in'}</Button>
+          <Button fullWidth>{signedIn ? copy.auth.publishPage : copy.auth.signIn}</Button>
         </Link>
       </div>
     </AuthLayout>

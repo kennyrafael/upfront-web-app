@@ -31,12 +31,21 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  /**
+   * Whether reading the balance failed without the server saying why. A flag rather than our
+   * fallback sentence, so the words are chosen at render in whatever language is showing.
+   *
+   * Not `copy` in the effect's dependencies instead: that effect also fills the amount and
+   * phone fields, so re-running it on a language switch would wipe what somebody had typed.
+   */
+  const [readFailed, setReadFailed] = useState(false);
   const [sentTo, setSentTo] = useState<string>();
 
   useEffect(() => {
     if (!open || !booking) return;
 
     setError(undefined);
+    setReadFailed(false);
     setSentTo(undefined);
     void (async () => {
       try {
@@ -45,10 +54,13 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
         setAmount(toEuros(next.pending?.amountCents ?? next.outstandingCents));
         setPhone(next.clientPhone ?? '');
       } catch (problem) {
-        setError(problem instanceof ApiError ? problem.message : copy.balance.errorRead);
+        if (problem instanceof ApiError) setError(problem.message);
+        else setReadFailed(true);
       }
     })();
   }, [open, booking]);
+
+  const shownError = error ?? (readFailed ? copy.balance.errorRead : undefined);
 
   async function refresh() {
     if (!booking) return;
@@ -174,9 +186,9 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
         </div>
       )}
 
-      {error ? (
+      {shownError ? (
         <p role="alert" className="mt-3 rounded-lg bg-danger/8 px-3 py-2 text-danger-ink text-sm">
-          {error}
+          {shownError}
         </p>
       ) : null}
     </Dialog>

@@ -1,4 +1,5 @@
 import { Spinner as ThemedSpinner } from '@radix-ui/themes';
+import { useCopy } from '@/lib';
 import { cn } from '@/lib/utils';
 
 export interface SpinnerProps {
@@ -13,9 +14,14 @@ export interface SpinnerProps {
  * inside a button that already says "Saving". Standing alone, as it does on a loading
  * screen, something has to tell a screen reader that a wait is in progress.
  */
-export function Spinner({ className, label = 'Loading' }: SpinnerProps) {
+export function Spinner({ className, label }: SpinnerProps) {
+  const copy = useCopy();
   return (
-    <span role="status" aria-label={label} className={cn('inline-flex', className)}>
+    <span
+      role="status"
+      aria-label={label ?? copy.common.loading}
+      className={cn('inline-flex', className)}
+    >
       <ThemedSpinner size="2" />
     </span>
   );

@@ -149,7 +149,7 @@ export function BrandingSettings() {
                   <button
                     key={suggestion}
                     type="button"
-                    aria-label={copy.branding.useColour(suggestion)}
+                    aria-label={copy.branding.pickColour(suggestion)}
                     onClick={() => {
                       setColor(suggestion);
                       setSaved(false);

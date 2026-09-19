@@ -1,5 +1,6 @@
 import { AlertDialog } from '@radix-ui/themes';
 import { Button } from '@/components/atoms';
+import { useCopy } from '@/lib';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -27,12 +28,13 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   loading = false,
   onConfirm,
 }: ConfirmDialogProps) {
+  const copy = useCopy();
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Content maxWidth="28rem">
@@ -44,7 +46,7 @@ export function ConfirmDialog({
         <div className="mt-5 flex justify-end gap-2">
           <AlertDialog.Cancel>
             <Button variant="secondary" disabled={loading}>
-              {cancelLabel}
+              {cancelLabel ?? copy.common.cancel}
             </Button>
           </AlertDialog.Cancel>
           {/* Not wrapped in `Action`: that closes the dialog on click, and the caller needs
@@ -54,7 +56,7 @@ export function ConfirmDialog({
             loading={loading}
             onClick={onConfirm}
           >
-            {confirmLabel}
+            {confirmLabel ?? copy.common.confirm}
           </Button>
         </div>
       </AlertDialog.Content>

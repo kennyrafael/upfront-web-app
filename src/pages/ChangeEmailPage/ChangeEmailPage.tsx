@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AuthLayout, Button, Spinner } from '@/components';
+import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
 import { useAuthStore } from '@/stores';
 
@@ -12,6 +13,7 @@ import { useAuthStore } from '@/stores';
  * to the old address.
  */
 export function ChangeEmailPage() {
+  const copy = useCopy();
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';
 
@@ -28,7 +30,6 @@ export function ChangeEmailPage() {
   useEffect(() => {
     if (!token) {
       setState('failed');
-      setMessage('That link is incomplete. Open it exactly as it was sent.');
       return;
     }
     if (attempted.current) return;
@@ -42,18 +43,18 @@ export function ChangeEmailPage() {
         void signOut();
       } catch (error) {
         setState('failed');
-        setMessage(
-          error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',
-        );
+        // The server's own words when it has some; ours are chosen at render, in whatever
+        // language is showing then.
+        setMessage(error instanceof ApiError ? error.message : undefined);
       }
     })();
   }, [token, signOut]);
 
   if (state === 'working') {
     return (
-      <AuthLayout title="Confirming your new address">
+      <AuthLayout title={copy.auth.confirmingNewEmail}>
         <p className="flex items-center justify-center gap-2 py-6 text-sm text-ink-muted">
-          <Spinner className="size-4 text-brand-ink" /> One moment…
+          <Spinner className="size-4 text-brand-ink" /> {copy.auth.oneMoment}
         </p>
       </AuthLayout>
     );
@@ -61,25 +62,27 @@ export function ChangeEmailPage() {
 
   if (state === 'failed') {
     return (
-      <AuthLayout title="That link did not work" subtitle={message}>
+      <AuthLayout
+        title={copy.auth.linkDidNotWork}
+        subtitle={!token ? copy.auth.linkCut : (message ?? copy.auth.somethingWrong)}
+      >
         <Button asChild fullWidth>
-          <Link to="/settings">Back to settings</Link>
+          <Link to="/settings">{copy.auth.backToSettings}</Link>
         </Button>
       </AuthLayout>
     );
   }
 
   return (
-    <AuthLayout title="Email address changed" subtitle={`Your account now signs in as ${email}.`}>
+    <AuthLayout title={copy.auth.emailChanged} subtitle={copy.auth.nowSignsInAs(email ?? '')}>
       <div className="flex flex-col gap-4">
         <p className="text-sm text-ink-muted">
           {/* Said plainly, because being signed out unexpectedly reads as something going
               wrong rather than as the safeguard it is. */}
-          Everywhere you were signed in has been signed out, including here — a change of address is
-          exactly the moment to make sure nobody else is still logged in.
+          {copy.auth.signedOutEverywhere}
         </p>
         <Button asChild fullWidth>
-          <Link to="/login">Sign in with your new address</Link>
+          <Link to="/login">{copy.auth.signInWithNew}</Link>
         </Button>
       </div>
     </AuthLayout>

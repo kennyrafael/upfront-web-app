@@ -1,5 +1,6 @@
 import { Select as ThemedSelect } from '@radix-ui/themes';
 import { forwardRef } from 'react';
+import { useCopy } from '@/lib';
 import { cn } from '@/lib/utils';
 
 export interface SelectOption {
@@ -33,7 +34,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
     value,
     onValueChange,
     options,
-    placeholder = 'Select…',
+    placeholder,
     invalid = false,
     disabled,
     required,
@@ -44,6 +45,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
   },
   ref,
 ) {
+  const copy = useCopy();
   return (
     <ThemedSelect.Root
       value={value}
@@ -55,7 +57,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
       <ThemedSelect.Trigger
         ref={ref}
         id={id}
-        placeholder={placeholder}
+        placeholder={placeholder ?? copy.common.select}
         color={invalid ? 'red' : undefined}
         aria-invalid={invalid || undefined}
         className={cn('w-full', className)}

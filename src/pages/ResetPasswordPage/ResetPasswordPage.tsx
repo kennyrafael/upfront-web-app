@@ -2,12 +2,14 @@ import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthLayout, Button } from '@/components';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { ApiError, authApi } from '@/lib/api';
 
 /** Mirrors the API's rule, so the round trip is not wasted telling you what it could here. */
 const MIN_LENGTH = 10;
 
 export function ResetPasswordPage() {
+  const copy = useCopy();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token') ?? '';
@@ -25,7 +27,7 @@ export function ResetPasswordPage() {
       return;
     }
     if (password !== confirmation) {
-      setError('Those two do not match.');
+      setError(copy.auth.mismatch);
       return;
     }
 
@@ -36,9 +38,7 @@ export function ResetPasswordPage() {
       // Every session ended, including any this browser had, so sign-in is the only way on.
       navigate('/login', { replace: true });
     } catch (caught) {
-      setError(
-        caught instanceof ApiError ? caught.message : 'Something went wrong. Please try again.',
-      );
+      setError(caught instanceof ApiError ? caught.message : copy.auth.somethingWrong);
       setSaving(false);
     }
   }
@@ -46,36 +46,34 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout
-        title="That link is incomplete"
+        title={copy.auth.linkIncomplete}
         footer={
           <Link
             to="/forgot-password"
             className="font-medium text-white underline-offset-2 hover:underline"
           >
-            Request a new one
+            {copy.auth.requestNew}
           </Link>
         }
       >
-        <p className="text-sm text-ink-muted">
-          Open the link from the email exactly as it was sent — some mail apps cut long links short.
-        </p>
+        <p className="text-sm text-ink-muted">{copy.auth.openExactly}</p>
       </AuthLayout>
     );
   }
 
   return (
     <AuthLayout
-      title="Choose a new password"
-      subtitle="You will be signed out everywhere else."
+      title={copy.auth.chooseNew}
+      subtitle={copy.auth.signedOutElsewhere}
       footer={
         <Link to="/login" className="font-medium text-white underline-offset-2 hover:underline">
-          Back to sign in
+          {copy.auth.backToSignIn}
         </Link>
       }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <FormField
-          label="New password"
+          label={copy.auth.newPassword}
           type="password"
           required
           autoFocus
@@ -85,7 +83,7 @@ export function ResetPasswordPage() {
           onChange={(event) => setPassword(event.target.value)}
         />
         <FormField
-          label="Again, to be sure"
+          label={copy.auth.again}
           type="password"
           required
           autoComplete="new-password"
@@ -100,7 +98,7 @@ export function ResetPasswordPage() {
         ) : null}
 
         <Button type="submit" fullWidth loading={saving}>
-          Set the password
+          {copy.auth.setPassword}
         </Button>
       </form>
     </AuthLayout>

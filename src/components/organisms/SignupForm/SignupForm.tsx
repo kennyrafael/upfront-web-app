@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { Button } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
+import { useCopy } from '@/lib';
 import { useAuthStore } from '@/stores';
 
 export interface SignupFormProps {
@@ -10,6 +11,7 @@ export interface SignupFormProps {
 const MIN_PASSWORD_LENGTH = 8;
 
 export function SignupForm({ onSuccess }: SignupFormProps) {
+  const copy = useCopy();
   const signup = useAuthStore((state) => state.signup);
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
@@ -45,7 +47,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
       <FormField
-        label="Your name"
+        label={copy.common.yourName}
         name="name"
         autoComplete="name"
         required
@@ -53,14 +55,14 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         onChange={(event) => setName(event.target.value)}
       />
       <FormField
-        label="Business name"
+        label={copy.auth.businessName}
         name="businessName"
-        hint="Optional — you can add it later."
+        hint={copy.auth.businessNameHint}
         value={businessName}
         onChange={(event) => setBusinessName(event.target.value)}
       />
       <FormField
-        label="Email"
+        label={copy.common.email}
         type="email"
         name="email"
         autoComplete="email"
@@ -69,16 +71,16 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         onChange={(event) => setEmail(event.target.value)}
       />
       <FormField
-        label="Phone"
+        label={copy.common.phone}
         type="tel"
         name="phone"
         autoComplete="tel"
-        hint="Optional."
+        hint={copy.common.optional}
         value={phone}
         onChange={(event) => setPhone(event.target.value)}
       />
       <FormField
-        label="Password"
+        label={copy.common.password}
         type="password"
         name="password"
         autoComplete="new-password"
@@ -94,7 +96,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         </p>
       ) : null}
       <Button type="submit" fullWidth loading={status === 'loading'}>
-        Create account
+        {copy.auth.createButton}
       </Button>
     </form>
   );

@@ -33,6 +33,7 @@ export const pt = {
     loading: 'A carregar…',
     searching: 'A procurar…',
     select: 'Selecionar…',
+    confirm: 'Confirmar',
     email: 'Email',
     phone: 'Telemóvel',
     password: 'Palavra-passe',
@@ -522,7 +523,7 @@ export const pt = {
     title: 'Aspeto da sua página de marcações',
     lede: 'É o que os seus clientes veem — o painel continua como está.',
     accentColour: 'Cor de destaque',
-    useColour: (hex: string) => `Usar ${hex}`,
+    pickColour: (hex: string) => `Usar ${hex}`,
     readable:
       'O texto sobre esta cor alterna entre preto e branco sozinho, para se manter legível seja qual for a cor.',
     logo: 'Logótipo',
@@ -589,6 +590,24 @@ export const pt = {
     noNif: 'Sem NIF registado — adicione-o nas Definições.',
   },
 
+  onboarding: {
+    title: 'Prepare o seu espaço',
+    subtitle: 'Três passos curtos. Pode alterar tudo mais tarde nas Definições.',
+    stepBusiness: 'Negócio',
+    stepHours: 'Horário',
+    stepService: 'Primeiro serviço',
+    businessNameHint: 'Como os clientes o conhecem. Deixe em branco para usar o seu próprio nome.',
+    nifHint: '9 dígitos. Necessário antes de emitir um recibo verde — pode adicionar mais tarde.',
+    hoursLede:
+      'Deixámos preenchida uma semana de segunda a sexta. Ajuste-a, ou divida um dia em duas linhas para a hora de almoço.',
+    serviceLede: 'Adicione o que marca mais vezes. Pode adicionar o resto quando quiser.',
+    serviceName: 'Nome do serviço',
+    back: 'Voltar',
+    skip: 'Saltar por agora',
+    finish: 'Concluir',
+    continue: 'Continuar',
+  },
+
   auth: {
     signIn: 'Entrar',
     signInSubtitle: 'Faça a gestão das marcações, dos clientes e dos recibos num só sítio.',
@@ -602,6 +621,47 @@ export const pt = {
 
     businessName: 'Nome do negócio',
     businessNameHint: 'Opcional — pode adicionar mais tarde.',
+    createButton: 'Criar conta',
+
+    resetTitle: 'Recuperar a palavra-passe',
+    resetSubtitle: 'Enviamos-lhe um link para escolher uma nova.',
+    backToSignIn: 'Voltar a entrar',
+    resetSent: (email: string) =>
+      `Se ${email} pertencer a uma conta Upfront, vai a caminho um link de recuperação. Funciona uma vez, e expira ao fim de uma hora.`,
+    nothingArrived: 'Não chegou nada? Veja o spam, ou',
+    tryAnother: 'experimente outro endereço',
+    sendLink: 'Enviar o link',
+
+    linkIncomplete: 'Esse link está incompleto',
+    requestNew: 'Pedir um novo',
+    openExactly:
+      'Abra o link do email exatamente como foi enviado — algumas aplicações de email cortam links longos.',
+    chooseNew: 'Escolha uma nova palavra-passe',
+    signedOutElsewhere: 'A sessão será terminada em todos os outros sítios.',
+    newPassword: 'Nova palavra-passe',
+    again: 'Outra vez, para confirmar',
+    setPassword: 'Definir a palavra-passe',
+    mismatch: 'As duas não coincidem.',
+    somethingWrong: 'Algo correu mal. Tente outra vez.',
+
+    oneMoment: 'Um momento…',
+    linkDidNotWork: 'Esse link não funcionou',
+    linkCut: 'Esse link está incompleto. Abra-o exatamente como foi enviado.',
+    confirmingEmail: 'A confirmar o seu email',
+    linksExpire:
+      'Os links expiram ao fim de um dia e só funcionam uma vez. Entre e enviamos outro.',
+    goToSettings: 'Ir para as Definições',
+    emailConfirmed: 'Email confirmado',
+    thanks: 'Obrigado — já pode publicar a sua página de marcações e cobrar sinais.',
+    publishPage: 'Publicar a página',
+
+    confirmingNewEmail: 'A confirmar o novo endereço',
+    backToSettings: 'Voltar às Definições',
+    emailChanged: 'Endereço de email alterado',
+    nowSignsInAs: (email: string) => `A sua conta passa a entrar com ${email}.`,
+    signedOutEverywhere:
+      'Todas as sessões foram terminadas, incluindo esta — uma mudança de endereço é exatamente o momento de garantir que mais ninguém continua com sessão iniciada.',
+    signInWithNew: 'Entrar com o novo endereço',
   },
 
   publicBooking: {

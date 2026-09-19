@@ -218,20 +218,21 @@ export function Combobox({
           className="p-1"
           style={{ width: 'var(--radix-popover-trigger-width)', maxWidth: 'calc(100vw - 1.5rem)' }}
         >
-          <ul id={listId} role="listbox" aria-label={label} className="max-h-64 overflow-y-auto">
+          <div id={listId} role="listbox" aria-label={label} className="max-h-64 overflow-y-auto">
             {loading && options.length === 0 ? (
-              <li className="flex items-center gap-2 px-3 py-2 text-ink-muted text-sm">
+              <div className="flex items-center gap-2 px-3 py-2 text-ink-muted text-sm">
                 <Spinner className="size-3.5 text-brand-ink" /> {loadingMessage}
-              </li>
+              </div>
             ) : options.length === 0 ? (
-              <li className="px-3 py-2 text-ink-muted text-sm">{emptyMessage}</li>
+              <div className="px-3 py-2 text-ink-muted text-sm">{emptyMessage}</div>
             ) : (
               options.map((option, index) => (
-                <li
+                <div
                   key={option.value}
                   id={`${listId}-${option.value}`}
                   role="option"
                   aria-selected={option.value === value}
+                  tabIndex={-1}
                   // Not onClick: mousedown with the default prevented keeps focus in the input.
                   onMouseDown={(event) => {
                     event.preventDefault();
@@ -248,10 +249,10 @@ export function Combobox({
                   {option.detail ? (
                     <span className="text-ink-muted text-xs tabular-nums">{option.detail}</span>
                   ) : null}
-                </li>
+                </div>
               ))
             )}
-          </ul>
+          </div>
         </Popover.Content>
       </Popover.Root>
 

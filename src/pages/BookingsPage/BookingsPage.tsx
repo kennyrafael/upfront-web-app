@@ -62,7 +62,9 @@ export function BookingsPage() {
       { value: 'all', label: copy.bookings.everyone },
       ...people.map((employee) => ({ value: employee.id, label: employee.name })),
     ],
-    [people],
+    // `copy` too, or "Everyone" stays in whichever language was showing when `people` last
+    // changed.
+    [people, copy],
   );
 
   function openCreate(start?: Date, employeeId?: string) {

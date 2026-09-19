@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
+import { useCopy } from '@/lib';
 import type { WorkingHours } from '@/lib/api';
 import { amountToCents, cn } from '@/lib/utils';
 import { useBusinessStore, useServiceStore } from '@/stores';
@@ -10,7 +11,7 @@ export interface ProviderOnboardingFormProps {
   onDone: () => void;
 }
 
-const STEPS = ['Business', 'Hours', 'First service'] as const;
+const STEPS = ['stepBusiness', 'stepHours', 'stepService'] as const;
 
 const DEFAULT_HOURS: WorkingHours[] = [1, 2, 3, 4, 5].map((weekday) => ({
   weekday,
@@ -19,6 +20,7 @@ const DEFAULT_HOURS: WorkingHours[] = [1, 2, 3, 4, 5].map((weekday) => ({
 }));
 
 export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) {
+  const copy = useCopy();
   const profile = useBusinessStore((state) => state.profile);
   const updateProfile = useBusinessStore((state) => state.update);
   const completeOnboarding = useBusinessStore((state) => state.completeOnboarding);
@@ -46,7 +48,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
 
   async function saveBusiness() {
     if (nif && !/^\d{9}$/.test(nif)) {
-      setNifError('A Portuguese NIF is exactly 9 digits');
+      setNifError(copy.settings.nifError);
       return;
     }
     setNifError(undefined);
@@ -70,11 +72,11 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
       const minutes = Number(duration);
       const priceCents = amountToCents(amount);
       const errors: Record<string, string> = {};
-      if (serviceName.trim().length < 2) errors.name = 'Give the service a name';
+      if (serviceName.trim().length < 2) errors.name = copy.services.errorName;
       if (!Number.isInteger(minutes) || minutes < 5 || minutes > 480) {
-        errors.duration = 'Between 5 and 480 minutes';
+        errors.duration = copy.services.errorDuration;
       }
-      if (priceCents === null) errors.amount = 'Use a number like 18 or 18.50';
+      if (priceCents === null) errors.amount = copy.services.errorPrice;
 
       setServiceErrors(errors);
       if (Object.keys(errors).length > 0 || priceCents === null) return;
@@ -95,8 +97,8 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
   return (
     <div className="flex flex-col gap-6">
       <ol className="flex items-center gap-2 text-xs">
-        {STEPS.map((label, index) => (
-          <li key={label} className="flex flex-1 items-center gap-2">
+        {STEPS.map((key, index) => (
+          <li key={key} className="flex flex-1 items-center gap-2">
             <span
               className={cn(
                 'flex size-6 shrink-0 items-center justify-center rounded-full font-medium transition-colors',
@@ -108,7 +110,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
               {index + 1}
             </span>
             <span className={cn(index === step ? 'font-medium text-brand-900' : 'text-ink-muted')}>
-              {label}
+              {copy.onboarding[key]}
             </span>
             {index < STEPS.length - 1 ? (
               <span className="h-px flex-1 bg-hairline" aria-hidden="true" />
@@ -120,21 +122,21 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
       {step === 0 ? (
         <div className="flex flex-col gap-4">
           <FormField
-            label="Business name"
-            hint="How clients know you. Leave blank to trade under your own name."
+            label={copy.auth.businessName}
+            hint={copy.onboarding.businessNameHint}
             value={businessName}
             onChange={(event) => setBusinessName(event.target.value)}
           />
           <FormField
-            label="Phone"
+            label={copy.common.phone}
             type="tel"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
           />
           <FormField
-            label="NIF"
+            label={copy.settings.nif}
             inputMode="numeric"
-            hint="9 digits. Needed before you issue a recibo verde — you can add it later."
+            hint={copy.onboarding.nifHint}
             error={nifError}
             value={nif}
             onChange={(event) => setNif(event.target.value)}
@@ -144,38 +146,33 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
 
       {step === 1 ? (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-ink-muted">
-            We have pre-filled a Monday-to-Friday week. Adjust it, or split a day into two rows for
-            a lunch break.
-          </p>
+          <p className="text-sm text-ink-muted">{copy.onboarding.hoursLede}</p>
           <WorkingHoursEditor value={workingHours} onChange={setWorkingHours} disabled={busy} />
         </div>
       ) : null}
 
       {step === 2 ? (
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-ink-muted">
-            Add the thing you book most often. You can add the rest any time.
-          </p>
+          <p className="text-sm text-ink-muted">{copy.onboarding.serviceLede}</p>
           <FormField
-            label="Service name"
+            label={copy.onboarding.serviceName}
             error={serviceErrors.name}
             value={serviceName}
             onChange={(event) => setServiceName(event.target.value)}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
-              label="Duration"
+              label={copy.common.duration}
               inputMode="numeric"
-              hint="Minutes."
+              hint={copy.services.durationHint}
               error={serviceErrors.duration}
               value={duration}
               onChange={(event) => setDuration(event.target.value)}
             />
             <FormField
-              label="Price"
+              label={copy.common.price}
               inputMode="decimal"
-              hint="Euros, e.g. 18.50."
+              hint={copy.services.priceHint}
               error={serviceErrors.amount}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
@@ -196,13 +193,13 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
           onClick={() => setStep((current) => current - 1)}
           disabled={step === 0 || busy}
         >
-          Back
+          {copy.onboarding.back}
         </Button>
 
         <div className="flex gap-2">
           {step === 2 ? (
             <Button variant="secondary" onClick={() => finish(false)} disabled={busy}>
-              Skip for now
+              {copy.onboarding.skip}
             </Button>
           ) : null}
           <Button
@@ -213,7 +210,7 @@ export function BusinessOnboardingForm({ onDone }: ProviderOnboardingFormProps) 
               return finish(true);
             }}
           >
-            {step === 2 ? 'Finish setup' : 'Continue'}
+            {step === 2 ? copy.onboarding.finish : copy.onboarding.continue}
           </Button>
         </div>
       </div>

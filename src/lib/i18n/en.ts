@@ -18,6 +18,7 @@ export const en: Dictionary = {
     loading: 'Loading…',
     searching: 'Searching…',
     select: 'Select…',
+    confirm: 'Confirm',
     email: 'Email',
     phone: 'Phone',
     password: 'Password',
@@ -487,7 +488,7 @@ export const en: Dictionary = {
     title: 'How your booking page looks',
     lede: 'This is what your clients see — the dashboard stays as it is.',
     accentColour: 'Accent colour',
-    useColour: (hex: string) => `Use ${hex}`,
+    pickColour: (hex: string) => `Use ${hex}`,
     readable:
       'Text on this colour switches between black and white by itself, so it stays readable whichever colour you choose.',
     logo: 'Logo',
@@ -553,6 +554,24 @@ export const en: Dictionary = {
     noNif: 'No NIF on file — add one in Settings.',
   },
 
+  onboarding: {
+    title: 'Set up your workspace',
+    subtitle: 'Three short steps. You can change any of this later in Settings.',
+    stepBusiness: 'Business',
+    stepHours: 'Hours',
+    stepService: 'First service',
+    businessNameHint: 'How clients know you. Leave blank to trade under your own name.',
+    nifHint: '9 digits. Needed before you issue a recibo verde — you can add it later.',
+    hoursLede:
+      'We have pre-filled a Monday-to-Friday week. Adjust it, or split a day into two rows for a lunch break.',
+    serviceLede: 'Add the thing you book most often. You can add the rest any time.',
+    serviceName: 'Service name',
+    back: 'Back',
+    skip: 'Skip for now',
+    finish: 'Finish setup',
+    continue: 'Continue',
+  },
+
   auth: {
     signIn: 'Sign in',
     signInSubtitle: 'Manage your bookings, clients and recibos in one place.',
@@ -566,6 +585,46 @@ export const en: Dictionary = {
 
     businessName: 'Business name',
     businessNameHint: 'Optional — you can add it later.',
+    createButton: 'Create account',
+
+    resetTitle: 'Reset your password',
+    resetSubtitle: 'We will email you a link to choose a new one.',
+    backToSignIn: 'Back to sign in',
+    resetSent: (email: string) =>
+      `If ${email} belongs to an Upfront account, a reset link is on its way. It works once, and expires in an hour.`,
+    nothingArrived: 'Nothing arrived? Check spam, then',
+    tryAnother: 'try another address',
+    sendLink: 'Send the link',
+
+    linkIncomplete: 'That link is incomplete',
+    requestNew: 'Request a new one',
+    openExactly:
+      'Open the link from the email exactly as it was sent — some mail apps cut long links short.',
+    chooseNew: 'Choose a new password',
+    signedOutElsewhere: 'You will be signed out everywhere else.',
+    newPassword: 'New password',
+    again: 'Again, to be sure',
+    setPassword: 'Set the password',
+    mismatch: 'Those two do not match.',
+    somethingWrong: 'Something went wrong. Please try again.',
+
+    oneMoment: 'One moment…',
+    linkDidNotWork: 'That link did not work',
+    linkCut: 'That link is incomplete. Open it exactly as it was sent.',
+    confirmingEmail: 'Confirming your email',
+    linksExpire: 'Links expire after a day and work only once. Sign in and we will send another.',
+    goToSettings: 'Go to settings',
+    emailConfirmed: 'Email confirmed',
+    thanks: 'Thank you — you can now publish your booking page and take deposits.',
+    publishPage: 'Publish your page',
+
+    confirmingNewEmail: 'Confirming your new address',
+    backToSettings: 'Back to settings',
+    emailChanged: 'Email address changed',
+    nowSignsInAs: (email: string) => `Your account now signs in as ${email}.`,
+    signedOutEverywhere:
+      'Everywhere you were signed in has been signed out, including here — a change of address is exactly the moment to make sure nobody else is still logged in.',
+    signInWithNew: 'Sign in with your new address',
   },
 
   publicBooking: {
