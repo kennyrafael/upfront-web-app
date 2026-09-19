@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge, Button, Card, Spinner } from '@/components/atoms';
 import { ConfirmDialog } from '@/components/molecules';
 import { useCopy } from '@/lib';
 import type { ServiceItem } from '@/lib/api';
 import { formatDuration, formatMoney } from '@/lib/utils';
-import { useServiceStore } from '@/stores';
+import { useCategoryStore, useServiceStore } from '@/stores';
 
 export interface ServiceCatalogTableProps {
   onEdit: (service: ServiceItem) => void;
@@ -14,9 +14,41 @@ export function ServiceCatalogTable({ onEdit }: ServiceCatalogTableProps) {
   const items = useServiceStore((state) => state.items);
   const status = useServiceStore((state) => state.status);
   const remove = useServiceStore((state) => state.remove);
+  const categories = useCategoryStore((state) => state.items);
 
   const copy = useCopy();
   const [pendingDelete, setPendingDelete] = useState<ServiceItem>();
+
+  /**
+   * The catalogue in the shop's own order, under the shop's own headings.
+   *
+   * Anything ungrouped falls to the end under "Outros" — including every service in a
+   * business that has made no categories at all, which is why a shop with none sees one
+   * unnamed group and no visible change.
+   */
+  const groups = useMemo(() => {
+    const named = categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      services: items.filter((service) => service.categoryId === category.id),
+    }));
+    const loose = items.filter(
+      (service) => !service.categoryId || !categories.some((c) => c.id === service.categoryId),
+    );
+
+    return [
+      ...named.filter((group) => group.services.length > 0),
+      ...(loose.length > 0
+        ? [
+            {
+              id: 'none',
+              name: named.length > 0 ? copy.services.otherCategory : '',
+              services: loose,
+            },
+          ]
+        : []),
+    ];
+  }, [items, categories, copy]);
 
   if (status === 'loading' && items.length === 0) {
     return (
@@ -49,46 +81,59 @@ export function ServiceCatalogTable({ onEdit }: ServiceCatalogTableProps) {
                 <th className="px-5 py-3" />
               </tr>
             </thead>
-            <tbody>
-              {items.map((service) => (
-                <tr
-                  key={service.id}
-                  className="border-b border-hairline/60 transition-colors last:border-0 hover:bg-brand-700/4"
-                >
-                  <td className="px-5 py-3">
-                    <p className="font-medium text-brand-900">{service.name}</p>
-                    {service.description ? (
-                      <p className="mt-0.5 max-w-md text-xs text-ink-muted">
-                        {service.description}
-                      </p>
-                    ) : null}
-                  </td>
-                  <td className="px-5 py-3 text-ink-muted">
-                    {formatDuration(service.durationMinutes)}
-                  </td>
-                  <td className="px-5 py-3 font-medium tabular-nums text-brand-900">
-                    {formatMoney(service.priceCents, service.currency)}
-                  </td>
-                  <td className="px-5 py-3">
-                    {service.active ? (
-                      <Badge variant="brand">{copy.services.bookable}</Badge>
-                    ) : (
-                      <Badge>{copy.services.archived}</Badge>
-                    )}
-                  </td>
-                  <td className="px-5 py-3">
-                    <div className="actions-row flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => onEdit(service)}>
-                        {copy.common.edit}
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setPendingDelete(service)}>
-                        {copy.common.delete}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            {groups.map((group) => (
+              <tbody key={group.id}>
+                {group.name ? (
+                  <tr className="border-b border-hairline/60 bg-sheet/50">
+                    <th
+                      colSpan={5}
+                      scope="colgroup"
+                      className="px-5 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted"
+                    >
+                      {group.name}
+                    </th>
+                  </tr>
+                ) : null}
+                {group.services.map((service) => (
+                  <tr
+                    key={service.id}
+                    className="border-b border-hairline/60 transition-colors last:border-0 hover:bg-brand-700/4"
+                  >
+                    <td className="px-5 py-3">
+                      <p className="font-medium text-brand-900">{service.name}</p>
+                      {service.description ? (
+                        <p className="mt-0.5 max-w-md text-xs text-ink-muted">
+                          {service.description}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-5 py-3 text-ink-muted">
+                      {formatDuration(service.durationMinutes)}
+                    </td>
+                    <td className="px-5 py-3 font-medium tabular-nums text-brand-900">
+                      {formatMoney(service.priceCents, service.currency)}
+                    </td>
+                    <td className="px-5 py-3">
+                      {service.active ? (
+                        <Badge variant="brand">{copy.services.bookable}</Badge>
+                      ) : (
+                        <Badge>{copy.services.archived}</Badge>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="actions-row flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => onEdit(service)}>
+                          {copy.common.edit}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setPendingDelete(service)}>
+                          {copy.common.delete}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            ))}
           </table>
         </div>
       </Card>

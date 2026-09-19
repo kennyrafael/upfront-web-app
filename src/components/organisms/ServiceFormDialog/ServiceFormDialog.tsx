@@ -1,10 +1,13 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Dialog, Label, Switch } from '@/components/atoms';
-import { FormField, TextareaField } from '@/components/molecules';
+import { FormField, SelectField, TextareaField } from '@/components/molecules';
 import { useCopy } from '@/lib';
 import type { ServiceItem } from '@/lib/api';
 import { amountToCents, centsToAmount } from '@/lib/utils';
-import { useServiceStore } from '@/stores';
+import { useCategoryStore, useServiceStore } from '@/stores';
+
+/** The "no category" option. A Radix Select cannot hold an empty string as a value. */
+const UNCATEGORISED = 'none';
 
 export interface ServiceFormDialogProps {
   open: boolean;
@@ -19,6 +22,7 @@ interface Fields {
   durationMinutes: string;
   amount: string;
   active: boolean;
+  category: string;
 }
 
 const EMPTY: Fields = {
@@ -27,6 +31,7 @@ const EMPTY: Fields = {
   durationMinutes: '30',
   amount: '',
   active: true,
+  category: UNCATEGORISED,
 };
 
 function toFields(service?: ServiceItem): Fields {
@@ -37,6 +42,7 @@ function toFields(service?: ServiceItem): Fields {
     durationMinutes: String(service.durationMinutes),
     amount: centsToAmount(service.priceCents),
     active: service.active,
+    category: service.categoryId ?? UNCATEGORISED,
   };
 }
 
@@ -46,6 +52,9 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
   const update = useServiceStore((state) => state.update);
   const status = useServiceStore((state) => state.status);
   const error = useServiceStore((state) => state.error);
+  // No picker at all until the business has made a heading — a shop with four services
+  // should never be asked to file them.
+  const categories = useCategoryStore((state) => state.items);
 
   const [fields, setFields] = useState<Fields>(() => toFields(service));
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
@@ -84,6 +93,9 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
       durationMinutes: duration,
       priceCents,
       active: fields.active,
+      // null, not undefined: undefined leaves the category alone, which would make
+      // "Sem categoria" the one choice in this form that does nothing.
+      category: fields.category === UNCATEGORISED ? null : fields.category,
     };
 
     const ok = service ? await update(service.id, payload) : await create(payload);
@@ -144,6 +156,19 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
             onChange={(event) => setField('amount', event.target.value)}
           />
         </div>
+
+        {categories.length > 0 ? (
+          <SelectField
+            label={copy.services.category}
+            hint={copy.services.categoryHint}
+            value={fields.category}
+            onValueChange={(value) => setField('category', value)}
+            options={[
+              { value: UNCATEGORISED, label: copy.services.noCategory },
+              ...categories.map((category) => ({ value: category.id, label: category.name })),
+            ]}
+          />
+        ) : null}
 
         <div className="flex items-center justify-between rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
           <div>

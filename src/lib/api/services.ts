@@ -8,6 +8,8 @@ export interface ServiceItem {
   priceCents: number;
   currency: string;
   active: boolean;
+  /** The heading it sits under, if the business uses them. */
+  categoryId?: string;
 }
 
 export interface CreateServicePayload {
@@ -16,6 +18,8 @@ export interface CreateServicePayload {
   durationMinutes: number;
   priceCents: number;
   active?: boolean;
+  /** A category id, or null to ungroup it. Undefined leaves it as it is. */
+  category?: string | null;
 }
 
 export type UpdateServicePayload = Partial<CreateServicePayload>;

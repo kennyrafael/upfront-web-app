@@ -2,6 +2,7 @@ export * from './alerts';
 export * from './auth';
 export * from './bookings';
 export * from './businesses';
+export * from './categories';
 export * from './client';
 export * from './clients';
 export * from './compliance';

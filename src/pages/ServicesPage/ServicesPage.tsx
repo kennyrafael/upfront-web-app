@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Button,
+  CategoryManagerDialog,
   DashboardLayout,
   Label,
   ServiceCatalogTable,
@@ -9,21 +10,26 @@ import {
 } from '@/components';
 import { useCopy } from '@/lib';
 import type { ServiceItem } from '@/lib/api';
-import { useServiceStore } from '@/stores';
+import { useCategoryStore, useServiceStore } from '@/stores';
 
 export function ServicesPage() {
   const copy = useCopy();
   const load = useServiceStore((state) => state.load);
+  const loadCategories = useCategoryStore((state) => state.load);
   const includeInactive = useServiceStore((state) => state.includeInactive);
   const setIncludeInactive = useServiceStore((state) => state.setIncludeInactive);
   const error = useServiceStore((state) => state.error);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [editing, setEditing] = useState<ServiceItem>();
 
   useEffect(() => {
     void load();
-  }, [load]);
+    // Loaded here rather than in the dialog: the table groups by them and the service form
+    // offers them, so both would otherwise wait for a dialog nobody has opened.
+    void loadCategories();
+  }, [load, loadCategories]);
 
   function openCreate() {
     setEditing(undefined);
@@ -39,7 +45,14 @@ export function ServicesPage() {
     <DashboardLayout
       title={copy.services.title}
       description={copy.services.lede}
-      actions={<Button onClick={openCreate}>{copy.services.newService}</Button>}
+      actions={
+        <>
+          <Button variant="secondary" onClick={() => setCategoriesOpen(true)}>
+            {copy.categories.title}
+          </Button>
+          <Button onClick={openCreate}>{copy.services.newService}</Button>
+        </>
+      }
     >
       <div className="mb-4 flex items-center gap-3">
         <Switch
@@ -61,6 +74,7 @@ export function ServicesPage() {
       <ServiceCatalogTable onEdit={openEdit} />
 
       <ServiceFormDialog open={dialogOpen} onOpenChange={setDialogOpen} service={editing} />
+      <CategoryManagerDialog open={categoriesOpen} onOpenChange={setCategoriesOpen} />
     </DashboardLayout>
   );
 }

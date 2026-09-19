@@ -1,6 +1,7 @@
 import { useAlertStore } from './useAlertStore';
 import { useBookingStore } from './useBookingStore';
 import { useBusinessStore } from './useBusinessStore';
+import { useCategoryStore } from './useCategoryStore';
 import { useClientStore } from './useClientStore';
 import { useComplianceStore } from './useComplianceStore';
 import { useEmployeeStore } from './useEmployeeStore';
@@ -14,6 +15,7 @@ import { useServiceStore } from './useServiceStore';
 export function resetDomainStores(): void {
   useBusinessStore.getState().reset();
   useServiceStore.getState().reset();
+  useCategoryStore.getState().reset();
   useClientStore.getState().reset();
   useBookingStore.getState().reset();
   useComplianceStore.getState().reset();

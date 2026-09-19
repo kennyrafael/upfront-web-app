@@ -3,6 +3,7 @@ export * from './useAlertStore';
 export * from './useAuthStore';
 export * from './useBookingStore';
 export * from './useBusinessStore';
+export * from './useCategoryStore';
 export * from './useClientStore';
 export * from './useComplianceStore';
 export * from './useEmployeeStore';
