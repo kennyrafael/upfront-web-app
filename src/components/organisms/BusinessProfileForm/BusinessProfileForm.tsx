@@ -1,9 +1,9 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atoms';
-import { FormField } from '@/components/molecules';
+import { FormField, SelectField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import { useCopy } from '@/lib';
-import type { BusinessProfile, WorkingHours } from '@/lib/api';
+import { type BusinessProfile, SLOT_MINUTES_CHOICES, type WorkingHours } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
 interface ProfileFields {
@@ -29,6 +29,7 @@ export function BusinessProfileForm() {
 
   const [fields, setFields] = useState<ProfileFields>(() => toFields(profile));
   const [hours, setHours] = useState<WorkingHours[]>(profile?.hours ?? []);
+  const [slotMinutes, setSlotMinutes] = useState<number>(profile?.slotMinutes ?? 30);
   const [nifError, setNifError] = useState<string>();
   const [saved, setSaved] = useState(false);
 
@@ -36,6 +37,7 @@ export function BusinessProfileForm() {
   useEffect(() => {
     setFields(toFields(profile));
     setHours(profile?.hours ?? []);
+    setSlotMinutes(profile?.slotMinutes ?? 30);
   }, [profile]);
 
   function setField(key: keyof ProfileFields, value: string) {
@@ -57,6 +59,7 @@ export function BusinessProfileForm() {
       phone: fields.phone || undefined,
       nif: fields.nif || undefined,
       hours,
+      slotMinutes,
     });
     setSaved(ok);
   }
@@ -111,6 +114,27 @@ export function BusinessProfileForm() {
               setSaved(false);
             }}
           />
+
+          {/*
+            Beside the hours rather than with the booking page, because it is both: the
+            rows of the calendar and the starts offered to clients are the same grid.
+          */}
+          <div className="mt-6 max-w-xs border-t border-hairline pt-5">
+            <SelectField
+              label={copy.settings.slotMinutes}
+              hint={copy.settings.slotMinutesHint}
+              disabled={busy}
+              value={String(slotMinutes)}
+              onValueChange={(value) => {
+                setSlotMinutes(Number(value));
+                setSaved(false);
+              }}
+              options={SLOT_MINUTES_CHOICES.map((minutes) => ({
+                value: String(minutes),
+                label: copy.settings.everyMinutes(minutes),
+              }))}
+            />
+          </div>
         </CardBody>
       </Card>
 

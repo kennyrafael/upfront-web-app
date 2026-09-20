@@ -201,6 +201,7 @@ export const en: Dictionary = {
       'Click an empty slot to book it, or a booking to edit it. Shaded bands are working hours.',
     bookedOnline: 'Booked by the client online',
     bookedOnlineShort: 'Booked online:',
+    bookAt: (column: string, time: string) => `Book ${column} at ${time}`,
 
     formLede: 'The end time comes from the services chosen; overlaps are rejected.',
     client: 'Client',
@@ -418,6 +419,11 @@ export const en: Dictionary = {
     saveChanges: 'Save changes',
     shopHoursLede: (timezone: string) =>
       `When the door is open, local to ${timezone}. A ceiling rather than an offer — what each person is bookable for is this crossed with their own hours. Split a day into two rows to carve out a lunch break.`,
+    slotMinutes: 'Time between bookings',
+    slotMinutesHint:
+      'The rows of your calendar and the times offered to clients. A shorter step makes the day taller on screen.',
+    everyMinutes: (minutes: number): string =>
+      minutes === 60 ? 'Every hour' : `Every ${minutes} minutes`,
   },
   hours: {
     noneSet:

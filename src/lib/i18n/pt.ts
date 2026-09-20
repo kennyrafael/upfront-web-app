@@ -218,6 +218,7 @@ export const pt = {
       'Clique num espaço livre para marcar, ou numa marcação para a editar. As faixas sombreadas são o horário de trabalho.',
     bookedOnline: 'Marcado pelo cliente online',
     bookedOnlineShort: 'Marcado online:',
+    bookAt: (column: string, time: string) => `Marcar ${column} às ${time}`,
 
     formLede: 'A hora de fim vem dos serviços escolhidos; sobreposições são recusadas.',
     client: 'Cliente',
@@ -452,6 +453,11 @@ export const pt = {
     saveChanges: 'Guardar alterações',
     shopHoursLede: (timezone: string) =>
       `Quando a porta está aberta, na hora de ${timezone}. É um tecto e não uma oferta — cada pessoa só pode ser marcada no cruzamento disto com o seu próprio horário. Divida um dia em duas linhas para reservar a hora de almoço.`,
+    slotMinutes: 'Intervalo entre marcações',
+    slotMinutesHint:
+      'As linhas da sua agenda e as horas oferecidas aos clientes. Um intervalo mais curto torna o dia mais alto no ecrã.',
+    everyMinutes: (minutes: number): string =>
+      minutes === 60 ? 'De hora a hora' : `De ${minutes} em ${minutes} minutos`,
   },
   hours: {
     noneSet:

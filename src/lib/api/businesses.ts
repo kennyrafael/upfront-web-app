@@ -7,6 +7,14 @@ export interface WorkingHours {
   end: string;
 }
 
+/**
+ * How finely the day divides, in minutes. Mirrors `SLOT_MINUTES_CHOICES` on the API.
+ *
+ * All of them divide an hour, so the grid lines up with the clock — 25 would put a row at
+ * 10:25 under a heading that says 10:00.
+ */
+export const SLOT_MINUTES_CHOICES = [5, 10, 15, 20, 30, 60] as const;
+
 /** The shop. The person signing in is `AuthenticatedUser` — they stopped being one record. */
 export interface BusinessProfile {
   id: string;
@@ -17,6 +25,8 @@ export interface BusinessProfile {
   onboardedAt?: string;
   /** When the shop is open. A ceiling: availability is this intersected with a person's own. */
   hours: WorkingHours[];
+  /** The grid: the rows of the calendar and the starts offered to clients. */
+  slotMinutes: number;
   slug?: string;
   publicBookingEnabled: boolean;
   autoConfirmPublicBookings: boolean;
@@ -38,6 +48,7 @@ export interface UpdateBusinessPayload {
   nif?: string;
   timezone?: string;
   hours?: WorkingHours[];
+  slotMinutes?: number;
   slug?: string;
   publicBookingEnabled?: boolean;
   autoConfirmPublicBookings?: boolean;

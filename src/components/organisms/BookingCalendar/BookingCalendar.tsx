@@ -25,9 +25,23 @@ export interface BookingCalendarProps {
   onCreateAt: (start: Date, employeeId?: string) => void;
 }
 
-/** Pixels per hour. Tall enough that a 30-minute booking still reads as a block. */
-const HOUR_HEIGHT = 56;
-const SLOT_MINUTES = 30;
+/** Pixels per hour at the default grid. Tall enough that a 30-minute booking reads as a block. */
+const BASE_HOUR_HEIGHT = 56;
+
+/**
+ * The shortest a clickable row may get.
+ *
+ * A finer grid makes the *day* taller rather than the rows shorter. At five-minute slots,
+ * keeping 56px to the hour would leave rows under 5px — a target nobody can hit, on the
+ * screen a shop uses all day.
+ */
+const MIN_ROW_HEIGHT = 28;
+
+/** Pixels per hour for a given grid: the default until the rows would get too small. */
+function hourHeightFor(slotMinutes: number): number {
+  return Math.max(BASE_HOUR_HEIGHT, (60 / slotMinutes) * MIN_ROW_HEIGHT);
+}
+
 const FALLBACK_RANGE = { start: 8 * 60, end: 20 * 60 };
 
 const STATUS_STYLES: Record<BookingStatus, string> = {
@@ -62,6 +76,8 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
   const weekEmployeeId = useBookingStore((state) => state.weekEmployeeId);
   const status = useBookingStore((state) => state.status);
   const shopHours = useBusinessStore((state) => state.profile?.hours);
+  // The shop's own grid: the rows here are the starts its clients are offered.
+  const slotMinutes = useBusinessStore((state) => state.profile?.slotMinutes ?? 30);
   const people = useEmployeeStore((state) => state.items);
   const loadPeople = useEmployeeStore((state) => state.load);
 
@@ -147,7 +163,8 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
     return list;
   }, [range]);
 
-  const gridHeight = ((range.end - range.start) / 60) * HOUR_HEIGHT;
+  const hourHeight = hourHeightFor(slotMinutes);
+  const gridHeight = ((range.end - range.start) / 60) * hourHeight;
   const today = new Date();
 
   /**
@@ -233,7 +250,7 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
                 <div
                   key={minute}
                   className="-translate-y-1/2 absolute right-2 text-[11px] text-ink-muted tabular-nums"
-                  style={{ top: ((minute - range.start) / 60) * HOUR_HEIGHT }}
+                  style={{ top: ((minute - range.start) / 60) * hourHeight }}
                 >
                   {String(Math.floor(minute / 60)).padStart(2, '0')}:00
                 </div>
@@ -247,6 +264,8 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
                 range={range}
                 hours={hours}
                 height={gridHeight}
+                hourHeight={hourHeight}
+                slotMinutes={slotMinutes}
                 bookings={column.bookings}
                 workingMinutes={column.hours.map((slot) => ({
                   start: toMinutes(slot.start),
@@ -269,6 +288,10 @@ interface DayColumnProps {
   range: { start: number; end: number };
   hours: number[];
   height: number;
+  /** Pixels per hour, derived from the shop's grid so the rows stay clickable. */
+  hourHeight: number;
+  /** Minutes per row: the shop's grid, and the starts its clients are offered. */
+  slotMinutes: number;
   bookings: Booking[];
   workingMinutes: { start: number; end: number }[];
   /** What this column is: a weekday in the week view, a person's name in the day view. */
@@ -282,6 +305,8 @@ function DayColumn({
   range,
   hours,
   height,
+  hourHeight,
+  slotMinutes,
   bookings,
   workingMinutes,
   label,
@@ -291,9 +316,9 @@ function DayColumn({
   const copy = useCopy();
   const slots = useMemo(() => {
     const list: number[] = [];
-    for (let minute = range.start; minute < range.end; minute += SLOT_MINUTES) list.push(minute);
+    for (let minute = range.start; minute < range.end; minute += slotMinutes) list.push(minute);
     return list;
-  }, [range]);
+  }, [range, slotMinutes]);
 
   return (
     <div className="relative border-l border-hairline" style={{ height }}>
@@ -304,10 +329,10 @@ function DayColumn({
           key={`${slot.start}-${slot.end}`}
           className="absolute inset-x-0 bg-brand-700/8"
           style={{
-            top: ((Math.max(slot.start, range.start) - range.start) / 60) * HOUR_HEIGHT,
+            top: ((Math.max(slot.start, range.start) - range.start) / 60) * hourHeight,
             height:
               ((Math.min(slot.end, range.end) - Math.max(slot.start, range.start)) / 60) *
-              HOUR_HEIGHT,
+              hourHeight,
           }}
         />
       ))}
@@ -316,7 +341,7 @@ function DayColumn({
         <div
           key={minute}
           className="absolute inset-x-0 border-t border-hairline/70"
-          style={{ top: ((minute - range.start) / 60) * HOUR_HEIGHT }}
+          style={{ top: ((minute - range.start) / 60) * hourHeight }}
         />
       ))}
 
@@ -327,12 +352,15 @@ function DayColumn({
           <button
             key={minute}
             type="button"
-            aria-label={`Book ${label} at ${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`}
+            aria-label={copy.bookings.bookAt(
+              label,
+              `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`,
+            )}
             onClick={() => onCreateAt(start)}
             className="absolute inset-x-0 transition-colors hover:bg-brand-700/8"
             style={{
-              top: ((minute - range.start) / 60) * HOUR_HEIGHT,
-              height: (SLOT_MINUTES / 60) * HOUR_HEIGHT,
+              top: ((minute - range.start) / 60) * hourHeight,
+              height: (slotMinutes / 60) * hourHeight,
             }}
           />
         );
@@ -341,8 +369,8 @@ function DayColumn({
       {bookings.map((booking) => {
         const start = new Date(booking.startsAt);
         const end = new Date(booking.endsAt);
-        const top = ((minutesSinceMidnight(start) - range.start) / 60) * HOUR_HEIGHT;
-        const minutes = Math.max(SLOT_MINUTES / 2, (end.getTime() - start.getTime()) / 60_000);
+        const top = ((minutesSinceMidnight(start) - range.start) / 60) * hourHeight;
+        const minutes = Math.max(slotMinutes / 2, (end.getTime() - start.getTime()) / 60_000);
 
         return (
           <button
@@ -355,7 +383,7 @@ function DayColumn({
               'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-700',
               STATUS_STYLES[booking.status],
             )}
-            style={{ top, height: (minutes / 60) * HOUR_HEIGHT - 2 }}
+            style={{ top, height: (minutes / 60) * hourHeight - 2 }}
           >
             <span className="block truncate font-medium">
               {booking.source === 'public' ? (
