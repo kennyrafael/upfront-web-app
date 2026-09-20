@@ -7,11 +7,12 @@ import {
   cn,
   formatDayHeading,
   formatTime,
+  gridStepFor,
   intersectHours,
   isSameDay,
   minutesSinceMidnight,
 } from '@/lib/utils';
-import { useBookingStore, useBusinessStore, useEmployeeStore } from '@/stores';
+import { useBookingStore, useBusinessStore, useEmployeeStore, useServiceStore } from '@/stores';
 
 export interface BookingCalendarProps {
   onSelect: (booking: Booking) => void;
@@ -76,8 +77,9 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
   const weekEmployeeId = useBookingStore((state) => state.weekEmployeeId);
   const status = useBookingStore((state) => state.status);
   const shopHours = useBusinessStore((state) => state.profile?.hours);
-  // The shop's own grid: the rows here are the starts its clients are offered.
-  const slotMinutes = useBusinessStore((state) => state.profile?.slotMinutes ?? 30);
+  // Absent means automatic, which is the usual case — see `slotMinutes` below.
+  const chosenStep = useBusinessStore((state) => state.profile?.slotMinutes);
+  const services = useServiceStore((state) => state.items);
   const people = useEmployeeStore((state) => state.items);
   const loadPeople = useEmployeeStore((state) => state.load);
 
@@ -162,6 +164,24 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
     for (let minute = range.start; minute < range.end; minute += 60) list.push(minute);
     return list;
   }, [range]);
+
+  /**
+   * How finely to rule the day.
+   *
+   * Automatic asks what is actually here: the shop's own service lengths, plus the start
+   * of everything already on screen. The second half matters because a booking can be
+   * off-grid however the grid was chosen — a 09:10 start typed in by hand, or a service
+   * whose length changed after it was booked — and a row it cannot sit on would leave it
+   * drawn between the lines with no way to click its slot.
+   */
+  const slotMinutes = useMemo(() => {
+    if (chosenStep) return chosenStep;
+
+    return gridStepFor([
+      ...services.map((service) => service.durationMinutes),
+      ...visible.map((booking) => minutesSinceMidnight(new Date(booking.startsAt))),
+    ]);
+  }, [chosenStep, services, visible]);
 
   const hourHeight = hourHeightFor(slotMinutes);
   const gridHeight = ((range.end - range.start) / 60) * hourHeight;
