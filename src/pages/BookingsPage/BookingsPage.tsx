@@ -5,12 +5,25 @@ import {
   Button,
   ChargeBalanceDialog,
   DashboardLayout,
+  MonthCalendar,
   Select,
 } from '@/components';
 import { useCopy } from '@/lib';
 import type { Booking } from '@/lib/api';
-import { formatDayHeading, formatWeekRange, startOfWeek } from '@/lib/utils';
-import { useAuthStore, useBookingStore, useBusinessStore, useEmployeeStore } from '@/stores';
+import {
+  formatDayHeading,
+  formatMonth,
+  formatWeekRange,
+  startOfMonth,
+  startOfWeek,
+} from '@/lib/utils';
+import {
+  useAuthStore,
+  useBookingStore,
+  useBusinessStore,
+  useEmployeeStore,
+  useServiceStore,
+} from '@/stores';
 
 export function BookingsPage() {
   const copy = useCopy();
@@ -24,6 +37,10 @@ export function BookingsPage() {
   const shiftWeek = useBookingStore((state) => state.shiftWeek);
   const goToWeek = useBookingStore((state) => state.goToWeek);
   const shiftDay = useBookingStore((state) => state.shiftDay);
+  const monthStart = useBookingStore((state) => state.monthStart);
+  const shiftMonth = useBookingStore((state) => state.shiftMonth);
+  const goToMonth = useBookingStore((state) => state.goToMonth);
+  const openDay = useBookingStore((state) => state.openDay);
   const goToDay = useBookingStore((state) => state.goToDay);
   const error = useBookingStore((state) => state.error);
 
@@ -31,6 +48,8 @@ export function BookingsPage() {
   const timezone = useBusinessStore((state) => state.profile?.timezone);
   const people = useEmployeeStore((state) => state.items);
   const loadPeople = useEmployeeStore((state) => state.load);
+  // The automatic grid is derived from what the shop sells, so the calendar needs them.
+  const loadServices = useServiceStore((state) => state.load);
   const me = useAuthStore((state) => state.user);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,7 +63,8 @@ export function BookingsPage() {
     // The calendar shades working hours, so it needs the profile as well as the bookings.
     void loadProfile();
     void loadPeople();
-  }, [load, loadProfile, loadPeople]);
+    void loadServices();
+  }, [load, loadProfile, loadPeople, loadServices]);
 
   /**
    * Staff see their own week and are not offered the picker.
@@ -76,34 +96,47 @@ export function BookingsPage() {
 
   const isThisWeek = weekStart.getTime() === startOfWeek(new Date()).getTime();
   const isToday = day.toDateString() === new Date().toDateString();
+  const isThisMonth = monthStart.getTime() === startOfMonth(new Date()).getTime();
+
+  const periodLabel =
+    view === 'week'
+      ? copy.bookings.weekOf(formatWeekRange(weekStart))
+      : view === 'month'
+        ? formatMonth(monthStart)
+        : formatDayHeading(day);
 
   return (
     <DashboardLayout
       title={copy.bookings.title}
-      description={
-        view === 'week'
-          ? `${copy.bookings.weekOf(formatWeekRange(weekStart))}${timezone ? ` · ${timezone}` : ''}`
-          : `${formatDayHeading(day)}${timezone ? ` · ${timezone}` : ''}`
-      }
+      description={`${periodLabel}${timezone ? ` · ${timezone}` : ''}`}
       actions={<Button onClick={() => openCreate()}>{copy.bookings.newBooking}</Button>}
     >
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {/* Week or day, because those are the two questions: how is one person's week, and
-            who is doing what today. A week of five people does not fit on a screen. */}
+        {/* Three shapes because no one grid answers everything: who is doing what today,
+            how is one person's week, and where is there room this month. A week of five
+            people does not fit on a screen, and a month of anybody's appointments is a
+            density map rather than a timetable. */}
         <div className="flex items-center gap-1 rounded-lg bg-sheet/60 p-0.5 ring-1 ring-hairline">
           <Button
             variant={view === 'week' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => setView('week')}
+            onClick={() => void setView('week')}
           >
             {copy.bookings.week}
           </Button>
           <Button
             variant={view === 'day' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => setView('day')}
+            onClick={() => void setView('day')}
           >
             {copy.bookings.day}
+          </Button>
+          <Button
+            variant={view === 'month' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => void setView('month')}
+          >
+            {copy.bookings.month}
           </Button>
         </div>
 
@@ -133,6 +166,23 @@ export function BookingsPage() {
               />
             ) : null}
           </>
+        ) : view === 'month' ? (
+          <>
+            <Button variant="secondary" size="sm" onClick={() => void shiftMonth(-1)}>
+              {copy.bookings.previous}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={isThisMonth}
+              onClick={() => void goToMonth(new Date())}
+            >
+              {copy.bookings.thisMonth}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => void shiftMonth(1)}>
+              {copy.bookings.next}
+            </Button>
+          </>
         ) : (
           <>
             <Button variant="secondary" size="sm" onClick={() => void shiftDay(-1)}>
@@ -159,18 +209,26 @@ export function BookingsPage() {
         </p>
       ) : null}
 
-      <BookingCalendar
-        onSelect={(booking) => {
-          setEditing(booking);
-          setInitialStart(undefined);
-          setInitialEmployeeId(undefined);
-          setDialogOpen(true);
-        }}
-        onCreateAt={openCreate}
-      />
+      {view === 'month' ? (
+        <MonthCalendar onOpenDay={(clicked) => void openDay(clicked)} />
+      ) : (
+        <BookingCalendar
+          onSelect={(booking) => {
+            setEditing(booking);
+            setInitialStart(undefined);
+            setInitialEmployeeId(undefined);
+            setDialogOpen(true);
+          }}
+          onCreateAt={openCreate}
+        />
+      )}
 
       <p className="mt-3 text-ink-muted text-xs">
-        {view === 'day' ? copy.bookings.dayHint : copy.bookings.weekHint}
+        {view === 'day'
+          ? copy.bookings.dayHint
+          : view === 'month'
+            ? copy.bookings.monthHint
+            : copy.bookings.weekHint}
       </p>
 
       <BookingFormDialog

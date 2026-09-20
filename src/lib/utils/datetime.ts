@@ -82,6 +82,31 @@ export function formatFullDate(date: Date): string {
   return dateFormat({ weekday: 'long', day: 'numeric', month: 'long' }).format(date);
 }
 
+/** Midnight on the first of this date's month, local. */
+export function startOfMonth(date: Date): Date {
+  const first = new Date(date);
+  first.setDate(1);
+  first.setHours(0, 0, 0, 0);
+  return first;
+}
+
+/** Adds months, clamping the day — 31 January plus one month is the end of February. */
+export function addMonths(date: Date, months: number): Date {
+  const moved = startOfMonth(date);
+  moved.setMonth(moved.getMonth() + months);
+  return moved;
+}
+
+/** "setembro de 2026" — the heading over a month grid. */
+export function formatMonth(date: Date): string {
+  return dateFormat({ month: 'long', year: 'numeric' }).format(date);
+}
+
+/** Just the number in the cell's corner, formatted rather than concatenated. */
+export function formatDayNumber(date: Date): string {
+  return dateFormat({ day: 'numeric' }).format(date);
+}
+
 /** "1 – 7 Jun 2026", collapsing the month when the week does not straddle one. */
 export function formatWeekRange(weekStart: Date): string {
   const weekEnd = addDays(weekStart, 6);

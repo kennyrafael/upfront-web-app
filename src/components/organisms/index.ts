@@ -13,6 +13,7 @@ export * from './DepositWaiting';
 export * from './InvoiceFormDialog';
 export * from './InvoiceTable';
 export * from './LoginForm';
+export * from './MonthCalendar';
 export * from './MyDetailsForm';
 export * from './NotificationBell';
 export * from './PaymentDialog';

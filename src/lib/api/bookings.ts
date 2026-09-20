@@ -68,6 +68,15 @@ export interface BookingRange {
   to: string;
 }
 
+/** One cell of the month grid: how full a day is, and a glimpse of it. */
+export interface DaySummary {
+  /** `YYYY-MM-DD`, already in the shop's timezone — compare it, do not re-parse it. */
+  day: string;
+  count: number;
+  /** The first few of the day, in order. `count` carries the rest. */
+  first: { startsAt: string; status: BookingStatus }[];
+}
+
 /** "Corte de cabelo + Barba" — how an appointment's services read in one line. */
 export function describeBooking(booking: { items: { name: string }[] }): string {
   return booking.items.map((item) => item.name).join(' + ') || 'Service';
@@ -81,6 +90,16 @@ export const bookingsApi = {
   list: ({ from, to }: BookingRange) =>
     api.get<Page<Booking>>(
       `/bookings?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&pageSize=${MAX_PAGE_SIZE}`,
+    ),
+  /**
+   * One row per day, for the month grid.
+   *
+   * A summary rather than the bookings: a busy shop has more in a month than the list
+   * endpoint will return, so a month built on `list` would be quietly incomplete.
+   */
+  month: ({ from, to }: BookingRange) =>
+    api.get<DaySummary[]>(
+      `/bookings/month?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
     ),
   /** Every booking for one client, for building a recibo from past work. */
   listByClient: (clientId: string) =>

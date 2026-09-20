@@ -218,6 +218,16 @@ export const pt = {
       'Clique num espaço livre para marcar, ou numa marcação para a editar. As faixas sombreadas são o horário de trabalho.',
     bookedOnline: 'Marcado pelo cliente online',
     bookedOnlineShort: 'Marcado online:',
+    month: 'Mês',
+    thisMonth: 'Este mês',
+    monthHint: 'Quão cheio está cada dia. Clique num dia para o abrir e trabalhar nele.',
+    openDay: (day: string, count: number): string =>
+      count === 0
+        ? `Dia ${day}, sem marcações`
+        : count === 1
+          ? `Dia ${day}, 1 marcação`
+          : `Dia ${day}, ${count} marcações`,
+    andMore: (count: number) => `+${count}`,
     bookAt: (column: string, time: string) => `Marcar ${column} às ${time}`,
 
     formLede: 'A hora de fim vem dos serviços escolhidos; sobreposições são recusadas.',

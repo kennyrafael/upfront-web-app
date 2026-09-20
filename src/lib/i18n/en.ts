@@ -201,6 +201,16 @@ export const en: Dictionary = {
       'Click an empty slot to book it, or a booking to edit it. Shaded bands are working hours.',
     bookedOnline: 'Booked by the client online',
     bookedOnlineShort: 'Booked online:',
+    month: 'Month',
+    thisMonth: 'This month',
+    monthHint: 'How full each day is. Click a day to open it and work in it.',
+    openDay: (day: string, count: number): string =>
+      count === 0
+        ? `Day ${day}, nothing booked`
+        : count === 1
+          ? `Day ${day}, 1 booking`
+          : `Day ${day}, ${count} bookings`,
+    andMore: (count: number) => `+${count}`,
     bookAt: (column: string, time: string) => `Book ${column} at ${time}`,
 
     formLede: 'The end time comes from the services chosen; overlaps are rejected.',
