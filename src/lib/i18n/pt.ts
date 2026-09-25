@@ -404,7 +404,7 @@ export const pt = {
     waitingApproval: 'A aguardar a sua aprovação —',
     couldNotStart: 'Não foi possível iniciar o pagamento',
     unavailable:
-      'Este negócio ainda não consegue receber pagamentos online. A hora não ficou reservada — contacte-o diretamente para marcar.',
+      'Este negócio ainda não consegue receber pagamentos online. Contacte-o diretamente para marcar.',
     tryAgain: 'Tentar outra vez',
   },
 

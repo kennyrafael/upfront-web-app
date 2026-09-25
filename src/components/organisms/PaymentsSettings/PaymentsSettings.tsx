@@ -92,7 +92,12 @@ export function PaymentsSettings() {
     let attached: HTMLElement | undefined;
     void (async () => {
       const created = (await instance())?.create('account-onboarding');
-      if (!created || !mount.current) return;
+      if (!created || !mount.current) {
+        // Back to the button rather than sitting in an empty panel. `start` checks the same
+        // thing first, so this is the case where Stripe.js was there and then was not.
+        setOnboarding(false);
+        return;
+      }
 
       // Stripe calls this when the form is done. It is **not** proof of anything: what
       // matters is what the account can actually do, which only the gateway can say. So it
@@ -117,6 +122,13 @@ export function PaymentsSettings() {
       // this twice does not leave a second account behind — invisible, unfinished, and
       // billed for all the same.
       await connectApi.session();
+
+      // **The form replaces this button, so it must be known to exist first.** Switching to
+      // onboarding when Stripe.js cannot load leaves an empty box where the button was, with
+      // nothing to press and no way back — which is exactly what happened on a dev install
+      // with no publishable key configured.
+      if (!(await instance())) return;
+
       setOnboarding(true);
       await refresh();
     } catch (problem) {

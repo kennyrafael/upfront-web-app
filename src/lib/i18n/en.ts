@@ -370,8 +370,7 @@ export const en: Dictionary = {
     pickAnother: 'Pick another time',
     waitingApproval: 'Waiting for your approval —',
     couldNotStart: 'The payment could not be started',
-    unavailable:
-      'This business cannot take online payments yet. The slot was not held — contact them directly to book.',
+    unavailable: 'This business cannot take online payments yet. Contact them directly to book.',
     tryAgain: 'Try again',
   },
 
