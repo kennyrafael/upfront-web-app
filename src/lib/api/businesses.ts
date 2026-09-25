@@ -15,12 +15,42 @@ export interface WorkingHours {
  */
 export const SLOT_MINUTES_CHOICES = [5, 10, 15, 20, 30, 60] as const;
 
+/**
+ * Whether the business *is* a person or is a company. Mirrors `ENTITY_TYPES` on the API.
+ *
+ * Decides which identity checks the payment gateway runs and which tax id it wants. It will
+ * also decide whether compliance issues a recibo verde or a fatura, once that is built.
+ */
+export const ENTITY_TYPES = ['individual', 'company'] as const;
+export type EntityType = (typeof ENTITY_TYPES)[number];
+
+/**
+ * What the shop does. Mirrors `BUSINESS_CATEGORIES` on the API.
+ *
+ * Asked because the payment gateway requires a merchant category code and will not accept
+ * "a service business". The four-digit code is the API's business, not the provider's.
+ */
+export const BUSINESS_CATEGORIES = ['beauty', 'fitness', 'home_services', 'other'] as const;
+export type BusinessCategory = (typeof BUSINESS_CATEGORIES)[number];
+
+/** The business's own address — the one on a recibo, and the one the gateway checks. */
+export interface Address {
+  line1: string;
+  line2?: string;
+  city: string;
+  postalCode: string;
+  country?: string;
+}
+
 /** The shop. The person signing in is `AuthenticatedUser` — they stopped being one record. */
 export interface BusinessProfile {
   id: string;
   name: string;
   phone?: string;
   nif?: string;
+  entityType: EntityType;
+  businessCategory?: BusinessCategory;
+  address?: Address;
   timezone: string;
   onboardedAt?: string;
   /** When the shop is open. A ceiling: availability is this intersected with a person's own. */
@@ -46,6 +76,9 @@ export interface UpdateBusinessPayload {
   name?: string;
   phone?: string;
   nif?: string;
+  entityType?: EntityType;
+  businessCategory?: BusinessCategory;
+  address?: Address;
   timezone?: string;
   hours?: WorkingHours[];
   slotMinutes?: number;

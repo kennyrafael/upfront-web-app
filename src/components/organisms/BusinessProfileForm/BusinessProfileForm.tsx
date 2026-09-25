@@ -3,13 +3,25 @@ import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atom
 import { FormField, SelectField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import { useCopy } from '@/lib';
-import { type BusinessProfile, SLOT_MINUTES_CHOICES, type WorkingHours } from '@/lib/api';
+import {
+  BUSINESS_CATEGORIES,
+  type BusinessProfile,
+  ENTITY_TYPES,
+  SLOT_MINUTES_CHOICES,
+  type WorkingHours,
+} from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
 interface ProfileFields {
   name: string;
   phone: string;
   nif: string;
+  entityType: string;
+  businessCategory: string;
+  line1: string;
+  line2: string;
+  city: string;
+  postalCode: string;
 }
 
 function toFields(profile: BusinessProfile | null): ProfileFields {
@@ -17,6 +29,12 @@ function toFields(profile: BusinessProfile | null): ProfileFields {
     name: profile?.name ?? '',
     phone: profile?.phone ?? '',
     nif: profile?.nif ?? '',
+    entityType: profile?.entityType ?? 'individual',
+    businessCategory: profile?.businessCategory ?? '',
+    line1: profile?.address?.line1 ?? '',
+    line2: profile?.address?.line2 ?? '',
+    city: profile?.address?.city ?? '',
+    postalCode: profile?.address?.postalCode ?? '',
   };
 }
 
@@ -31,6 +49,7 @@ export function BusinessProfileForm() {
   const [hours, setHours] = useState<WorkingHours[]>(profile?.hours ?? []);
   const [slotMinutes, setSlotMinutes] = useState<number>(profile?.slotMinutes ?? 30);
   const [nifError, setNifError] = useState<string>();
+  const [postalError, setPostalError] = useState<string>();
   const [saved, setSaved] = useState(false);
 
   // The profile arrives after the first render, so the form seeds itself when it lands.
@@ -54,10 +73,29 @@ export function BusinessProfileForm() {
     }
     setNifError(undefined);
 
+    if (fields.postalCode && !/^\d{4}-\d{3}$/.test(fields.postalCode)) {
+      setPostalError(copy.settings.postalCodeError);
+      return;
+    }
+    setPostalError(undefined);
+
     const ok = await update({
       name: fields.name,
       phone: fields.phone || undefined,
       nif: fields.nif || undefined,
+      entityType: fields.entityType as BusinessProfile['entityType'],
+      businessCategory: (fields.businessCategory ||
+        undefined) as BusinessProfile['businessCategory'],
+      // All or nothing: the API rejects a partial address, because a city with no street
+      // satisfies neither the recibo nor the gateway that wanted it.
+      address: fields.line1
+        ? {
+            line1: fields.line1,
+            line2: fields.line2 || undefined,
+            city: fields.city,
+            postalCode: fields.postalCode,
+          }
+        : undefined,
       hours,
       slotMinutes,
     });
@@ -94,6 +132,68 @@ export function BusinessProfileForm() {
             hint={copy.settings.nifHint}
             value={fields.nif}
             onChange={(event) => setField('nif', event.target.value)}
+          />
+          <SelectField
+            label={copy.settings.entityType}
+            hint={copy.settings.entityTypeHint}
+            disabled={busy}
+            value={fields.entityType}
+            onValueChange={(value) => setField('entityType', value)}
+            options={ENTITY_TYPES.map((type) => ({
+              value: type,
+              label: copy.settings.entityTypes[type],
+            }))}
+          />
+          <SelectField
+            label={copy.settings.businessCategory}
+            hint={copy.settings.businessCategoryHint}
+            disabled={busy}
+            value={fields.businessCategory}
+            onValueChange={(value) => setField('businessCategory', value)}
+            options={BUSINESS_CATEGORIES.map((category) => ({
+              value: category,
+              label: copy.settings.businessCategories[category],
+            }))}
+          />
+        </CardBody>
+      </Card>
+
+      {/*
+        Its own card rather than three more inputs among the details, because it is asked for
+        by two separate things — a recibo verde carries it, and the payment gateway will not
+        enable an account without it. The lede says so, so it does not read as bureaucracy.
+      */}
+      <Card id="address">
+        <CardHeader>
+          <CardTitle>{copy.settings.address}</CardTitle>
+          <p className="mt-1 text-sm text-ink-muted">{copy.settings.addressLede}</p>
+        </CardHeader>
+        <CardBody className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <FormField
+              label={copy.settings.addressLine1}
+              value={fields.line1}
+              onChange={(event) => setField('line1', event.target.value)}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <FormField
+              label={copy.settings.addressLine2}
+              value={fields.line2}
+              onChange={(event) => setField('line2', event.target.value)}
+            />
+          </div>
+          <FormField
+            label={copy.settings.city}
+            value={fields.city}
+            onChange={(event) => setField('city', event.target.value)}
+          />
+          <FormField
+            label={copy.settings.postalCode}
+            error={postalError}
+            hint={copy.settings.postalCodeHint}
+            value={fields.postalCode}
+            onChange={(event) => setField('postalCode', event.target.value)}
           />
         </CardBody>
       </Card>
