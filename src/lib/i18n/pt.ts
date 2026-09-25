@@ -584,6 +584,14 @@ export const pt = {
     errorRead: 'Não foi possível verificar a conta. Tente novamente daqui a pouco.',
     errorStart: 'Não foi possível abrir a ligação da conta. Tente novamente daqui a pouco.',
     notConfigured: 'Os pagamentos ainda não estão configurados nesta instalação.',
+    detailsNeeded: 'Faltam dados do negócio antes de ligar os pagamentos:',
+    detailNames: {
+      nif: 'NIF',
+      phone: 'Telemóvel',
+      businessCategory: 'Área de atividade',
+      address: 'Endereço do negócio',
+    } as Record<string, string | undefined>,
+    goToDetails: 'Preencher os dados do negócio',
   },
 
   bookingPage: {

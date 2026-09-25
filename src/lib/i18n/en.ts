@@ -548,6 +548,14 @@ export const en: Dictionary = {
     errorRead: 'Could not check the account. Try again shortly.',
     errorStart: 'Could not open the account setup. Try again shortly.',
     notConfigured: 'Payments are not configured on this installation.',
+    detailsNeeded: 'Some business details are needed before payments can be connected:',
+    detailNames: {
+      nif: 'NIF',
+      phone: 'Phone',
+      businessCategory: 'What you do',
+      address: 'Business address',
+    } as Record<string, string | undefined>,
+    goToDetails: 'Fill in the business details',
   },
 
   bookingPage: {

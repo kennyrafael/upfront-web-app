@@ -74,6 +74,12 @@ export function PaymentsSettings() {
   /** The banner is where Stripe asks for something that has come up since onboarding. */
   useEffect(() => {
     if (!status || status.state === 'not_connected' || !banner.current) return;
+    // Mounting this before the business details exist is what produced Stripe's opaque
+    // "An error occurred while authenticating your account": the banner fetches a session
+    // as it mounts, and the API will not open one yet. It appears by itself whenever an
+    // account exists, so this guard is the only thing standing between a half-filled
+    // profile and an error nobody can act on.
+    if (status.detailsMissing.length > 0) return;
 
     let attached: HTMLElement | undefined;
     void (async () => {
@@ -186,7 +192,22 @@ export function PaymentsSettings() {
               </p>
             ) : null}
 
-            {onboarding ? (
+            {status.detailsMissing.length > 0 ? (
+              // Said here rather than letting the button fail: the provider is one link away
+              // from fixing it, and Stripe's own message for the same state names neither
+              // the fields nor where they live.
+              <div className="rounded-lg bg-warning/8 px-3 py-3 text-sm">
+                <p className="text-ink">{copy.payoutAccount.detailsNeeded}</p>
+                <ul className="mt-2 list-disc pl-5 text-ink-muted">
+                  {status.detailsMissing.map((field) => (
+                    <li key={field}>{copy.payoutAccount.detailNames[field] ?? field}</li>
+                  ))}
+                </ul>
+                <a className="mt-3 inline-block text-brand-ink underline" href="/settings#business">
+                  {copy.payoutAccount.goToDetails}
+                </a>
+              </div>
+            ) : onboarding ? (
               <div ref={mount} />
             ) : (
               <div>

@@ -112,6 +112,15 @@ export interface ConnectStatus {
   payoutsEnabled: boolean;
   /** The gateway's own field names for what is outstanding. Support detail, not copy. */
   requirementsDue: string[];
+  /**
+   * Business details we still need, in our own field names.
+   *
+   * **Nothing from Stripe may be mounted while this is non-empty.** Every embedded component
+   * fetches a session as it mounts, the API refuses to open one until these are filled in,
+   * and Stripe turns that refusal into "An error occurred while authenticating your account"
+   * — a message that names neither the cause nor the cure, and is not ours to reword.
+   */
+  detailsMissing: string[];
 }
 
 export const connectApi = {
