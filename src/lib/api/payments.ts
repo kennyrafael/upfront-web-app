@@ -93,3 +93,29 @@ export const paymentsApi = {
     api.patch<Payment>(`/payments/${id}`, payload),
   remove: (id: string) => api.delete<void>(`/payments/${id}`),
 };
+
+/**
+ * Where the business has got to in connecting a payments account.
+ *
+ * Three states rather than a boolean, because the middle one is real and lasts: identity
+ * checks can take a day, and a business sitting in it needs to be told that rather than
+ * shown a page that looks finished.
+ */
+export type PaymentsState = 'not_connected' | 'pending' | 'active';
+
+export interface ConnectStatus {
+  state: PaymentsState;
+  accountId?: string;
+  /** Whether they can take money yet. */
+  chargesEnabled: boolean;
+  /** Whether we can send them any — verified bank details, in practice. */
+  payoutsEnabled: boolean;
+  /** The gateway's own field names for what is outstanding. Support detail, not copy. */
+  requirementsDue: string[];
+}
+
+export const connectApi = {
+  /** Creates the account on first call, then hands back a secret for the onboarding UI. */
+  session: () => api.post<{ accountId: string; clientSecret: string }>('/payments/connect/session'),
+  status: () => api.get<ConnectStatus>('/payments/connect/status'),
+};

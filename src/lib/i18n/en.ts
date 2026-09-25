@@ -368,6 +368,11 @@ export const en: Dictionary = {
     expiredBody: 'The deposit was not approved in time, so the time has gone back on offer.',
     nothingCharged: 'Nothing was charged.',
     pickAnother: 'Pick another time',
+    waitingApproval: 'Waiting for your approval —',
+    couldNotStart: 'The payment could not be started',
+    unavailable:
+      'This business cannot take online payments yet. The slot was not held — contact them directly to book.',
+    tryAgain: 'Try again',
   },
 
   manageBooking: {
@@ -402,6 +407,7 @@ export const en: Dictionary = {
     tabBusiness: 'Business',
     tabPeople: 'People',
     tabPage: 'Booking page',
+    tabPayments: 'Payments',
 
     roles: {
       owner: 'Owner',
@@ -499,6 +505,27 @@ export const en: Dictionary = {
     noneAhead: 'Nothing booked off in the next three months.',
     pickDays: 'Pick the days this covers',
     endAfterStart: 'It has to end after it starts',
+  },
+
+  payoutAccount: {
+    title: 'Getting paid',
+    lede: 'Connect your account to take MB WAY and card payments on bookings.',
+    notConnected: 'Not connected',
+    pending: 'Being checked',
+    active: 'Ready',
+    checking: 'Checking the account…',
+    notConnectedBody:
+      'Bookings work without this — you simply cannot ask for a deposit or charge through the app.',
+    pendingBody:
+      'The account exists and is being verified. It can take up to a working day; we will say so here as soon as it is ready.',
+    activeBody:
+      'You can take payments. The money sits in your account and is transferred once the appointment has happened.',
+    outstanding: 'Still needed',
+    connect: 'Connect account',
+    finish: 'Continue',
+    errorRead: 'Could not check the account. Try again shortly.',
+    errorStart: 'Could not open the account setup. Try again shortly.',
+    notConfigured: 'Payments are not configured on this installation.',
   },
 
   bookingPage: {

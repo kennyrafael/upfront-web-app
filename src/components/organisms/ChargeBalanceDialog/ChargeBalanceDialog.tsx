@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Dialog, Spinner } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
-import { useCopy } from '@/lib';
+import { confirmMbWay, useCopy } from '@/lib';
 import { ApiError, type Booking, type BookingBalance, bookingsApi } from '@/lib/api';
 import { formatMoney } from '@/lib/utils';
 
@@ -20,9 +20,16 @@ const toCents = (euros: string) => Math.round(Number(euros.replace(',', '.')) * 
  * Opened straight off "mark completed" rather than from a menu, because that is the only
  * moment it works: a request sent after they have left is a support ticket, not a payment.
  *
- * It does not pretend to know the answer. The push goes to a phone, the client taps approve
- * or does not, and this shows what is waiting until a webhook says otherwise — refreshing on
- * demand rather than polling, because nobody wants a dialog that flickers while they talk.
+ * **The push is sent from here, not from the server.** Stripe has no documented way to
+ * confirm MB WAY without a browser, so this dialog is the browser: the server creates the
+ * payment, and the button below turns it into a notification on the client's phone. Which is
+ * a little odd and entirely fine — the person paying is standing in front of the person whose
+ * screen this is.
+ *
+ * It does not pretend to know the answer. The client taps approve or does not, and this shows
+ * what is waiting until a webhook says otherwise — refreshing when Stripe's own answer comes
+ * back, and otherwise on demand rather than polling, because nobody wants a dialog that
+ * flickers while they talk.
  */
 export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalanceDialogProps) {
   const copy = useCopy();
@@ -78,6 +85,17 @@ export function ChargeBalanceDialog({ open, onOpenChange, booking }: ChargeBalan
       });
       setSentTo(result.phone);
       await refresh();
+
+      // Deliberately not awaited. This resolves when the client taps approve, which can be a
+      // minute of them looking for their phone — and the business needs the waiting screen
+      // now, not when it is over. When it does come back it refreshes, so an approval shows
+      // up without anybody pressing "check again".
+      if (result.clientSecret) {
+        void confirmMbWay(result.clientSecret, result.phone).then(async (outcome) => {
+          if (!outcome.ok) setError(outcome.message ?? copy.balance.errorSend);
+          await refresh();
+        });
+      }
     } catch (problem) {
       setError(problem instanceof ApiError ? problem.message : copy.balance.errorSend);
     } finally {

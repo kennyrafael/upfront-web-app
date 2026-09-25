@@ -6,6 +6,7 @@ import {
   BusinessProfileForm,
   DashboardLayout,
   MyDetailsForm,
+  PaymentsSettings,
   PeopleSettings,
   PublicBookingSettings,
   SignInSettings,
@@ -27,6 +28,7 @@ const TAB_FOR_HASH: Record<string, string> = {
   '#business': 'business',
   '#people': 'people',
   '#page': 'page',
+  '#payments': 'payments',
 };
 
 export function SettingsPage() {
@@ -76,6 +78,7 @@ export function SettingsPage() {
               <Tabs.Trigger value="business">{copy.settings.tabBusiness}</Tabs.Trigger>
               <Tabs.Trigger value="people">{copy.settings.tabPeople}</Tabs.Trigger>
               <Tabs.Trigger value="page">{copy.settings.tabPage}</Tabs.Trigger>
+              <Tabs.Trigger value="payments">{copy.settings.tabPayments}</Tabs.Trigger>
             </>
           ) : null}
         </Tabs.List>
@@ -103,6 +106,13 @@ export function SettingsPage() {
               <Tabs.Content value="page" className="flex flex-col gap-6">
                 <PublicBookingSettings />
                 <BrandingSettings />
+              </Tabs.Content>
+
+              {/* Its own tab rather than a card under the booking page. Deposits are only
+                  half of it — the balance charged at the counter needs this too — and it is
+                  the one setting in here that somebody's bank details go through. */}
+              <Tabs.Content value="payments">
+                <PaymentsSettings />
               </Tabs.Content>
             </>
           ) : null}

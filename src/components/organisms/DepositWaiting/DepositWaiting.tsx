@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Spinner } from '@/components/atoms';
-import { useCopy } from '@/lib';
+import { confirmMbWay, useCopy } from '@/lib';
 import { formatMoney } from '@/lib/utils';
 import { usePublicBookingStore } from '@/stores';
 
@@ -24,9 +24,14 @@ export interface DepositWaitingProps {
 /**
  * The screen a client sits on while their MB WAY app asks them to approve the deposit.
  *
- * The page cannot know the payment succeeded on its own — the gateway tells the server, not
- * the browser — so this polls. It also counts down out loud, because the slot really is
- * released when the timer runs out and finding that out silently would be worse.
+ * **It also starts the payment.** Stripe has no documented way to confirm MB WAY from a
+ * server, so the notification on the client's phone is sent from here — which makes this
+ * screen part of the payment rather than a view of it. Mounting it is the ask.
+ *
+ * It still cannot know the payment succeeded: Stripe's own answer is a hint, and the record
+ * is the webhook the server receives. So this polls, and it counts down out loud, because the
+ * slot really is released when the timer runs out and finding that out silently would be
+ * worse.
  */
 export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
   const copy = useCopy();
@@ -35,7 +40,17 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
   const refreshDeposit = usePublicBookingStore((state) => state.refreshDeposit);
 
   const expiresAt = result?.deposit?.expiresAt;
+  const clientSecret = result?.deposit?.clientSecret;
   const [remaining, setRemaining] = useState(() => (expiresAt ? secondsLeft(expiresAt) : 0));
+  /** Set when Stripe refused outright, or when there is no Stripe to ask. */
+  const [problem, setProblem] = useState<{ unavailable: boolean; message?: string }>();
+  /**
+   * Whether the request has already gone out.
+   *
+   * A ref, not state: React re-runs effects on mount in development, and asking twice would
+   * put two payment requests on somebody's phone for one booking.
+   */
+  const asked = useRef(false);
 
   useEffect(() => {
     if (!expiresAt) return;
@@ -43,6 +58,27 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
     const tick = setInterval(() => setRemaining(secondsLeft(expiresAt)), 1000);
     return () => clearInterval(tick);
   }, [expiresAt]);
+
+  useEffect(() => {
+    if (!clientSecret || asked.current) return;
+    asked.current = true;
+
+    void (async () => {
+      const outcome = await confirmMbWay(clientSecret, phone);
+      if (outcome.ok) {
+        // Their app says yes. The money is not ours to declare received — the webhook does
+        // that — so this only stops us waiting three seconds for the next poll.
+        await refreshDeposit();
+        return;
+      }
+      // Both "no Stripe key" and "Stripe.js has no MB WAY" are ours to fix, not the client's:
+      // nothing they do will make the payment work, so they are told the slot is not held.
+      setProblem({
+        unavailable: outcome.reason !== 'declined',
+        message: outcome.message,
+      });
+    })();
+  }, [clientSecret, phone, refreshDeposit]);
 
   useEffect(() => {
     // Stop asking the moment there is nothing left to wait for. A page left open must not
@@ -64,6 +100,28 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
 
   const amount = result?.deposit?.amountCents ?? 0;
   const lapsed = depositStatus === 'expired' || depositStatus === 'failed' || remaining === 0;
+
+  // Said plainly rather than left as a spinner that will never stop. A refusal from the app
+  // is the client's own decision and they can try again; no Stripe account at all is the
+  // business's problem, and the client needs to hear that the slot is not theirs.
+  if (problem && depositStatus !== 'paid') {
+    return (
+      <div className="flex flex-col gap-4">
+        <Card className="px-4 py-3">
+          <p className="font-medium text-brand-900">
+            {problem.unavailable ? copy.deposit.notHeld : copy.deposit.couldNotStart}
+          </p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {problem.unavailable ? copy.deposit.unavailable : problem.message}{' '}
+            <strong className="font-medium text-brand-900">{copy.deposit.nothingCharged}</strong>
+          </p>
+        </Card>
+        <Button fullWidth onClick={onStartOver}>
+          {problem.unavailable ? copy.deposit.pickAnother : copy.deposit.tryAgain}
+        </Button>
+      </div>
+    );
+  }
 
   if (lapsed && depositStatus !== 'paid') {
     return (
@@ -97,7 +155,7 @@ export function DepositWaiting({ phone, onStartOver }: DepositWaitingProps) {
 
       <p className="flex items-center justify-center gap-2 text-sm text-ink-muted">
         <Spinner className="size-4 text-brand-ink" />
-        Waiting for your approval —{' '}
+        {copy.deposit.waitingApproval}{' '}
         <span className="tabular-nums">{formatCountdown(remaining)}</span> {copy.deposit.timeLeft}
       </p>
 

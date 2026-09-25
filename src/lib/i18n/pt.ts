@@ -401,6 +401,11 @@ export const pt = {
     expiredBody: 'O sinal não foi aprovado a tempo, por isso a hora voltou a ficar disponível.',
     nothingCharged: 'Não foi cobrado nada.',
     pickAnother: 'Escolher outra hora',
+    waitingApproval: 'A aguardar a sua aprovação —',
+    couldNotStart: 'Não foi possível iniciar o pagamento',
+    unavailable:
+      'Este negócio ainda não consegue receber pagamentos online. A hora não ficou reservada — contacte-o diretamente para marcar.',
+    tryAgain: 'Tentar outra vez',
   },
 
   manageBooking: {
@@ -436,6 +441,7 @@ export const pt = {
     tabBusiness: 'Negócio',
     tabPeople: 'Pessoas',
     tabPage: 'Página de marcações',
+    tabPayments: 'Pagamentos',
 
     roles: {
       owner: 'Proprietária',
@@ -534,6 +540,27 @@ export const pt = {
     noneAhead: 'Nenhuma ausência marcada nos próximos três meses.',
     pickDays: 'Escolha os dias que isto abrange',
     endAfterStart: 'Tem de acabar depois de começar',
+  },
+
+  payoutAccount: {
+    title: 'Receber pagamentos',
+    lede: 'Ligue a sua conta para aceitar MB WAY e cartão nas marcações.',
+    notConnected: 'Por ligar',
+    pending: 'Em verificação',
+    active: 'A funcionar',
+    checking: 'A verificar a conta…',
+    notConnectedBody:
+      'Enquanto não estiver ligada, as marcações funcionam na mesma — só não é possível pedir sinal nem cobrar pela app.',
+    pendingBody:
+      'A conta foi criada e está a ser verificada. Pode demorar até um dia útil; avisamos-lhe aqui assim que estiver pronta.',
+    activeBody:
+      'Já pode receber. O dinheiro fica na sua conta e é transferido depois de a marcação acontecer.',
+    outstanding: 'Em falta',
+    connect: 'Ligar conta',
+    finish: 'Continuar',
+    errorRead: 'Não foi possível verificar a conta. Tente novamente daqui a pouco.',
+    errorStart: 'Não foi possível abrir a ligação da conta. Tente novamente daqui a pouco.',
+    notConfigured: 'Os pagamentos ainda não estão configurados nesta instalação.',
   },
 
   bookingPage: {

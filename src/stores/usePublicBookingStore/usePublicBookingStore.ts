@@ -15,7 +15,7 @@ interface BookingResult {
   reference: string;
   manageToken: string;
   nextStep: 'confirmed' | 'payment_required';
-  deposit?: { amountCents: number; expiresAt: string };
+  deposit?: { amountCents: number; expiresAt: string; clientSecret?: string };
 }
 
 interface PublicBookingState {

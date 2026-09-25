@@ -99,7 +99,18 @@ export interface CreatePublicBookingResult {
   manageToken: string;
   nextStep: 'confirmed' | 'payment_required';
   /** Present exactly when `nextStep` is `payment_required`. */
-  deposit?: { amountCents: number; expiresAt: string };
+  deposit?: {
+    amountCents: number;
+    expiresAt: string;
+    /**
+     * What the browser confirms the payment with.
+     *
+     * MB WAY approval happens in the client's own app, and Stripe has no documented way to
+     * start that from a server — so the page does it. Given once, on this response, and
+     * never fetched again: it is a bearer credential for this one payment.
+     */
+    clientSecret?: string;
+  };
 }
 
 /**

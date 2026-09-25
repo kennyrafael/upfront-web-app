@@ -151,4 +151,11 @@ export interface ChargeBalanceResult {
   amountCents: number;
   /** Echoed back, so it can be read aloud before the client's phone buzzes. */
   phone: string;
+  /**
+   * What sends the push, from this browser.
+   *
+   * MB WAY is approved on the payer's device but has to be started from a page, and here
+   * that page belongs to whoever is behind the counter rather than to the client.
+   */
+  clientSecret?: string;
 }
