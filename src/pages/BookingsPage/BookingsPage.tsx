@@ -116,7 +116,7 @@ export function BookingsPage() {
             how is one person's week, and where is there room this month. A week of five
             people does not fit on a screen, and a month of anybody's appointments is a
             density map rather than a timetable. */}
-        <div className="flex items-center gap-1 rounded-lg bg-sheet/60 p-0.5 ring-1 ring-hairline">
+        <div className="flex items-center gap-4 rounded-lg bg-sheet/60 p-0.5 ring-1 ring-hairline w-fit-content">
           <Button
             variant={view === 'week' ? 'secondary' : 'ghost'}
             size="sm"

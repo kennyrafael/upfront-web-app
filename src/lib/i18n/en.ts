@@ -133,6 +133,13 @@ export const en: Dictionary = {
     newTitle: 'New service',
     saveButton: 'Save service',
     addButton: 'Add service',
+    pauseTitle: 'Pause in the middle',
+    pauseHint:
+      'For services like colour, where you are free while it develops. Leave blank if the service runs straight through — the duration above is then what counts.',
+    workBefore: 'Work before',
+    pauseLength: 'Pause',
+    workAfter: 'Work after',
+    errorPauseParts: 'Fill all three with minutes, or leave all three blank',
     category: 'Category',
     categoryHint: 'Groups the service on your booking page.',
     noCategory: 'No category',

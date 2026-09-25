@@ -1,3 +1,4 @@
+import type { ServiceSegment } from './bookings';
 import { api } from './client';
 
 export interface ServiceItem {
@@ -8,6 +9,13 @@ export interface ServiceItem {
   priceCents: number;
   currency: string;
   active: boolean;
+  /**
+   * The stretches it holds the person for. Absent means one solid block.
+   *
+   * A colour is twenty minutes of work, thirty-five developing, twenty-five more — and
+   * the chair is free in the middle.
+   */
+  segments?: ServiceSegment[];
   /** The heading it sits under, if the business uses them. */
   categoryId?: string;
 }
@@ -18,6 +26,10 @@ export interface CreateServicePayload {
   durationMinutes: number;
   priceCents: number;
   active?: boolean;
+  /**
+   * The shape, or null to make it solid again. Sending parts sets the duration from them.
+   */
+  segments?: ServiceSegment[] | null;
   /** A category id, or null to ungroup it. Undefined leaves it as it is. */
   category?: string | null;
 }

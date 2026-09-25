@@ -4,6 +4,7 @@ import { useCopy } from '@/lib';
 import { type Booking, type BookingStatus, describeBooking } from '@/lib/api';
 import {
   addDays,
+  busyBlocks,
   cn,
   formatDayHeading,
   formatTime,
@@ -386,43 +387,63 @@ function DayColumn({
         );
       })}
 
-      {bookings.map((booking) => {
+      {bookings.flatMap((booking) => {
         const start = new Date(booking.startsAt);
-        const end = new Date(booking.endsAt);
-        const top = ((minutesSinceMidnight(start) - range.start) / 60) * hourHeight;
-        const minutes = Math.max(slotMinutes / 2, (end.getTime() - start.getTime()) / 60_000);
+        const startedAt = minutesSinceMidnight(start);
 
-        return (
-          <button
-            key={booking.id}
-            type="button"
-            onClick={() => onSelect(booking)}
-            className={cn(
-              'absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1 text-left text-[11px] leading-tight',
-              'ring-1 ring-inset backdrop-blur-sm transition-colors',
-              'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-700',
-              STATUS_STYLES[booking.status],
-            )}
-            style={{ top, height: (minutes / 60) * hourHeight - 2 }}
-          >
-            <span className="block truncate font-medium">
-              {booking.source === 'public' ? (
+        /**
+         * One block per stretch the appointment actually holds, not one per appointment.
+         *
+         * A colour is drawn as two blocks with its developing time showing between them —
+         * and because the gap is genuinely empty on screen, a booking placed inside it
+         * lands in clear space rather than on top of this one.
+         */
+        return busyBlocks(booking.items).map((block, index) => {
+          const top = ((startedAt + block.offsetMinutes - range.start) / 60) * hourHeight;
+          const minutes = Math.max(slotMinutes / 2, block.minutes);
+
+          return (
+            <button
+              key={`${booking.id}-${block.offsetMinutes}`}
+              type="button"
+              onClick={() => onSelect(booking)}
+              className={cn(
+                'absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1 text-left text-[11px] leading-tight',
+                'ring-1 ring-inset backdrop-blur-sm transition-colors',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-700',
+                STATUS_STYLES[booking.status],
+              )}
+              style={{ top, height: (minutes / 60) * hourHeight - 2 }}
+            >
+              {/* Only the first block is labelled: repeating the name either side of a
+                  gap reads as two appointments, which is exactly what it is not. */}
+              {index === 0 ? (
                 <>
-                  {/* Real text rather than an aria-label on a dot: a plain span has no
-                      role to hang one on, and this reads correctly to a screen reader. */}
-                  <span className="sr-only">{copy.bookings.bookedOnlineShort} </span>
-                  <span aria-hidden="true" title={copy.bookings.bookedOnline}>
-                    •{' '}
+                  <span className="block truncate font-medium">
+                    {booking.source === 'public' ? (
+                      <>
+                        {/* Real text rather than an aria-label on a dot: a plain span has no
+                            role to hang one on, and this reads correctly to a screen reader. */}
+                        <span className="sr-only">{copy.bookings.bookedOnlineShort} </span>
+                        <span aria-hidden="true" title={copy.bookings.bookedOnline}>
+                          •{' '}
+                        </span>
+                      </>
+                    ) : null}
+                    {booking.client.name}
+                  </span>
+                  <span className="block truncate opacity-80">
+                    {formatTime(start)} · {describeBooking(booking)}
                   </span>
                 </>
-              ) : null}
-              {booking.client.name}
-            </span>
-            <span className="block truncate opacity-80">
-              {formatTime(start)} · {describeBooking(booking)}
-            </span>
-          </button>
-        );
+              ) : (
+                <span className="sr-only">
+                  {booking.client.name} · {describeBooking(booking)}
+                </span>
+              )}
+            </button>
+          );
+        });
       })}
     </div>
   );

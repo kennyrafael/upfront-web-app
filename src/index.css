@@ -214,6 +214,26 @@
   margin-inline: 0;
 }
 
+.view-switch {
+  overflow: hidden;
+}
+
+.view-switch > button {
+  margin-inline: 0 !important;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.view-switch > button:first-child {
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
+.view-switch > button:last-child {
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
 /**
  * The picker icon at the end of the field rather than glued to the value.
  *

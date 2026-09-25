@@ -23,6 +23,10 @@ interface Fields {
   amount: string;
   active: boolean;
   category: string;
+  /** Minutes of work before the gap, the gap, and the work after it. Empty means solid. */
+  workBefore: string;
+  pause: string;
+  workAfter: string;
 }
 
 const EMPTY: Fields = {
@@ -32,6 +36,9 @@ const EMPTY: Fields = {
   amount: '',
   active: true,
   category: UNCATEGORISED,
+  workBefore: '',
+  pause: '',
+  workAfter: '',
 };
 
 function toFields(service?: ServiceItem): Fields {
@@ -43,7 +50,19 @@ function toFields(service?: ServiceItem): Fields {
     amount: centsToAmount(service.priceCents),
     active: service.active,
     category: service.categoryId ?? UNCATEGORISED,
+    // The form offers work / pause / work, which is the shape a salon actually has.
+    // A service with more parts than that keeps them until somebody edits them here.
+    workBefore: service.segments?.length ? String(service.segments[0].minutes) : '',
+    pause: service.segments?.length ? String(pauseMinutes(service.segments)) : '',
+    workAfter: service.segments?.length
+      ? String(service.segments[service.segments.length - 1].minutes)
+      : '',
   };
+}
+
+/** Everything between the first and last stretch, however many parts it came in. */
+function pauseMinutes(segments: { minutes: number; busy: boolean }[]): number {
+  return segments.slice(1, -1).reduce((total, segment) => total + segment.minutes, 0);
 }
 
 export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDialogProps) {
@@ -78,8 +97,27 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
     const priceCents = amountToCents(fields.amount);
     const nextErrors: Partial<Record<keyof Fields, string>> = {};
 
+    /**
+     * Work, gap, work — or nothing at all.
+     *
+     * All three or none: two of them describe an appointment whose parts do not add up,
+     * and the server would refuse it with a message about segments that means nothing to
+     * somebody looking at three boxes.
+     */
+    const parts = [fields.workBefore, fields.pause, fields.workAfter].map((value) =>
+      Number(value.trim()),
+    );
+    const hasPause = [fields.workBefore, fields.pause, fields.workAfter].some(
+      (value) => value.trim() !== '',
+    );
+    const partsValid = parts.every((value) => Number.isInteger(value) && value >= 1);
+
     if (fields.name.trim().length < 2) nextErrors.name = copy.services.errorName;
-    if (!Number.isInteger(duration) || duration < 5 || duration > 480) {
+    if (hasPause && !partsValid) {
+      nextErrors.pause = copy.services.errorPauseParts;
+    }
+    // Only when the length is the thing being given. With a pause it comes from the parts.
+    if (!hasPause && (!Number.isInteger(duration) || duration < 5 || duration > 480)) {
       nextErrors.durationMinutes = copy.services.errorDuration;
     }
     if (priceCents === null) nextErrors.amount = copy.services.errorPrice;
@@ -93,6 +131,15 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
       durationMinutes: duration,
       priceCents,
       active: fields.active,
+      // null, not undefined, for the same reason as the category below: undefined would
+      // leave an old shape in place and make "clear the pause" do nothing.
+      segments: hasPause
+        ? [
+            { minutes: parts[0], busy: true },
+            { minutes: parts[1], busy: false },
+            { minutes: parts[2], busy: true },
+          ]
+        : null,
       // null, not undefined: undefined leaves the category alone, which would make
       // "Sem categoria" the one choice in this form that does nothing.
       category: fields.category === UNCATEGORISED ? null : fields.category,
@@ -156,6 +203,40 @@ export function ServiceFormDialog({ open, onOpenChange, service }: ServiceFormDi
             onChange={(event) => setField('amount', event.target.value)}
           />
         </div>
+
+        {/*
+          Three boxes rather than a general editor: work, gap, work is the shape a salon
+          has, and a service with more parts than that is not worth a UI nobody will use.
+          Left empty, the service is one solid block and the duration above is its length.
+        */}
+        <fieldset className="rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
+          <legend className="px-1 font-medium text-brand-900 text-sm">
+            {copy.services.pauseTitle}
+          </legend>
+          <p className="mb-3 text-xs text-ink-muted">{copy.services.pauseHint}</p>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <FormField
+              label={copy.services.workBefore}
+              inputMode="numeric"
+              value={fields.workBefore}
+              onChange={(event) => setField('workBefore', event.target.value)}
+            />
+            <FormField
+              label={copy.services.pauseLength}
+              inputMode="numeric"
+              error={errors.pause}
+              value={fields.pause}
+              onChange={(event) => setField('pause', event.target.value)}
+            />
+            <FormField
+              label={copy.services.workAfter}
+              inputMode="numeric"
+              value={fields.workAfter}
+              onChange={(event) => setField('workAfter', event.target.value)}
+            />
+          </div>
+        </fieldset>
 
         {categories.length > 0 ? (
           <SelectField

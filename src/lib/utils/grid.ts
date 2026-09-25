@@ -19,6 +19,40 @@ export const GRID_STEPS = [30, 20, 15, 10, 5] as const;
  * starts a client can pick from, and a five-minute row is already at the limit of what a
  * finger can hit.
  */
+/**
+ * The stretches of an appointment that actually hold somebody, as offsets from its start.
+ *
+ * A service with a pause in it is drawn as two blocks with the chair-free time showing
+ * between them — which is the whole point of recording the pause, and is also what keeps
+ * a booking placed inside that gap from being drawn on top of this one.
+ *
+ * Adjacent busy stretches are merged, so two ordinary services back to back stay one
+ * block rather than becoming two with a seam down the middle.
+ */
+export function busyBlocks(
+  items: { durationMinutes: number; segments?: { minutes: number; busy: boolean }[] }[],
+): { offsetMinutes: number; minutes: number }[] {
+  const blocks: { offsetMinutes: number; minutes: number }[] = [];
+  let cursor = 0;
+
+  for (const item of items) {
+    const parts = item.segments?.length
+      ? item.segments
+      : [{ minutes: item.durationMinutes, busy: true }];
+
+    for (const part of parts) {
+      if (part.busy) {
+        const last = blocks.at(-1);
+        if (last && last.offsetMinutes + last.minutes === cursor) last.minutes += part.minutes;
+        else blocks.push({ offsetMinutes: cursor, minutes: part.minutes });
+      }
+      cursor += part.minutes;
+    }
+  }
+
+  return blocks;
+}
+
 export function gridStepFor(minutes: number[]): number {
   const usable = minutes.filter((value) => Number.isFinite(value) && value > 0);
   if (usable.length === 0) return GRID_STEPS[0];

@@ -149,6 +149,13 @@ export const pt = {
     newTitle: 'Novo serviço',
     saveButton: 'Guardar serviço',
     addButton: 'Adicionar serviço',
+    pauseTitle: 'Pausa a meio',
+    pauseHint:
+      'Para serviços como a coloração, em que fica livre enquanto a cor actua. Deixe em branco se o serviço for contínuo — a duração acima é então a que conta.',
+    workBefore: 'Trabalho antes',
+    pauseLength: 'Pausa',
+    workAfter: 'Trabalho depois',
+    errorPauseParts: 'Preencha os três campos com minutos, ou deixe todos em branco',
     category: 'Categoria',
     categoryHint: 'Agrupa o serviço na sua página de marcações.',
     noCategory: 'Sem categoria',

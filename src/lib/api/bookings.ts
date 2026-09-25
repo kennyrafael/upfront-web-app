@@ -19,6 +19,12 @@ export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 /** What a provider may set by hand. `expired` is the server's to give, not theirs. */
 export const SETTABLE_BOOKING_STATUSES = BOOKING_STATUSES.filter((status) => status !== 'expired');
 
+/** One stretch of a service: minutes, and whether the person is held by them. */
+export interface ServiceSegment {
+  minutes: number;
+  busy: boolean;
+}
+
 export interface BookingItem {
   /** The catalog entry it came from, for preselecting it in the edit form. */
   serviceId: string;
@@ -28,6 +34,8 @@ export interface BookingItem {
   name: string;
   priceCents: number;
   durationMinutes: number;
+  /** The stretches this holds the person for. Absent means all of it. */
+  segments?: ServiceSegment[];
 }
 
 export interface Booking {
