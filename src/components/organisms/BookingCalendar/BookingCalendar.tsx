@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Card, Spinner } from '@/components/atoms';
+import { useEffect, useMemo, useState } from 'react';
+import { Card, ContextMenu, Spinner, Tooltip } from '@/components/atoms';
 import { useCopy } from '@/lib';
 import { type Booking, type BookingStatus, describeBooking } from '@/lib/api';
 import {
@@ -25,6 +25,15 @@ export interface BookingCalendarProps {
    * happens to default to.
    */
   onCreateAt: (start: Date, employeeId?: string) => void;
+  /**
+   * A booking dragged onto a new row, and whose column it landed in.
+   *
+   * The employee is what makes a drag across the day view a reassignment rather than
+   * only a move in time.
+   */
+  onMove: (bookingId: string, start: Date, employeeId?: string) => void;
+  /** One of the right-click shortcuts. Everything here is also reachable through the form. */
+  onQuickAction: (booking: Booking, action: QuickAction) => void;
 }
 
 /** Pixels per hour at the default grid. Tall enough that a 30-minute booking reads as a block. */
@@ -69,7 +78,12 @@ const STATUS_STYLES: Record<BookingStatus, string> = {
  */
 const HIDDEN_FROM_CALENDAR: BookingStatus[] = ['expired'];
 
-export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) {
+export function BookingCalendar({
+  onSelect,
+  onCreateAt,
+  onMove,
+  onQuickAction,
+}: BookingCalendarProps) {
   const copy = useCopy();
   const bookings = useBookingStore((state) => state.items);
   const weekStart = useBookingStore((state) => state.weekStart);
@@ -293,8 +307,11 @@ export function BookingCalendar({ onSelect, onCreateAt }: BookingCalendarProps) 
                   end: toMinutes(slot.end),
                 }))}
                 label={column.heading}
+                employeeId={column.employeeId}
                 onSelect={onSelect}
                 onCreateAt={(start) => onCreateAt(start, column.employeeId)}
+                onMove={onMove}
+                onQuickAction={onQuickAction}
               />
             ))}
           </div>
@@ -317,9 +334,20 @@ interface DayColumnProps {
   workingMinutes: { start: number; end: number }[];
   /** What this column is: a weekday in the week view, a person's name in the day view. */
   label: string;
+  /** Whose column this is, when it belongs to somebody — a drop here moves the work to them. */
+  employeeId?: string;
   onSelect: (booking: Booking) => void;
   onCreateAt: (start: Date, employeeId?: string) => void;
+  /** An id rather than a booking: a drag can arrive from a column this one cannot see. */
+  onMove: (bookingId: string, start: Date, employeeId?: string) => void;
+  onQuickAction: (booking: Booking, action: QuickAction) => void;
 }
+
+/** What the right-click menu offers. `edit` opens the form; the rest are one click. */
+export type QuickAction = 'edit' | 'complete' | 'no_show' | 'cancel' | 'charge';
+
+/** The drag payload. A booking id is all the drop target needs to ask for the move. */
+const DRAG_TYPE = 'application/x-upfront-booking';
 
 function DayColumn({
   day,
@@ -331,10 +359,15 @@ function DayColumn({
   bookings,
   workingMinutes,
   label,
+  employeeId,
   onSelect,
   onCreateAt,
+  onMove,
+  onQuickAction,
 }: DayColumnProps) {
   const copy = useCopy();
+  /** The slot the pointer is over mid-drag, so the target is visible before the drop. */
+  const [dragOver, setDragOver] = useState<number>();
   const slots = useMemo(() => {
     const list: number[] = [];
     for (let minute = range.start; minute < range.end; minute += slotMinutes) list.push(minute);
@@ -378,7 +411,33 @@ function DayColumn({
               `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`,
             )}
             onClick={() => onCreateAt(start)}
-            className="absolute inset-x-0 transition-colors hover:bg-brand-700/8"
+            /**
+             * Also the drop target for a dragged appointment.
+             *
+             * The rows are already the grid, so a drop lands on a legal start rather than
+             * wherever the pointer happened to be — which is what stops a drag producing
+             * a 09:07 appointment on a shop that works in half hours.
+             */
+            onDragOver={(event) => {
+              if (!event.dataTransfer.types.includes(DRAG_TYPE)) return;
+              event.preventDefault();
+              setDragOver(minute);
+            }}
+            onDragLeave={() => setDragOver((current) => (current === minute ? undefined : current))}
+            onDrop={(event) => {
+              const id = event.dataTransfer.getData(DRAG_TYPE);
+              setDragOver(undefined);
+              if (!id) return;
+
+              event.preventDefault();
+              // An id rather than the booking: a drag from another column carries
+              // something this column has never seen, and the page has the whole week.
+              onMove(id, start, employeeId);
+            }}
+            className={cn(
+              'absolute inset-x-0 transition-colors hover:bg-brand-700/8',
+              dragOver === minute && 'bg-brand-700/20 ring-1 ring-brand-600 ring-inset',
+            )}
             style={{
               top: ((minute - range.start) / 60) * hourHeight,
               height: (slotMinutes / 60) * hourHeight,
@@ -402,17 +461,31 @@ function DayColumn({
           const top = ((startedAt + block.offsetMinutes - range.start) / 60) * hourHeight;
           const minutes = Math.max(slotMinutes / 2, block.minutes);
 
-          return (
+          const block_ = (
             <button
               key={`${booking.id}-${block.offsetMinutes}`}
               type="button"
               onClick={() => onSelect(booking)}
+              /**
+               * Dragging moves the appointment; the rows underneath are the drop targets.
+               *
+               * Only the first block is draggable. Picking a colour up by its second half
+               * would drop it an hour earlier than the pointer suggests, because what is
+               * being moved is the start of the whole thing.
+               */
+              draggable={index === 0}
+              onDragStart={(event) => {
+                event.dataTransfer.setData(DRAG_TYPE, booking.id);
+                event.dataTransfer.effectAllowed = 'move';
+              }}
               className={cn(
                 'absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1 text-left text-[11px] leading-tight',
                 'ring-1 ring-inset backdrop-blur-sm transition-colors',
                 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-700',
+                index === 0 && 'cursor-grab active:cursor-grabbing',
                 STATUS_STYLES[booking.status],
               )}
+              title={hoverSummary(booking, copy)}
               style={{ top, height: (minutes / 60) * hourHeight - 2 }}
             >
               {/* Only the first block is labelled: repeating the name either side of a
@@ -443,6 +516,33 @@ function DayColumn({
               )}
             </button>
           );
+
+          /**
+           * Hover and right-click only wrap the labelled block.
+           *
+           * The far side of a pause is the same appointment; giving it its own menu and
+           * its own tooltip would present it as a second one.
+           */
+          /**
+           * Tooltip outside, menu inside, and the button innermost.
+           *
+           * Radix triggers compose by cloning their child, so each wrapper has to pass
+           * what it is given further down. In this order the tooltip's handlers reach
+           * the menu, the menu's reach the button, and both work; swapped, the outer one
+           * silently does nothing.
+           */
+          return index === 0 ? (
+            <Tooltip key={`${booking.id}-menu`} side="top" label={hoverSummary(booking, copy)}>
+              <ContextMenu
+                items={quickActionsFor(booking, copy)}
+                onSelect={(action) => onQuickAction(booking, action as QuickAction)}
+              >
+                {block_}
+              </ContextMenu>
+            </Tooltip>
+          ) : (
+            block_
+          );
         });
       })}
     </div>
@@ -452,4 +552,48 @@ function DayColumn({
 function toMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
+}
+
+/**
+ * Everything the block is too small to show, on hover and on focus.
+ *
+ * One line rather than a card: this is the *preview*, and somebody who wants the detail
+ * clicks. It goes through the `Tooltip` atom rather than `title` so it reaches the
+ * keyboard as well as the mouse.
+ */
+function hoverSummary(booking: Booking, copy: ReturnType<typeof useCopy>): string {
+  const when = `${formatTime(booking.startsAt)}–${formatTime(booking.endsAt)}`;
+  const parts = [
+    booking.client.name,
+    describeBooking(booking),
+    when,
+    copy.bookings.statuses[booking.status],
+  ];
+
+  if (booking.client.phone) parts.push(booking.client.phone);
+  if (booking.notes) parts.push(booking.notes);
+
+  return parts.join(' · ');
+}
+
+/**
+ * The four things a shop does to an appointment without opening it.
+ *
+ * Offered only where they make sense: an appointment that has already been cancelled has
+ * nothing to cancel, and there is nothing to charge for one nobody has turned up to yet.
+ */
+function quickActionsFor(
+  booking: Booking,
+  copy: ReturnType<typeof useCopy>,
+): { id: QuickAction; label: string; destructive?: boolean }[] {
+  const settled = booking.status === 'cancelled' || booking.status === 'no_show';
+
+  const live: { id: QuickAction; label: string; destructive?: boolean }[] = [
+    { id: 'complete', label: copy.bookings.quickComplete },
+    { id: 'charge', label: copy.bookings.quickCharge },
+    { id: 'no_show', label: copy.bookings.quickNoShow, destructive: true },
+    { id: 'cancel', label: copy.bookings.quickCancel, destructive: true },
+  ];
+
+  return [{ id: 'edit', label: copy.bookings.quickEdit }, ...(settled ? [] : live)];
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { QuickAction } from '@/components';
 import {
   BookingCalendar,
   BookingFormDialog,
@@ -43,6 +44,8 @@ export function BookingsPage() {
   const openDay = useBookingStore((state) => state.openDay);
   const goToDay = useBookingStore((state) => state.goToDay);
   const error = useBookingStore((state) => state.error);
+  const bookings = useBookingStore((state) => state.items);
+  const update = useBookingStore((state) => state.update);
 
   const loadProfile = useBusinessStore((state) => state.load);
   const timezone = useBusinessStore((state) => state.profile?.timezone);
@@ -87,6 +90,49 @@ export function BookingsPage() {
     [people, copy],
   );
 
+  /**
+   * A booking dragged onto another row, and possibly another person's column.
+   *
+   * Straight through the ordinary update, so a drag cannot land somewhere the form would
+   * refuse: overlaps, working hours and the rest are checked once, on the server. A
+   * refusal surfaces as the store's error rather than silently snapping back.
+   */
+  async function handleMove(bookingId: string, start: Date, employeeId?: string) {
+    const booking = bookings.find((candidate) => candidate.id === bookingId);
+    if (!booking) return;
+
+    // Unchanged drops are common — a short drag that lands where it started — and a
+    // request for them would churn the week for nothing.
+    const movedTime = new Date(booking.startsAt).getTime() !== start.getTime();
+    const movedPerson = Boolean(employeeId) && booking.items[0]?.employeeId !== employeeId;
+    if (!movedTime && !movedPerson) return;
+
+    await update(bookingId, {
+      startsAt: start.toISOString(),
+      ...(movedPerson ? { employeeId } : {}),
+    });
+  }
+
+  async function handleQuickAction(booking: Booking, action: QuickAction) {
+    if (action === 'edit') {
+      setEditing(booking);
+      setInitialStart(undefined);
+      setInitialEmployeeId(undefined);
+      setDialogOpen(true);
+      return;
+    }
+    // The balance prompt is a dialog of its own: it asks which phone to push to, and
+    // how much, neither of which a menu item can answer.
+    if (action === 'charge') {
+      setCharging(booking);
+      return;
+    }
+
+    const status =
+      action === 'complete' ? 'completed' : action === 'cancel' ? 'cancelled' : 'no_show';
+    await update(booking.id, { status });
+  }
+
   function openCreate(start?: Date, employeeId?: string) {
     setEditing(undefined);
     setInitialStart(start);
@@ -116,7 +162,14 @@ export function BookingsPage() {
             how is one person's week, and where is there room this month. A week of five
             people does not fit on a screen, and a month of anybody's appointments is a
             density map rather than a timetable. */}
-        <div className="flex items-center gap-4 rounded-lg bg-sheet/60 p-0.5 ring-1 ring-hairline w-fit-content">
+        {/*
+          `view-switch` is what stops the three overlapping: Themes gives a ghost button
+          `margin: -4px -8px` to optically align its label with body text, and side by
+          side the facing margins eat 16px between them — "Dia" ends up inside "Semana"'s
+          hit area. Same fix as `actions-row`, and it has to be a class rather than a
+          utility because the rule has to reach the buttons Radix renders.
+        */}
+        <div className="view-switch flex w-fit items-center rounded-xl bg-sheet/60 p-0.5 ring-1 ring-hairline">
           <Button
             variant={view === 'week' ? 'secondary' : 'ghost'}
             size="sm"
@@ -220,6 +273,8 @@ export function BookingsPage() {
             setDialogOpen(true);
           }}
           onCreateAt={openCreate}
+          onMove={handleMove}
+          onQuickAction={handleQuickAction}
         />
       )}
 
