@@ -460,7 +460,7 @@ export const pt = {
   settings: {
     title: 'Definições',
     lede: 'Os seus dados, e os do negócio.',
-    tabYou: 'Você',
+    tabYou: 'Perfil',
     tabBusiness: 'Negócio',
     tabPeople: 'Pessoas',
     tabPage: 'Página de marcações',
@@ -473,7 +473,7 @@ export const pt = {
       staff: 'Colaboradora',
     } as Record<string, string>,
 
-    youTitle: 'Você',
+    youTitle: 'Perfil',
     youLede: 'Como aparece aos colegas. O nome e o número do negócio estão no separador ao lado.',
     yourPhone: 'O seu telemóvel',
     saved: 'Guardado.',
@@ -551,7 +551,7 @@ export const pt = {
     lede: 'Toda a gente que presta serviços. O horário de cada pessoa estreita o do espaço em vez de o alargar, por isso uma hora só é oferecida quando ambos estão abertos.',
     addSomeone: 'Adicionar alguém',
     add: 'Adicionar',
-    you: 'Você',
+    you: 'Perfil',
     left: 'Saiu',
     timesAWeek: (count: number) => `${count} ${count === 1 ? 'período' : 'períodos'} por semana`,
     followsShop: 'Segue o horário do espaço',
