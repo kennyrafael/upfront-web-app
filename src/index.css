@@ -187,8 +187,15 @@
 
 @utility panel {
   /* The shared surface: a panel over the washed ground, hairline ring, soft shadow.
-     Everything card-like in the app uses this. */
-  @apply rounded-2xl bg-sheet/85 shadow-panel ring-1 ring-hairline backdrop-blur-xl;
+     Everything card-like in the app uses this.
+
+     **No `backdrop-blur`, deliberately.** It used to blur what was behind it, which at 85%
+     opacity over a flat ground was decoration nobody could point to — and it cost a visible
+     artifact: hovering a tab repaints that column, every blurred surface it crosses
+     re-samples its backdrop, and Chromium leaves a lighter vertical band running the height
+     of the page. Only obvious in dark mode, where the band is lighter than everything
+     around it. The blur bought nothing and the band was on every hover. */
+  @apply rounded-2xl bg-sheet/85 shadow-panel ring-1 ring-hairline;
 }
 
 /**
