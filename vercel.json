@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "bash ../scripts/vercel-ignore.sh web",
   "rewrites": [
+    {
+      "source": "/__hostprobe",
+      "has": [{ "type": "header", "key": "host", "value": { "pre": "upfront-web" } }],
+      "destination": "https://upfront-api.vercel.app/api/me/entitlements"
+    },
     { "source": "/api/:path*", "destination": "https://upfront-api.vercel.app/api/:path*" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
