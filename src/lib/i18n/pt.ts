@@ -478,8 +478,8 @@ export const pt = {
     nif: 'NIF',
     nifHint: '9 dígitos.',
     nifError: 'Um NIF português tem exatamente 9 dígitos',
-    paymentDetailsMoved:
-      'O tipo de entidade, a área de atividade e os dados bancários estão no separador Pagamentos.',
+    businessDetailsMoved:
+      'O nome, o contacto, o NIF e a morada do negócio estão no separador Pagamentos — são os mesmos dados que confirmam quem recebe o dinheiro.',
     entityType: 'Tipo de entidade',
     entityTypeHint: 'Trabalhador independente ou sociedade. Muda as verificações do pagamento.',
     entityTypes: {
@@ -584,6 +584,7 @@ export const pt = {
     moneySection: 'Onde entra o dinheiro',
     moneyLede: 'A conta para onde as transferências são feitas depois de cada marcação.',
     nifHint: '9 dígitos. O mesmo que consta dos recibos verdes.',
+    addressHint: 'Aparece nos recibos verdes. Não é mostrada aos clientes.',
     firstName: 'Nome próprio',
     lastName: 'Apelido',
     legalNameHint: 'Como aparece no cartão de cidadão ou passaporte.',

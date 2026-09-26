@@ -443,7 +443,8 @@ export const en: Dictionary = {
     nif: 'NIF',
     nifHint: '9 digits.',
     nifError: 'A Portuguese NIF is exactly 9 digits',
-    paymentDetailsMoved: 'Entity type, what you do and your bank details are on the Payments tab.',
+    businessDetailsMoved:
+      'Your name, contact, NIF and address are on the Payments tab — they are the same details that confirm who receives the money.',
     entityType: 'Entity type',
     entityTypeHint: 'Sole trader or company. It changes the payment checks.',
     entityTypes: {
@@ -540,6 +541,7 @@ export const en: Dictionary = {
     moneySection: 'Where the money lands',
     moneyLede: 'The account transfers are made to after each appointment.',
     nifHint: '9 digits. The same one your recibos verdes carry.',
+    addressHint: 'Appears on recibos verdes. Never shown to clients.',
     firstName: 'First name',
     lastName: 'Last name',
     legalNameHint: 'As it appears on their ID card or passport.',

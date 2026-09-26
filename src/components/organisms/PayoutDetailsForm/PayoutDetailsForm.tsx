@@ -6,9 +6,15 @@ import { BUSINESS_CATEGORIES, type BusinessProfile, ENTITY_TYPES } from '@/lib/a
 import { useBusinessStore } from '@/stores';
 
 interface Fields {
+  name: string;
+  phone: string;
   entityType: string;
   businessCategory: string;
   nif: string;
+  line1: string;
+  line2: string;
+  city: string;
+  postalCode: string;
   firstName: string;
   lastName: string;
   birthDate: string;
@@ -18,9 +24,15 @@ interface Fields {
 
 function toFields(profile: BusinessProfile | null): Fields {
   return {
+    name: profile?.name ?? '',
+    phone: profile?.phone ?? '',
     entityType: profile?.entityType ?? 'individual',
     businessCategory: profile?.businessCategory ?? '',
     nif: profile?.nif ?? '',
+    line1: profile?.address?.line1 ?? '',
+    line2: profile?.address?.line2 ?? '',
+    city: profile?.address?.city ?? '',
+    postalCode: profile?.address?.postalCode ?? '',
     firstName: profile?.representative?.firstName ?? '',
     lastName: profile?.representative?.lastName ?? '',
     birthDate: profile?.representative?.birthDate ?? '',
@@ -67,6 +79,9 @@ export function PayoutDetailsForm() {
 
     const found: Partial<Record<keyof Fields, string>> = {};
     if (fields.nif && !/^\d{9}$/.test(fields.nif)) found.nif = copy.settings.nifError;
+    if (fields.postalCode && !/^\d{4}-\d{3}$/.test(fields.postalCode)) {
+      found.postalCode = copy.settings.postalCodeError;
+    }
     if (fields.payoutIban && !/^PT50[\s\d]{21,25}$/.test(fields.payoutIban)) {
       found.payoutIban = copy.payoutDetails.ibanError;
     }
@@ -84,6 +99,18 @@ export function PayoutDetailsForm() {
     const complete = fields.firstName && fields.lastName && fields.birthDate;
 
     const ok = await update({
+      name: fields.name,
+      phone: fields.phone || undefined,
+      // All or nothing: the API rejects a partial address, because a city with no street
+      // satisfies neither the recibo nor the gateway that wanted it.
+      address: fields.line1
+        ? {
+            line1: fields.line1,
+            line2: fields.line2 || undefined,
+            city: fields.city,
+            postalCode: fields.postalCode,
+          }
+        : undefined,
       entityType: fields.entityType as BusinessProfile['entityType'],
       businessCategory: (fields.businessCategory ||
         undefined) as BusinessProfile['businessCategory'],
@@ -119,6 +146,19 @@ export function PayoutDetailsForm() {
             <p className="sm:col-span-2 font-medium text-ink text-sm">
               {copy.payoutDetails.businessSection}
             </p>
+            <FormField
+              label={copy.settings.businessName}
+              required
+              hint={copy.settings.businessNameHint}
+              value={fields.name}
+              onChange={(event) => setField('name', event.target.value)}
+            />
+            <FormField
+              label={copy.common.phone}
+              type="tel"
+              value={fields.phone}
+              onChange={(event) => setField('phone', event.target.value)}
+            />
             <SelectField
               label={copy.settings.entityType}
               hint={copy.settings.entityTypeHint}
@@ -148,6 +188,33 @@ export function PayoutDetailsForm() {
               hint={copy.payoutDetails.nifHint}
               value={fields.nif}
               onChange={(event) => setField('nif', event.target.value)}
+            />
+            <div className="sm:col-span-2">
+              <FormField
+                label={copy.settings.addressLine1}
+                hint={copy.payoutDetails.addressHint}
+                value={fields.line1}
+                onChange={(event) => setField('line1', event.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <FormField
+                label={copy.settings.addressLine2}
+                value={fields.line2}
+                onChange={(event) => setField('line2', event.target.value)}
+              />
+            </div>
+            <FormField
+              label={copy.settings.city}
+              value={fields.city}
+              onChange={(event) => setField('city', event.target.value)}
+            />
+            <FormField
+              label={copy.settings.postalCode}
+              error={errors.postalCode}
+              hint={copy.settings.postalCodeHint}
+              value={fields.postalCode}
+              onChange={(event) => setField('postalCode', event.target.value)}
             />
           </section>
 

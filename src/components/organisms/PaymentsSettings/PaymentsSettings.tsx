@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Spinner } from '@/components/atoms';
 import { useCopy } from '@/lib';
 import { ApiError, type ConnectStatus, connectApi } from '@/lib/api';
+import { useThemeStore } from '@/stores';
 
 const PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY as string | undefined;
 
@@ -24,6 +25,7 @@ export function PaymentsSettings() {
   const [error, setError] = useState<string>();
   const [starting, setStarting] = useState(false);
   const [onboarding, setOnboarding] = useState(false);
+  const theme = useThemeStore((state) => state.theme);
 
   const mount = useRef<HTMLDivElement>(null);
   const banner = useRef<HTMLDivElement>(null);
@@ -57,19 +59,41 @@ export function PaymentsSettings() {
     connect.current = loadConnectAndInitialize({
       publishableKey: PUBLIC_KEY,
       fetchClientSecret: async () => (await connectApi.session()).clientSecret,
-      appearance: {
-        // Read off our own tokens so the form wears the accent the business picked, rather
-        // than Stripe's blue in the middle of an Upfront page.
-        variables: {
-          colorPrimary: cssValue('--accent-9', '#2f6f5e'),
-          colorText: cssValue('--gray-12', '#1c2b26'),
-          colorBackground: cssValue('--color-panel-solid', '#ffffff'),
-          borderRadius: '10px',
-        },
-      },
+      appearance: { variables: appearanceVariables() },
     });
     return connect.current;
   }, [copy.payoutAccount.notConfigured]);
+
+  /**
+   * Re-themes the mounted form when the appearance changes.
+   *
+   * **The variables are read once at `loadConnectAndInitialize` and never again**, so
+   * without this a provider who switches to dark keeps a white form in the middle of a dark
+   * page until they reload. `update` is the supported way to change it in place; the
+   * component keeps whatever the provider had already typed.
+   *
+   * Driven off the theme store *and* the system preference, because `system` is a real
+   * choice here and the colour it resolves to can change without anything in the app
+   * happening at all.
+   */
+  useEffect(() => {
+    const retheme = () =>
+      connect.current?.update({ appearance: { variables: appearanceVariables() } });
+
+    // After paint: `applyTheme` writes to the document and the tokens are only resolved once
+    // the browser has recalculated styles. Reading them in the same tick returns the values
+    // that are on their way out.
+    const id = requestAnimationFrame(retheme);
+
+    if (theme !== 'system') return () => cancelAnimationFrame(id);
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    media.addEventListener('change', retheme);
+    return () => {
+      cancelAnimationFrame(id);
+      media.removeEventListener('change', retheme);
+    };
+  }, [theme]);
 
   /** The banner is where Stripe asks for something that has come up since onboarding. */
   useEffect(() => {
@@ -238,8 +262,83 @@ export function PaymentsSettings() {
  * read out and handed over. The fallback matters for the same reason: a variable that has
  * not been defined yet would otherwise pass an empty string, which Stripe rejects.
  */
+/**
+ * Our tokens, in the names Stripe's appearance API uses.
+ *
+ * Read fresh every time rather than captured, because the same token names resolve to
+ * different colours in light and dark — which is the whole point of the bridge in
+ * `index.css`. Nothing here is a hex literal except the fallbacks, so a business that
+ * changes its accent changes this too.
+ *
+ * `colorBackground` is the panel rather than the page: the form sits inside a card, and
+ * matching the page would leave it floating on the wrong shade.
+ */
+function appearanceVariables(): Record<string, string> {
+  return {
+    fontFamily: cssValue('--default-font-family', "'Inter', ui-sans-serif, system-ui"),
+    borderRadius: '10px',
+
+    colorPrimary: cssValue('--accent-9', '#2f6f5e'),
+    colorBackground: cssValue('--color-panel-solid', '#ffffff'),
+    colorText: cssValue('--gray-12', '#1c2b26'),
+    colorSecondaryText: cssValue('--gray-11', '#5b6b66'),
+    colorDanger: cssValue('--red-9', '#d5323a'),
+    colorBorder: cssValue('--gray-6', '#d8e0dd'),
+
+    /**
+     * The panels inside the form — a summary row, a highlighted block.
+     *
+     * **This is the one that caused the halos.** It defaults to white, so in dark mode every
+     * inner card was drawn as a pale slab over a dark page and read as a glow around the
+     * edges. It is a *raised* surface rather than the page, hence step 2 and not the panel
+     * colour, or the sections lose their edges entirely.
+     */
+    offsetBackgroundColor: cssValue('--gray-2', '#f7f9f8'),
+    formBackgroundColor: cssValue('--gray-2', '#f7f9f8'),
+    formHighlightColorBorder: cssValue('--accent-8', '#5aa38d'),
+    formAccentColor: cssValue('--accent-9', '#2f6f5e'),
+    formPlaceholderTextColor: cssValue('--gray-9', '#8b9995'),
+
+    buttonPrimaryColorBackground: cssValue('--accent-9', '#2f6f5e'),
+    buttonPrimaryColorBorder: cssValue('--accent-9', '#2f6f5e'),
+    buttonPrimaryColorText: cssValue('--accent-contrast', '#ffffff'),
+    buttonSecondaryColorBackground: cssValue('--gray-3', '#eef2f0'),
+    buttonSecondaryColorBorder: cssValue('--gray-6', '#d8e0dd'),
+    buttonSecondaryColorText: cssValue('--gray-12', '#1c2b26'),
+
+    // Links inside the form. Step 11, not 9 — the same rule as `brand-ink`, because step 9
+    // is the block buttons are painted with and fails contrast as text.
+    actionPrimaryColorText: cssValue('--accent-11', '#217a5f'),
+
+    // Meanings rather than decoration, so these follow the fixed scales and not the accent
+    // a business happens to have picked.
+    badgeNeutralColorBackground: cssValue('--gray-3', '#eef2f0'),
+    badgeNeutralColorText: cssValue('--gray-11', '#5b6b66'),
+    badgeNeutralColorBorder: cssValue('--gray-6', '#d8e0dd'),
+    badgeSuccessColorBackground: cssValue('--jade-3', '#ddf3ea'),
+    badgeSuccessColorText: cssValue('--jade-11', '#208368'),
+    badgeSuccessColorBorder: cssValue('--jade-6', '#a8d9c4'),
+    badgeWarningColorBackground: cssValue('--amber-3', '#fff4d5'),
+    badgeWarningColorText: cssValue('--amber-11', '#ab6400'),
+    badgeWarningColorBorder: cssValue('--amber-6', '#f3d673'),
+    badgeDangerColorBackground: cssValue('--red-3', '#ffdbdc'),
+    badgeDangerColorText: cssValue('--red-11', '#ce2c31'),
+    badgeDangerColorBorder: cssValue('--red-6', '#f4a9aa'),
+  };
+}
+
+/**
+ * A Radix Themes token, as it currently resolves.
+ *
+ * **Read off `.radix-themes`, not `:root`.** Themes declares its scales on its own element,
+ * so `--accent-9` and `--color-panel-solid` come back *empty* from the document root and
+ * `--gray-12` comes back with the light value whatever the appearance is. Every fallback
+ * below then won, which is why the embedded form was white inside a dark page and looked
+ * like the theming had never been wired up at all.
+ */
 function cssValue(name: string, fallback: string): string {
   if (typeof window === 'undefined') return fallback;
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const scope = document.querySelector('.radix-themes') ?? document.documentElement;
+  const value = getComputedStyle(scope).getPropertyValue(name).trim();
   return value || fallback;
 }
