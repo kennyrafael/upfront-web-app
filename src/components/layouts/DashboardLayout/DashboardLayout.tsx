@@ -165,7 +165,9 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
          */}
         <aside
           className={cn(
-            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet/60 transition-[width] duration-200 lg:flex',
+            // Opaque for the same reason `.panel` is: a full-height translucent surface is a
+            // full-height blend, and the repainted strip of one reads as a band.
+            'sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-hairline bg-sheet transition-[width] duration-200 lg:flex',
             collapsed ? 'w-16' : 'w-60',
           )}
         >

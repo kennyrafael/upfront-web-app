@@ -189,13 +189,19 @@
   /* The shared surface: a panel over the washed ground, hairline ring, soft shadow.
      Everything card-like in the app uses this.
 
-     **No `backdrop-blur`, deliberately.** It used to blur what was behind it, which at 85%
-     opacity over a flat ground was decoration nobody could point to — and it cost a visible
-     artifact: hovering a tab repaints that column, every blurred surface it crosses
-     re-samples its backdrop, and Chromium leaves a lighter vertical band running the height
-     of the page. Only obvious in dark mode, where the band is lighter than everything
-     around it. The blur bought nothing and the band was on every hover. */
-  @apply rounded-2xl bg-sheet/85 shadow-panel ring-1 ring-hairline;
+     **Opaque, and no `backdrop-blur`.** Both were chasing the same artifact: hovering a
+     control left a lighter rectangle over the page that faded out on its own a moment later,
+     in dark mode only.
+
+     What a translucent panel costs is a blend on every repainted pixel. Chromium repaints
+     the damaged rectangle around whatever changed, and blending 85% over a dark ground does
+     not land on exactly the colour the full paint produced — so the repainted rectangle sits
+     visibly lighter until the next full paint takes it away. The blur made the same thing
+     worse by re-sampling a backdrop as well.
+
+     Neither bought anything here: this is a flat colour over a flat canvas, so the alpha
+     was a blend with nothing to reveal. */
+  @apply rounded-2xl bg-sheet shadow-panel ring-1 ring-hairline;
 }
 
 /**
