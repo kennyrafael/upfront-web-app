@@ -478,6 +478,18 @@ export const pt = {
     yourPhone: 'O seu telemóvel',
     saved: 'Guardado.',
 
+    reminders: 'Lembretes',
+    remindersLede:
+      'Avisamos o cliente um dia antes. Por email quando temos o endereço, por SMS quando não temos.',
+    remindersEmail: 'Por email',
+    remindersAlways: 'Sempre incluído',
+    remindersSms: 'Por SMS',
+    remindersOn: 'No seu plano',
+    remindersOffPlan: 'Fora do seu plano',
+    remindersUsed: (used: number, allowance: number) => `${used} de ${allowance} SMS este mês.`,
+    remindersSpent: 'Recomeça no dia 1.',
+    remindersUpgrade: 'Os lembretes por email continuam a ser enviados normalmente.',
+
     signingIn: 'Sessão',
     signInAs: (email: string) => `Entra com ${email}.`,
     changeEmail: 'Alterar o email',

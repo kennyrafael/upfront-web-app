@@ -454,8 +454,11 @@ export function BookingFormDialog({
         */}
         {booking ? null : (
           <div className="rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
-            <label className="flex items-center gap-3 text-ink text-sm">
+            {/* Tied by id rather than by nesting: Radix renders the switch as a button, and
+                a button inside a bare label is associated with nothing. */}
+            <label className="flex items-center gap-3 text-ink text-sm" htmlFor="booking-repeats">
               <Switch
+                id="booking-repeats"
                 checked={repeats}
                 onCheckedChange={(next) => {
                   setRepeats(next);

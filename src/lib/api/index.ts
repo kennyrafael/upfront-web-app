@@ -7,6 +7,7 @@ export * from './client';
 export * from './clients';
 export * from './compliance';
 export * from './employees';
+export * from './entitlements';
 export * from './invoices';
 export * from './pagination';
 export * from './payments';

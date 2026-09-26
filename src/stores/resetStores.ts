@@ -5,6 +5,7 @@ import { useCategoryStore } from './useCategoryStore';
 import { useClientStore } from './useClientStore';
 import { useComplianceStore } from './useComplianceStore';
 import { useEmployeeStore } from './useEmployeeStore';
+import { useEntitlementsStore } from './useEntitlementsStore';
 import { usePaymentStore } from './usePaymentStore';
 import { useServiceStore } from './useServiceStore';
 
@@ -22,4 +23,5 @@ export function resetDomainStores(): void {
   usePaymentStore.getState().reset();
   useAlertStore.getState().reset();
   useEmployeeStore.getState().reset();
+  useEntitlementsStore.getState().reset();
 }

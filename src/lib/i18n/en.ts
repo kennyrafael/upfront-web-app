@@ -444,6 +444,18 @@ export const en: Dictionary = {
     yourPhone: 'Your phone',
     saved: 'Saved.',
 
+    reminders: 'Reminders',
+    remindersLede:
+      'We tell the client the day before — by email where we have an address, by SMS where we do not.',
+    remindersEmail: 'By email',
+    remindersAlways: 'Always included',
+    remindersSms: 'By SMS',
+    remindersOn: 'On your plan',
+    remindersOffPlan: 'Not on your plan',
+    remindersUsed: (used: number, allowance: number) => `${used} of ${allowance} SMS this month.`,
+    remindersSpent: 'Starts again on the 1st.',
+    remindersUpgrade: 'Email reminders keep going out as normal.',
+
     signingIn: 'Signing in',
     signInAs: (email: string) => `You sign in as ${email}.`,
     changeEmail: 'Change your email',

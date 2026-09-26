@@ -7,6 +7,7 @@ export * from './useCategoryStore';
 export * from './useClientStore';
 export * from './useComplianceStore';
 export * from './useEmployeeStore';
+export * from './useEntitlementsStore';
 export * from './usePaymentStore';
 export * from './usePublicBookingStore';
 export * from './useServiceStore';

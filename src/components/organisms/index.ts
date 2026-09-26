@@ -24,6 +24,7 @@ export * from './PeopleSettings';
 export * from './PublicBookingFlow';
 export * from './PublicBookingSettings';
 export * from './ReciboPreview';
+export * from './RemindersSettings';
 export * from './ServiceCatalogTable';
 export * from './ServiceFormDialog';
 export * from './SignInSettings';

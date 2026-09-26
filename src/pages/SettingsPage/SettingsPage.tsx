@@ -10,6 +10,7 @@ import {
   PayoutDetailsForm,
   PeopleSettings,
   PublicBookingSettings,
+  RemindersSettings,
   SignInSettings,
 } from '@/components';
 import { useCopy } from '@/lib';
@@ -94,8 +95,13 @@ export function SettingsPage() {
 
           {runsTheShop ? (
             <>
-              <Tabs.Content value="business">
+              {/* Reminders sit with the shop rather than with the booking page: they fire
+                  for an appointment taken over the counter just as much as for one booked
+                  online. Read-only for now — what a provider cannot otherwise see is whether
+                  SMS is on their plan and how much of the month's allowance is left. */}
+              <Tabs.Content value="business" className="flex flex-col gap-6">
                 <BusinessProfileForm />
+                <RemindersSettings />
               </Tabs.Content>
 
               <Tabs.Content value="people">
