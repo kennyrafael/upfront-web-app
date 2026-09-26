@@ -388,6 +388,13 @@ export const pt = {
     waitingToInvoice: (total: string) => `${total} por faturar.`,
     /** Quarter labels. Short month names, so `Intl` would be more trouble than four strings. */
     quarters: ['Jan–Mar', 'Abr–Jun', 'Jul–Set', 'Out–Dez'],
+    exportPack: 'Descarregar pacote',
+    exportPeriod: 'Período a exportar',
+    wholeYear: 'Ano inteiro',
+    quarterLabel: (quarter: number) =>
+      `T${quarter} · ${['Jan–Mar', 'Abr–Jun', 'Jul–Set', 'Out–Dez'][quarter - 1]}`,
+    monthLabel: (month: number) =>
+      new Intl.DateTimeFormat('pt-PT', { month: 'long' }).format(new Date(2026, month - 1, 1)),
   },
 
   deposit: {

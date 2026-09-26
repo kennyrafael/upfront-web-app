@@ -50,7 +50,33 @@ export const invoicesApi = {
   remove: (id: string) => api.delete<void>(`/invoices/${id}`),
   billedBookingIds: () => api.get<string[]>('/invoices/billed-bookings'),
   /** The browser sandbox blocks script-driven downloads, so this returns the text. */
-  exportCsv: (year: number) => api.text(`/invoices/export?year=${year}`),
+  exportCsv: (period: ExportPeriod) => api.text(`/invoices/export?${periodQuery(period)}`),
+  /**
+   * The whole hand-off: the CSV and every recibo of the period as a PDF, in one archive.
+   *
+   * A blob rather than text, because unlike the CSV there is nothing useful to show inline —
+   * an accountant wants the file.
+   */
+  exportZip: (period: ExportPeriod) => api.blob(`/invoices/export.zip?${periodQuery(period)}`),
   /** The recibo as a PDF. Rendered on the server, so it matches what was issued. */
   pdf: (id: string) => api.blob(`/invoices/${id}/pdf`),
 };
+
+/**
+ * Which period an export covers.
+ *
+ * A quarter and a month are alternatives, not a pair — the API takes the narrower of the two
+ * if both arrive, and the UI never sends both.
+ */
+export interface ExportPeriod {
+  year: number;
+  quarter?: number;
+  month?: number;
+}
+
+function periodQuery({ year, quarter, month }: ExportPeriod): string {
+  const params = new URLSearchParams({ year: String(year) });
+  if (month) params.set('month', String(month));
+  else if (quarter) params.set('quarter', String(quarter));
+  return params.toString();
+}

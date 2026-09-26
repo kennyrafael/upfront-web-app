@@ -33,12 +33,35 @@ export function CompliancePage() {
   const status = useComplianceStore((state) => state.status);
   const error = useComplianceStore((state) => state.error);
   const exportCsv = useComplianceStore((state) => state.exportCsv);
+  const exportZip = useComplianceStore((state) => state.exportZip);
+  const exportQuarter = useComplianceStore((state) => state.exportQuarter);
+  const exportMonth = useComplianceStore((state) => state.exportMonth);
+  const setExportPeriod = useComplianceStore((state) => state.setExportPeriod);
   const loadProfile = useBusinessStore((state) => state.load);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Invoice>();
   const [previewing, setPreviewing] = useState<Invoice>();
   const [csv, setCsv] = useState<string>();
+
+  /**
+   * Hands the archive to the browser.
+   *
+   * An object URL and a synthetic click, because the endpoint needs an Authorization header
+   * and a plain `<a href>` cannot send one. The URL is revoked straight after — it pins the
+   * blob in memory until it is, and a quarter of PDFs is not nothing.
+   */
+  async function downloadPack(): Promise<void> {
+    const pack = await exportZip();
+    if (!pack) return;
+
+    const url = URL.createObjectURL(pack.blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = pack.filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   useEffect(() => {
     void load();
@@ -58,6 +81,13 @@ export function CompliancePage() {
           >
             {copy.compliance.exportCsv}
           </Button>
+          {/*
+            The pack: the CSV and every recibo of the period as a PDF. Downloaded rather
+            than shown, because unlike the CSV there is nothing to read inline.
+          */}
+          <Button variant="secondary" onClick={() => void downloadPack()}>
+            {copy.compliance.exportPack}
+          </Button>
           <Button
             onClick={() => {
               setEditing(undefined);
@@ -69,13 +99,29 @@ export function CompliancePage() {
         </>
       }
     >
-      <div className="mb-4 flex w-36 flex-col gap-1.5">
-        <Select
-          aria-label={copy.compliance.fiscalYear}
-          options={yearOptions()}
-          value={String(year)}
-          onValueChange={(value) => void setYear(Number(value))}
-        />
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <div className="flex w-36 flex-col gap-1.5">
+          <Select
+            aria-label={copy.compliance.fiscalYear}
+            options={yearOptions()}
+            value={String(year)}
+            onValueChange={(value) => void setYear(Number(value))}
+          />
+        </div>
+
+        {/*
+          Narrows the *export*, not the page. The IVA ceiling is an annual figure and the
+          quarter cards below are the year broken down — filtering the view to one quarter
+          would hide the number this page exists to show.
+        */}
+        <div className="flex w-52 flex-col gap-1.5">
+          <Select
+            aria-label={copy.compliance.exportPeriod}
+            options={exportPeriodOptions(copy)}
+            value={exportPeriodValue(exportQuarter, exportMonth)}
+            onValueChange={(value) => setExportPeriod(parseExportPeriod(value))}
+          />
+        </div>
       </div>
 
       {error ? (
@@ -150,4 +196,40 @@ export function CompliancePage() {
       ) : null}
     </DashboardLayout>
   );
+}
+
+/**
+ * The export period as one select, rather than a quarter picker and a month picker that can
+ * contradict each other.
+ *
+ * Encoded into the value — `''`, `q3`, `m9` — because a Select holds one string and the
+ * alternative is two controls with a rule about which wins.
+ */
+// 'year' rather than an empty string: a Select treats empty as nothing-chosen and shows its
+// placeholder, so the default period read as an unanswered question instead of "the whole
+// year", which is what it is.
+function exportPeriodValue(quarter?: number, month?: number): string {
+  if (month) return `m`;
+  if (quarter) return `q`;
+  return 'year';
+}
+
+function parseExportPeriod(value: string): { quarter?: number; month?: number } {
+  if (value.startsWith('q')) return { quarter: Number(value.slice(1)) };
+  if (value.startsWith('m')) return { month: Number(value.slice(1)) };
+  return {};
+}
+
+function exportPeriodOptions(copy: ReturnType<typeof useCopy>): { value: string; label: string }[] {
+  return [
+    { value: 'year', label: copy.compliance.wholeYear },
+    ...[1, 2, 3, 4].map((quarter) => ({
+      value: `q${quarter}`,
+      label: copy.compliance.quarterLabel(quarter),
+    })),
+    ...Array.from({ length: 12 }, (_, index) => ({
+      value: `m${index + 1}`,
+      label: copy.compliance.monthLabel(index + 1),
+    })),
+  ];
 }

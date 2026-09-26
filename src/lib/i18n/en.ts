@@ -356,6 +356,13 @@ export const en: Dictionary = {
     completedBookings: (count: number) => `completed booking${count === 1 ? '' : 's'}`,
     waitingToInvoice: (total: string) => `${total} waiting to be invoiced.`,
     quarters: ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'],
+    exportPack: 'Download pack',
+    exportPeriod: 'Period to export',
+    wholeYear: 'The whole year',
+    quarterLabel: (quarter: number) =>
+      `Q${quarter} · ${['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'][quarter - 1]}`,
+    monthLabel: (month: number) =>
+      new Intl.DateTimeFormat('en-GB', { month: 'long' }).format(new Date(2026, month - 1, 1)),
   },
 
   deposit: {

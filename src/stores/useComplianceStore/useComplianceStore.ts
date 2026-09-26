@@ -4,6 +4,7 @@ import {
   type ComplianceSummary,
   type CreateInvoicePayload,
   complianceApi,
+  type ExportPeriod,
   type Invoice,
   invoicesApi,
   MAX_PAGE_SIZE,
@@ -12,6 +13,15 @@ import {
 
 interface ComplianceState {
   year: number;
+  /**
+   * Which slice of the year an export covers. Absent means the whole of it.
+   *
+   * Only on exports, deliberately — the page itself still shows the year, because the IVA
+   * ceiling is an annual figure and narrowing the view to a quarter would hide the number
+   * the page exists to show.
+   */
+  exportQuarter?: number;
+  exportMonth?: number;
   summary: ComplianceSummary | null;
   invoices: Invoice[];
   /** Bookings already held by a draft or issued recibo. */
@@ -25,7 +35,9 @@ interface ComplianceState {
   issue: (id: string) => Promise<boolean>;
   cancel: (id: string) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
+  setExportPeriod: (period: { quarter?: number; month?: number }) => void;
   exportCsv: () => Promise<string | null>;
+  exportZip: () => Promise<{ blob: Blob; filename: string } | null>;
   clearError: () => void;
   reset: () => void;
 }
@@ -71,9 +83,21 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
   cancel: async (id) => run(set, get, () => invoicesApi.cancel(id)),
   remove: async (id) => run(set, get, () => invoicesApi.remove(id)),
 
+  setExportPeriod: (period) => set({ exportQuarter: period.quarter, exportMonth: period.month }),
+
   exportCsv: async () => {
     try {
-      return await invoicesApi.exportCsv(get().year);
+      return await invoicesApi.exportCsv(periodOf(get()));
+    } catch (error) {
+      set({ error: toMessage(error) });
+      return null;
+    }
+  },
+
+  exportZip: async () => {
+    try {
+      const period = periodOf(get());
+      return { blob: await invoicesApi.exportZip(period), filename: zipNameFor(period) };
     } catch (error) {
       set({ error: toMessage(error) });
       return null;
@@ -111,4 +135,26 @@ async function run(
     set({ status: 'idle', error: toMessage(error) });
     return false;
   }
+}
+
+/** The export period, out of the state that holds it in three separate fields. */
+function periodOf(state: {
+  year: number;
+  exportQuarter?: number;
+  exportMonth?: number;
+}): ExportPeriod {
+  return { year: state.year, quarter: state.exportQuarter, month: state.exportMonth };
+}
+
+/**
+ * What to call the downloaded archive.
+ *
+ * Mirrors what the API puts in `Content-Disposition`, because reading that header back out
+ * of a `fetch` means parsing a header format with quoting rules for a string we already
+ * know. If the two ever disagree the file is still correct — only its name is ours.
+ */
+function zipNameFor({ year, quarter, month }: ExportPeriod): string {
+  if (month) return `recibos-emitidos-${year}-${String(month).padStart(2, '0')}.zip`;
+  if (quarter) return `recibos-emitidos-${year}-T${quarter}.zip`;
+  return `recibos-emitidos-${year}.zip`;
 }
