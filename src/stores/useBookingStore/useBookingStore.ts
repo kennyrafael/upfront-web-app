@@ -4,7 +4,9 @@ import {
   type Booking,
   bookingsApi,
   type CreateBookingPayload,
+  type CreateRecurringPayload,
   type DaySummary,
+  type SeriesResult,
   type UpdateBookingPayload,
 } from '@/lib/api';
 import { addDays, addMonths, startOfMonth, startOfWeek } from '@/lib/utils';
@@ -63,8 +65,11 @@ interface BookingState {
   goToWeek: (weekStart: Date) => Promise<void>;
   shiftWeek: (weeks: number) => Promise<void>;
   create: (payload: CreateBookingPayload) => Promise<boolean>;
+  /** Returns what was booked and what was not, so the form can say which weeks clashed. */
+  createRecurring: (payload: CreateRecurringPayload) => Promise<SeriesResult | null>;
   update: (id: string, payload: UpdateBookingPayload) => Promise<boolean>;
   remove: (id: string) => Promise<boolean>;
+  removeFollowing: (id: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }
@@ -193,6 +198,18 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     }
   },
 
+  createRecurring: async (payload) => {
+    set({ status: 'saving', error: null });
+    try {
+      const result = await bookingsApi.createRecurring(payload);
+      await get().load();
+      return result;
+    } catch (error) {
+      set({ status: 'idle', error: toMessage(error) });
+      return null;
+    }
+  },
+
   update: async (id, payload) => {
     set({ status: 'saving', error: null });
     try {
@@ -212,6 +229,20 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     try {
       await bookingsApi.remove(id);
       set({ items: get().items.filter((item) => item.id !== id), status: 'idle' });
+      return true;
+    } catch (error) {
+      set({ status: 'idle', error: toMessage(error) });
+      return false;
+    }
+  },
+
+  removeFollowing: async (id) => {
+    set({ status: 'saving', error: null });
+    try {
+      await bookingsApi.removeFollowing(id);
+      // Reloaded rather than filtered: this took an unknown number of later appointments
+      // with it, and the list has no way to work out which.
+      await get().load();
       return true;
     } catch (error) {
       set({ status: 'idle', error: toMessage(error) });

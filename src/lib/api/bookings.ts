@@ -51,6 +51,8 @@ export interface Booking {
   notes?: string;
   /** 'public' means the client booked it themselves, unattended. */
   source: 'provider' | 'public';
+  /** Present when this is one of a repeating set. The id groups them; nothing else. */
+  seriesId?: string;
 }
 
 export interface CreateBookingPayload {
@@ -115,9 +117,13 @@ export const bookingsApi = {
       `/bookings?clientId=${encodeURIComponent(clientId)}&pageSize=${MAX_PAGE_SIZE}`,
     ),
   create: (payload: CreateBookingPayload) => api.post<Booking>('/bookings', payload),
+  createRecurring: (payload: CreateRecurringPayload) =>
+    api.post<SeriesResult>('/bookings/recurring', payload),
   update: (id: string, payload: UpdateBookingPayload) =>
     api.patch<Booking>(`/bookings/${id}`, payload),
   remove: (id: string) => api.delete<void>(`/bookings/${id}`),
+  /** This occurrence and every later one in its series. Never the earlier ones. */
+  removeFollowing: (id: string) => api.delete<void>(`/bookings/${id}?scope=following`),
 
   /** What is owed, and whether a push is already waiting. Read when the prompt opens. */
   balance: (id: string) => api.get<BookingBalance>(`/bookings/${id}/balance`),
@@ -158,4 +164,26 @@ export interface ChargeBalanceResult {
    * that page belongs to whoever is behind the counter rather than to the client.
    */
   clientSecret?: string;
+}
+
+/** Mirrors `RECURRENCE_FREQUENCIES` on the API. */
+export const RECURRENCE_FREQUENCIES = ['weekly', 'fortnightly', 'monthly'] as const;
+export type RecurrenceFrequency = (typeof RECURRENCE_FREQUENCIES)[number];
+
+export interface CreateRecurringPayload extends CreateBookingPayload {
+  frequency: RecurrenceFrequency;
+  /** The last day the series may place an appointment on. Inclusive. */
+  until: string;
+}
+
+/**
+ * What a series actually produced.
+ *
+ * `skipped` is not an error list — a year of Tuesdays meets a holiday, and the provider
+ * needs to see which weeks those were rather than a count that disagrees with their
+ * calendar.
+ */
+export interface SeriesResult {
+  created: Booking[];
+  skipped: { startsAt: string; reason: string }[];
 }

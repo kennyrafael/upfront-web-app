@@ -263,6 +263,22 @@ export const pt = {
     errorClient: 'Escolha um cliente',
     errorService: 'Escolha pelo menos um serviço',
     errorWhen: 'Escolha uma data e hora válidas',
+    errorUntil: 'Escolha até quando se repete',
+    deleteThisOne: 'Eliminar só esta',
+    deleteFollowing: 'Eliminar esta e as seguintes',
+    repeats: 'Marcação repetida',
+    frequency: 'Com que frequência',
+    frequencies: {
+      weekly: 'Todas as semanas',
+      fortnightly: 'De duas em duas semanas',
+      monthly: 'Todos os meses',
+    },
+    until: 'Até',
+    untilHint: 'O último dia conta. Máximo de 104 marcações.',
+    skippedTitle: (count: number) =>
+      count === 1
+        ? 'Uma data não ficou marcada porque o horário não estava livre:'
+        : `${count} datas não ficaram marcadas porque o horário não estava livre:`,
     editTitle: 'Editar marcação',
     newTitle: 'Nova marcação',
     saveButton: 'Guardar marcação',

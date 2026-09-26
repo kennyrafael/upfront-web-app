@@ -246,6 +246,22 @@ export const en: Dictionary = {
     errorClient: 'Pick a client',
     errorService: 'Pick at least one service',
     errorWhen: 'Pick a valid date and time',
+    errorUntil: 'Pick when the repeat ends',
+    deleteThisOne: 'Delete just this one',
+    deleteFollowing: 'Delete this and the ones after',
+    repeats: 'Repeating appointment',
+    frequency: 'How often',
+    frequencies: {
+      weekly: 'Every week',
+      fortnightly: 'Every two weeks',
+      monthly: 'Every month',
+    },
+    until: 'Until',
+    untilHint: 'The last day counts. Up to 104 appointments.',
+    skippedTitle: (count: number) =>
+      count === 1
+        ? 'One date was not booked because the time was not free:'
+        : `${count} dates were not booked because the time was not free:`,
     editTitle: 'Edit booking',
     newTitle: 'New booking',
     saveButton: 'Save booking',

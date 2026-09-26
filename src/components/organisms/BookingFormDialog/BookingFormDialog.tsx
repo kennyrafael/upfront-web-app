@@ -1,8 +1,14 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, Icon, Label, Switch } from '@/components/atoms';
 import { Combobox, FormField, SelectField, TextareaField } from '@/components/molecules';
-import { useCopy } from '@/lib';
-import { type Booking, clientsApi, SETTABLE_BOOKING_STATUSES } from '@/lib/api';
+import { formatDate, useCopy } from '@/lib';
+import {
+  type Booking,
+  clientsApi,
+  RECURRENCE_FREQUENCIES,
+  type RecurrenceFrequency,
+  SETTABLE_BOOKING_STATUSES,
+} from '@/lib/api';
 import {
   formatDuration,
   formatMoney,
@@ -93,8 +99,10 @@ export function BookingFormDialog({
   const loadServices = useServiceStore((state) => state.load);
 
   const create = useBookingStore((state) => state.create);
+  const createRecurring = useBookingStore((state) => state.createRecurring);
   const update = useBookingStore((state) => state.update);
   const remove = useBookingStore((state) => state.remove);
+  const removeFollowing = useBookingStore((state) => state.removeFollowing);
   const status = useBookingStore((state) => state.status);
   const error = useBookingStore((state) => state.error);
   const clearError = useBookingStore((state) => state.clearError);
@@ -103,6 +111,18 @@ export function BookingFormDialog({
     toFields(booking, initialStart, initialEmployeeId),
   );
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
+
+  /**
+   * The repeat, kept outside `Fields` because it is not part of the booking.
+   *
+   * It describes how many bookings to make, not what any one of them is — and it applies
+   * only when creating. Editing one occurrence of a regular edits that occurrence; the rule
+   * is not something an edit can reach.
+   */
+  const [repeats, setRepeats] = useState(false);
+  const [frequency, setFrequency] = useState<RecurrenceFrequency>('weekly');
+  const [until, setUntil] = useState('');
+  const [skipped, setSkipped] = useState<{ startsAt: string; reason: string }[]>();
   const [allowOutsideHours, setAllowOutsideHours] = useState(false);
 
   useEffect(() => {
@@ -189,6 +209,28 @@ export function BookingFormDialog({
       allowOutsideHours: allowOutsideHours || undefined,
     };
 
+    // A repeat only exists when creating. Editing one occurrence edits that occurrence.
+    if (!booking && repeats) {
+      if (!until) {
+        setErrors({ date: copy.bookings.errorUntil });
+        return;
+      }
+
+      const result = await createRecurring({ ...payload, frequency, until });
+      if (!result) return;
+
+      // Weeks that clashed are shown rather than swallowed: the provider's calendar will
+      // disagree with what they asked for, and they need to know which ones before they
+      // close this.
+      if (result.skipped.length > 0) {
+        setSkipped(result.skipped);
+        return;
+      }
+
+      onOpenChange(false);
+      return;
+    }
+
     const ok = booking
       ? await update(booking.id, { ...payload, status: fields.status as Booking['status'] })
       : await create(payload);
@@ -222,16 +264,36 @@ export function BookingFormDialog({
       footer={
         <>
           {booking ? (
-            <Button
-              variant="ghost"
-              className="mr-auto text-danger-ink hover:bg-danger/8 hover:text-danger-ink"
-              disabled={busy}
-              onClick={async () => {
-                if (await remove(booking.id)) onOpenChange(false);
-              }}
-            >
-              {copy.common.delete}
-            </Button>
+            <div className="mr-auto flex items-center gap-1">
+              <Button
+                variant="ghost"
+                className="text-danger-ink hover:bg-danger/8 hover:text-danger-ink"
+                disabled={busy}
+                onClick={async () => {
+                  if (await remove(booking.id)) onOpenChange(false);
+                }}
+              >
+                {booking.seriesId ? copy.bookings.deleteThisOne : copy.common.delete}
+              </Button>
+
+              {/*
+                Only for a repeat, and only ever forwards. Earlier occurrences may be
+                completed, invoiced or paid for — deleting those is a decision taken one at
+                a time, not a side effect of tidying up the future.
+              */}
+              {booking.seriesId ? (
+                <Button
+                  variant="ghost"
+                  className="text-danger-ink hover:bg-danger/8 hover:text-danger-ink"
+                  disabled={busy}
+                  onClick={async () => {
+                    if (await removeFollowing(booking.id)) onOpenChange(false);
+                  }}
+                >
+                  {copy.bookings.deleteFollowing}
+                </Button>
+              ) : null}
+            </div>
           ) : null}
           <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={busy}>
             {copy.common.cancel}
@@ -384,6 +446,70 @@ export function BookingFormDialog({
             onValueChange={(value) => setField('status', value)}
           />
         ) : null}
+
+        {/*
+          Only when creating. A regular is a decision about how many appointments to make,
+          and there is nothing to decide once they exist — editing one of them edits that
+          one, which is the whole of the edit model.
+        */}
+        {booking ? null : (
+          <div className="rounded-xl bg-sheet/50 px-3 py-3 ring-1 ring-hairline">
+            <label className="flex items-center gap-3 text-ink text-sm">
+              <Switch
+                checked={repeats}
+                onCheckedChange={(next) => {
+                  setRepeats(next);
+                  setSkipped(undefined);
+                }}
+              />
+              {copy.bookings.repeats}
+            </label>
+
+            {repeats ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <SelectField
+                  label={copy.bookings.frequency}
+                  options={RECURRENCE_FREQUENCIES.map((value) => ({
+                    value,
+                    label: copy.bookings.frequencies[value],
+                  }))}
+                  value={frequency}
+                  onValueChange={(value) => setFrequency(value as RecurrenceFrequency)}
+                />
+                <FormField
+                  label={copy.bookings.until}
+                  type="date"
+                  hint={copy.bookings.untilHint}
+                  value={until}
+                  onChange={(event) => setUntil(event.target.value)}
+                />
+              </div>
+            ) : null}
+
+            {/*
+              Shown instead of closing the dialog. The provider asked for every Tuesday and
+              did not get every Tuesday, and a toast they might miss is not good enough for
+              a calendar that now disagrees with what they intended.
+            */}
+            {skipped && skipped.length > 0 ? (
+              <div className="mt-3 rounded-lg bg-warning/8 px-3 py-2 text-sm">
+                <p className="text-ink">{copy.bookings.skippedTitle(skipped.length)}</p>
+                <ul className="mt-1 list-disc pl-5 text-ink-muted">
+                  {skipped.map((miss) => (
+                    <li key={miss.startsAt}>{formatDate(miss.startsAt)}</li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  className="mt-2 text-brand-ink underline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  {copy.common.done}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <TextareaField
           label={copy.common.notes}
