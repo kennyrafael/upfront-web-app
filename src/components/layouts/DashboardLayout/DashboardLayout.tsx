@@ -196,7 +196,16 @@ export function DashboardLayout({ title, description, actions, children }: Dashb
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-sheet/80 px-4 backdrop-blur-xl md:px-8">
+          {/*
+            Opaque, and **no `backdrop-blur`**. A sticky element with `backdrop-filter` makes
+            the compositor re-sample what is behind it whenever anything repaints, and a
+            hover anywhere below left a lighter vertical band the width of the hovered
+            control running the height of the page. It was on every page because this header
+            is, and only visible in dark mode, where the band is lighter than its
+            surroundings. Fully opaque rather than 80%, since nothing shows through a header
+            that no longer blurs.
+          */}
+          <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-hairline bg-sheet px-4 md:px-8">
             {/* Phone: the drawer trigger takes the place the sidebar would. */}
             <button
               type="button"

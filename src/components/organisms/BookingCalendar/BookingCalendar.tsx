@@ -480,7 +480,10 @@ function DayColumn({
               }}
               className={cn(
                 'absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1 text-left text-[11px] leading-tight',
-                'ring-1 ring-inset backdrop-blur-sm transition-colors',
+                // No `backdrop-blur`: a grid of these over a repainting calendar is the
+                // worst case for the banding artifact the sticky header also caused, and
+                // the chips are opaque enough that it blurred almost nothing.
+                'ring-1 ring-inset transition-colors',
                 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-700',
                 index === 0 && 'cursor-grab active:cursor-grabbing',
                 STATUS_STYLES[booking.status],
