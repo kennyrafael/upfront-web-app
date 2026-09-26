@@ -1,13 +1,27 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "bash ../scripts/vercel-ignore.sh web",
+  "ignoreCommand": "bash ../scripts/vercel-ignore.sh web scripts",
   "rewrites": [
     {
       "source": "/api/:path*",
-      "has": [{ "type": "header", "key": "host", "value": { "pre": "upfront-web-sandbox" } }],
+      "has": [
+        {
+          "type": "header",
+          "key": "host",
+          "value": {
+            "pre": "upfront-web-sandbox"
+          }
+        }
+      ],
       "destination": "https://upfront-api-sandbox.vercel.app/api/:path*"
     },
-    { "source": "/api/:path*", "destination": "https://upfront-api.vercel.app/api/:path*" },
-    { "source": "/:path*", "destination": "/index.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "https://upfront-api.vercel.app/api/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
   ]
 }
