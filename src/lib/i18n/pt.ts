@@ -478,6 +478,8 @@ export const pt = {
     nif: 'NIF',
     nifHint: '9 dígitos.',
     nifError: 'Um NIF português tem exatamente 9 dígitos',
+    paymentDetailsMoved:
+      'O tipo de entidade, a área de atividade e os dados bancários estão no separador Pagamentos.',
     entityType: 'Tipo de entidade',
     entityTypeHint: 'Trabalhador independente ou sociedade. Muda as verificações do pagamento.',
     entityTypes: {
@@ -565,6 +567,36 @@ export const pt = {
     endAfterStart: 'Tem de acabar depois de começar',
   },
 
+  /**
+   * The one form that decides whether a business can be paid at all.
+   *
+   * Written to make the purpose obvious before the fields are: a date of birth asked with no
+   * reason given reads as intrusive, and the same question asked by Stripe a screen later
+   * reads as being asked twice.
+   */
+  payoutDetails: {
+    title: 'Dados para receber pagamentos',
+    lede: 'Pedidos pelo sistema de pagamentos para confirmar quem recebe o dinheiro. Preencha uma vez e quase nada mais lhe será perguntado.',
+    businessSection: 'O negócio',
+    personSection: 'Quem responde pelo negócio',
+    personLede:
+      'O titular, tal como consta do documento de identificação. É verificado e nunca é mostrado aos clientes.',
+    moneySection: 'Onde entra o dinheiro',
+    moneyLede: 'A conta para onde as transferências são feitas depois de cada marcação.',
+    nifHint: '9 dígitos. O mesmo que consta dos recibos verdes.',
+    firstName: 'Nome próprio',
+    lastName: 'Apelido',
+    legalNameHint: 'Como aparece no cartão de cidadão ou passaporte.',
+    birthDate: 'Data de nascimento',
+    birthDateError: 'Indique uma data válida',
+    iban: 'IBAN',
+    ibanHint: 'A conta portuguesa onde quer receber.',
+    ibanError: 'Indique um IBAN português, começado por PT50',
+    website: 'Site do negócio',
+    websiteHint: 'Opcional. Uma página que mostre o que faz.',
+    websiteHintWithPage: (page: string) =>
+      `Opcional. Se deixar vazio, usamos a sua página de marcações: ${page}`,
+  },
   payoutAccount: {
     title: 'Receber pagamentos',
     lede: 'Ligue a sua conta para aceitar MB WAY e cartão nas marcações.',
@@ -590,6 +622,8 @@ export const pt = {
       phone: 'Telemóvel',
       businessCategory: 'Área de atividade',
       address: 'Endereço do negócio',
+      representative: 'Nome e data de nascimento do titular',
+      payoutIban: 'IBAN',
     } as Record<string, string | undefined>,
     goToDetails: 'Preencher os dados do negócio',
   },

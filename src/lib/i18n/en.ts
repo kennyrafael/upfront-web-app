@@ -443,6 +443,7 @@ export const en: Dictionary = {
     nif: 'NIF',
     nifHint: '9 digits.',
     nifError: 'A Portuguese NIF is exactly 9 digits',
+    paymentDetailsMoved: 'Entity type, what you do and your bank details are on the Payments tab.',
     entityType: 'Entity type',
     entityTypeHint: 'Sole trader or company. It changes the payment checks.',
     entityTypes: {
@@ -529,6 +530,29 @@ export const en: Dictionary = {
     endAfterStart: 'It has to end after it starts',
   },
 
+  payoutDetails: {
+    title: 'Details for receiving payments',
+    lede: 'Asked by the payments system to confirm who receives the money. Fill this in once and you will barely be asked anything else.',
+    businessSection: 'The business',
+    personSection: 'Who answers for the business',
+    personLede:
+      'The account holder, as it appears on their identity document. It is verified, and never shown to clients.',
+    moneySection: 'Where the money lands',
+    moneyLede: 'The account transfers are made to after each appointment.',
+    nifHint: '9 digits. The same one your recibos verdes carry.',
+    firstName: 'First name',
+    lastName: 'Last name',
+    legalNameHint: 'As it appears on their ID card or passport.',
+    birthDate: 'Date of birth',
+    birthDateError: 'Enter a valid date',
+    iban: 'IBAN',
+    ibanHint: 'The Portuguese account you want to be paid into.',
+    ibanError: 'Enter a Portuguese IBAN, starting PT50',
+    website: 'Business website',
+    websiteHint: 'Optional. A page that shows what you do.',
+    websiteHintWithPage: (page: string) =>
+      `Optional. Left empty, we use your booking page: ${page}`,
+  },
   payoutAccount: {
     title: 'Getting paid',
     lede: 'Connect your account to take MB WAY and card payments on bookings.',
@@ -554,6 +578,8 @@ export const en: Dictionary = {
       phone: 'Phone',
       businessCategory: 'What you do',
       address: 'Business address',
+      representative: "The account holder's name and date of birth",
+      payoutIban: 'IBAN',
     } as Record<string, string | undefined>,
     goToDetails: 'Fill in the business details',
   },

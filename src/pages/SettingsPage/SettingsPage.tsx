@@ -7,6 +7,7 @@ import {
   DashboardLayout,
   MyDetailsForm,
   PaymentsSettings,
+  PayoutDetailsForm,
   PeopleSettings,
   PublicBookingSettings,
   SignInSettings,
@@ -112,7 +113,10 @@ export function SettingsPage() {
                   half of it — the balance charged at the counter needs this too — and it is
                   the one setting in here that somebody's bank details go through. */}
               <Tabs.Content value="payments">
-                <PaymentsSettings />
+                <div className="flex flex-col gap-6">
+                  <PaymentsSettings />
+                  <PayoutDetailsForm />
+                </div>
               </Tabs.Content>
             </>
           ) : null}

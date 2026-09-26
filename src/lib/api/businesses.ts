@@ -33,6 +33,14 @@ export type EntityType = (typeof ENTITY_TYPES)[number];
 export const BUSINESS_CATEGORIES = ['beauty', 'fitness', 'home_services', 'other'] as const;
 export type BusinessCategory = (typeof BUSINESS_CATEGORIES)[number];
 
+/** The person the gateway checks against public records. */
+export interface Representative {
+  firstName: string;
+  lastName: string;
+  /** `YYYY-MM-DD`. A plain date — a birthday has no time and no zone to shift it. */
+  birthDate: string;
+}
+
 /** The business's own address — the one on a recibo, and the one the gateway checks. */
 export interface Address {
   line1: string;
@@ -51,6 +59,11 @@ export interface BusinessProfile {
   entityType: EntityType;
   businessCategory?: BusinessCategory;
   address?: Address;
+  representative?: Representative;
+  /** Where they are paid out. Absent until payments are set up. */
+  payoutIban?: string;
+  /** A site describing the business. Absent means their own booking page is used. */
+  websiteUrl?: string;
   timezone: string;
   onboardedAt?: string;
   /** When the shop is open. A ceiling: availability is this intersected with a person's own. */
@@ -79,6 +92,9 @@ export interface UpdateBusinessPayload {
   entityType?: EntityType;
   businessCategory?: BusinessCategory;
   address?: Address;
+  representative?: Representative;
+  payoutIban?: string;
+  websiteUrl?: string;
   timezone?: string;
   hours?: WorkingHours[];
   slotMinutes?: number;

@@ -3,21 +3,13 @@ import { Button, Card, CardBody, CardHeader, CardTitle } from '@/components/atom
 import { FormField, SelectField } from '@/components/molecules';
 import { WorkingHoursEditor } from '@/components/organisms/WorkingHoursEditor';
 import { useCopy } from '@/lib';
-import {
-  BUSINESS_CATEGORIES,
-  type BusinessProfile,
-  ENTITY_TYPES,
-  SLOT_MINUTES_CHOICES,
-  type WorkingHours,
-} from '@/lib/api';
+import { type BusinessProfile, SLOT_MINUTES_CHOICES, type WorkingHours } from '@/lib/api';
 import { useBusinessStore } from '@/stores';
 
 interface ProfileFields {
   name: string;
   phone: string;
   nif: string;
-  entityType: string;
-  businessCategory: string;
   line1: string;
   line2: string;
   city: string;
@@ -29,8 +21,6 @@ function toFields(profile: BusinessProfile | null): ProfileFields {
     name: profile?.name ?? '',
     phone: profile?.phone ?? '',
     nif: profile?.nif ?? '',
-    entityType: profile?.entityType ?? 'individual',
-    businessCategory: profile?.businessCategory ?? '',
     line1: profile?.address?.line1 ?? '',
     line2: profile?.address?.line2 ?? '',
     city: profile?.address?.city ?? '',
@@ -83,9 +73,6 @@ export function BusinessProfileForm() {
       name: fields.name,
       phone: fields.phone || undefined,
       nif: fields.nif || undefined,
-      entityType: fields.entityType as BusinessProfile['entityType'],
-      businessCategory: (fields.businessCategory ||
-        undefined) as BusinessProfile['businessCategory'],
       // All or nothing: the API rejects a partial address, because a city with no street
       // satisfies neither the recibo nor the gateway that wanted it.
       address: fields.line1
@@ -133,28 +120,9 @@ export function BusinessProfileForm() {
             value={fields.nif}
             onChange={(event) => setField('nif', event.target.value)}
           />
-          <SelectField
-            label={copy.settings.entityType}
-            hint={copy.settings.entityTypeHint}
-            disabled={busy}
-            value={fields.entityType}
-            onValueChange={(value) => setField('entityType', value)}
-            options={ENTITY_TYPES.map((type) => ({
-              value: type,
-              label: copy.settings.entityTypes[type],
-            }))}
-          />
-          <SelectField
-            label={copy.settings.businessCategory}
-            hint={copy.settings.businessCategoryHint}
-            disabled={busy}
-            value={fields.businessCategory}
-            onValueChange={(value) => setField('businessCategory', value)}
-            options={BUSINESS_CATEGORIES.map((category) => ({
-              value: category,
-              label: copy.settings.businessCategories[category],
-            }))}
-          />
+          <p className="text-ink-muted text-sm sm:col-span-2">
+            {copy.settings.paymentDetailsMoved}
+          </p>
         </CardBody>
       </Card>
 

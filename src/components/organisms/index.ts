@@ -19,6 +19,7 @@ export * from './NotificationBell';
 export * from './PaymentDialog';
 export * from './PaymentLedger';
 export * from './PaymentsSettings';
+export * from './PayoutDetailsForm';
 export * from './PeopleSettings';
 export * from './PublicBookingFlow';
 export * from './PublicBookingSettings';
