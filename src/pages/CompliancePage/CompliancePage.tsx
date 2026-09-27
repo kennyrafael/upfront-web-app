@@ -209,8 +209,11 @@ export function CompliancePage() {
 // placeholder, so the default period read as an unanswered question instead of "the whole
 // year", which is what it is.
 function exportPeriodValue(quarter?: number, month?: number): string {
-  if (month) return `m`;
-  if (quarter) return `q`;
+  // Both interpolations were lost in an edit once, and the loss is silent: a bare 'q' matches
+  // no option, so the Select falls back to its placeholder and the period you just picked
+  // reads as unanswered. Worth a glance whenever this file is edited by anything but a human.
+  if (month) return `m${month}`;
+  if (quarter) return `q${quarter}`;
   return 'year';
 }
 
