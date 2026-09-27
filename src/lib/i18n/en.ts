@@ -238,6 +238,7 @@ export const en: Dictionary = {
     addAnotherService: 'Add another service',
     chooseService: 'Choose a service',
     servicesHint: 'The appointment runs as long as everything on it, and is priced the same way.',
+    noServiceMatch: 'No service matches that.',
     total: 'Total:',
     date: 'Date',
     startTime: 'Start time',

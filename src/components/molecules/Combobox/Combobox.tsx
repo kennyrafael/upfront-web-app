@@ -11,7 +11,7 @@ export interface ComboboxOption {
   detail?: string;
 }
 
-export interface ComboboxProps {
+interface ComboboxBase {
   label: string;
   required?: boolean;
   placeholder?: string;
@@ -24,12 +24,72 @@ export interface ComboboxProps {
    * normal case when editing: the booking's client is one of hundreds and was never fetched.
    */
   selectedLabel?: string;
-  /** Asked for with whatever has been typed, empty included. The server does the matching. */
-  loadOptions: (term: string) => Promise<ComboboxOption[]>;
   onChange: (option: ComboboxOption) => void;
-  loadingMessage: string;
   emptyMessage: string;
   disabled?: boolean;
+  /**
+   * Keeps the label for screen readers but takes it off the screen.
+   *
+   * For the case where something above already says what this is — repeating it reads as two
+   * headings for one control, and dropping it leaves the field with no accessible name.
+   */
+  srOnlyLabel?: boolean;
+}
+
+/**
+ * Either a list this component filters, or a loader that does its own matching.
+ *
+ * **Two sources because there are two kinds of list, not as a convenience.** Clients are
+ * unbounded and paginated, so only the server can match them and every keystroke is a request.
+ * A shop's service catalogue is deliberately unpaginated — bounded by the shop, per the
+ * reasoning in CLAUDE.md — so it is already in memory, and asking the server would add a round
+ * trip and a debounce to filtering a list of forty things.
+ *
+ * A union rather than two optional props, so passing both is a type error instead of a question
+ * about which one wins.
+ */
+export type ComboboxProps = ComboboxBase &
+  (
+    | {
+        /** Filtered here, on every keystroke, with no debounce and no loading state. */
+        options: ComboboxOption[];
+        loadOptions?: never;
+        loadingMessage?: never;
+      }
+    | {
+        /** Asked for with whatever has been typed, empty included. The server does the matching. */
+        loadOptions: (term: string) => Promise<ComboboxOption[]>;
+        options?: never;
+        loadingMessage: string;
+      }
+  );
+
+/**
+ * Folded for comparison: case, and the accents Portuguese names carry.
+ *
+ * Somebody typing `joao` means João, and a filter that disagrees is a filter people stop
+ * trusting. Only the local path needs this — what the server matches on is the server's
+ * business.
+ */
+function fold(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+}
+
+/**
+ * Every word typed has to appear somewhere in the option, in any order.
+ *
+ * So "corte ana" finds "Ana · Corte" as readily as "ana corte", which is how people type when
+ * they half-remember two things about one row.
+ */
+function matches(option: ComboboxOption, term: string): boolean {
+  const haystack = fold(`${option.label} ${option.detail ?? ''}`);
+  return fold(term)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word));
 }
 
 /** Long enough that a typist's next key usually arrives first; short enough not to feel slow. */
@@ -66,10 +126,12 @@ export function Combobox({
   value,
   selectedLabel,
   loadOptions,
+  options: staticOptions,
   onChange,
   loadingMessage,
   emptyMessage,
   disabled,
+  srOnlyLabel = false,
 }: ComboboxProps) {
   const fieldId = useId();
   const listId = `${fieldId}-list`;
@@ -78,7 +140,7 @@ export function Combobox({
   const [open, setOpen] = useState(false);
   /** What is typed. `null` means "not typing", and the field shows the chosen label instead. */
   const [query, setQuery] = useState<string | null>(null);
-  const [options, setOptions] = useState<ComboboxOption[]>([]);
+  const [fetched, setFetched] = useState<ComboboxOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(0);
   const sequence = useRef(0);
@@ -94,22 +156,31 @@ export function Combobox({
 
   const term = query ?? '';
 
+  /**
+   * The list to show, from whichever source this instance was given.
+   *
+   * Derived for a static list rather than held in state: there is nothing to synchronise, and a
+   * `useEffect` that copies a filtered prop into state is a render behind on every keystroke.
+   */
+  const shownOptions = staticOptions ? staticOptions.filter((o) => matches(o, term)) : fetched;
+
   useEffect(() => {
-    if (!open) return;
+    // Nothing to fetch, and no debounce to wait out — a local filter should feel instant.
+    const fetcher = load.current;
+    if (!open || !fetcher) return;
 
     const request = ++sequence.current;
     setLoading(true);
 
     const timer = setTimeout(() => {
-      load
-        .current(term.trim())
+      fetcher(term.trim())
         .then((next) => {
           if (request !== sequence.current) return;
-          setOptions(next);
+          setFetched(next);
           setActive(0);
         })
         .catch(() => {
-          if (request === sequence.current) setOptions([]);
+          if (request === sequence.current) setFetched([]);
         })
         .finally(() => {
           if (request === sequence.current) setLoading(false);
@@ -137,14 +208,14 @@ export function Combobox({
       case 'ArrowDown':
         event.preventDefault();
         if (!open) setOpen(true);
-        else setActive((index) => Math.min(index + 1, options.length - 1));
+        else setActive((index) => Math.min(index + 1, shownOptions.length - 1));
         break;
       case 'ArrowUp':
         event.preventDefault();
         setActive((index) => Math.max(index - 1, 0));
         break;
       case 'Enter': {
-        const option = open ? options[active] : undefined;
+        const option = open ? shownOptions[boundedActive] : undefined;
         if (option) {
           // Only swallowed when it chose something; otherwise Enter still submits the form.
           event.preventDefault();
@@ -166,17 +237,31 @@ export function Combobox({
     }
   }
 
-  const activeId = open && options[active] ? `${listId}-${options[active].value}` : undefined;
+  // Reset as the local filter narrows: the highlight must not point past the end of a shorter
+  // list. The fetching path does this when a response lands; there is no response here.
+  const boundedActive = Math.min(active, Math.max(shownOptions.length - 1, 0));
+  const activeId =
+    open && shownOptions[boundedActive]
+      ? `${listId}-${shownOptions[boundedActive].value}`
+      : undefined;
   const shown = query ?? selectedLabel ?? '';
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={fieldId} required={required}>
+      <Label htmlFor={fieldId} required={required} className={cn(srOnlyLabel && 'sr-only')}>
         {label}
       </Label>
 
       <Popover.Root open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
-        <Popover.Anchor>
+        {/* **Trigger rather than Anchor, and not as a preference.** `Popover.Anchor` renders
+            nothing at all in this version of Themes: the label appeared with no field beneath
+            it, so the client could not be typed and no booking could be made from the dashboard.
+            Confirmed by swapping one for the other and watching the input come back.
+
+            Themes' Trigger already clones its child rather than wrapping it in a button of its
+            own, so the markup is the same as before. Opening is still driven by the input's focus
+            and click handlers; the Trigger only gives the list something to anchor to. */}
+        <Popover.Trigger>
           <div>
             <Input
               id={fieldId}
@@ -201,7 +286,7 @@ export function Combobox({
               onKeyDown={onKeyDown}
             />
           </div>
-        </Popover.Anchor>
+        </Popover.Trigger>
 
         <Popover.Content
           align="start"
@@ -219,14 +304,14 @@ export function Combobox({
           style={{ width: 'var(--radix-popover-trigger-width)', maxWidth: 'calc(100vw - 1.5rem)' }}
         >
           <div id={listId} role="listbox" aria-label={label} className="max-h-64 overflow-y-auto">
-            {loading && options.length === 0 ? (
+            {loading && shownOptions.length === 0 ? (
               <div className="flex items-center gap-2 px-3 py-2 text-ink-muted text-sm">
                 <Spinner className="size-3.5 text-brand-ink" /> {loadingMessage}
               </div>
-            ) : options.length === 0 ? (
+            ) : shownOptions.length === 0 ? (
               <div className="px-3 py-2 text-ink-muted text-sm">{emptyMessage}</div>
             ) : (
-              options.map((option, index) => (
+              shownOptions.map((option, index) => (
                 <div
                   key={option.value}
                   id={`${listId}-${option.value}`}

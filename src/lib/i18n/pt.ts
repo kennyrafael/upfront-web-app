@@ -255,6 +255,7 @@ export const pt = {
     addAnotherService: 'Adicionar outro serviço',
     chooseService: 'Escolha um serviço',
     servicesHint: 'A marcação dura o que durar tudo o que estiver nela, e é somada da mesma forma.',
+    noServiceMatch: 'Nenhum serviço corresponde.',
     total: 'Total:',
     date: 'Data',
     startTime: 'Hora de início',

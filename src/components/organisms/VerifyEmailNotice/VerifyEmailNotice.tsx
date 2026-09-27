@@ -21,7 +21,10 @@ export function VerifyEmailNotice() {
   if (!user || user.emailVerified) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warn/12 px-4 py-3 ring-1 ring-warn/25">
+    // `mb-6` matches the page title's own bottom margin, so the rhythm down the page is even.
+    // Carried here rather than by the layout because this returns null once the address is
+    // confirmed — a margin on the slot around it would leave a gap with nothing in it.
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-warn/12 px-4 py-3 ring-1 ring-warn/25">
       <div>
         <p className="text-sm font-medium text-warn-ink">{copy.verifyEmail.confirm}</p>
         <p className="text-xs text-warn-ink/80">{copy.verifyEmail.body(user.email)}</p>

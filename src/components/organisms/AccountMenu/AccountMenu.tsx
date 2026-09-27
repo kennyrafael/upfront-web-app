@@ -51,7 +51,9 @@ export function AccountMenu() {
           width its own padding and items then exceed gives a horizontal scrollbar rather
           than a wider menu. */}
       <DropdownMenu.Content align="end" variant="soft" className="min-w-64">
-        <DropdownMenu.Label>
+        {/* `mb-1` so whose account this is reads as a heading over the items rather than as the
+            first of them — without it the business name sits flush against "Your profile". */}
+        <DropdownMenu.Label className="mb-1">
           <div className="py-1">
             <p className="truncate font-medium text-brand-900">{user?.name}</p>
             <p className="truncate text-xs text-ink-muted">{user?.businessName ?? user?.email}</p>

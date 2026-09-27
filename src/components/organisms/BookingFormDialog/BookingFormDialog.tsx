@@ -390,20 +390,26 @@ export function BookingFormDialog({
           ) : null}
 
           <div className="mt-2">
-            <SelectField
+            {/* A combobox rather than a select: a salon's catalogue is a few dozen rows by the
+                time it has colours, treatments and every length of them, and scrolling to find
+                one is worse than typing three letters of it. Filtered here rather than on the
+                server, because the catalogue is deliberately unpaginated and already loaded. */}
+            <Combobox
               label={copy.bookings.addService}
               srOnlyLabel
               placeholder={
                 chosen.length > 0 ? copy.bookings.addAnotherService : copy.bookings.chooseService
               }
               options={serviceOptions}
-              // Never holds a value: choosing one appends it and the control resets, so the
-              // same service can be added twice in a row.
+              // Never holds a value, and carries no selectedLabel for the same reason: choosing
+              // one appends it and the field clears itself, so the same service can be added
+              // twice in a row.
               value={undefined}
               error={errors.services}
               hint={copy.bookings.servicesHint}
-              onValueChange={(value) =>
-                setField('services', [...fields.services, chosenService(value)])
+              emptyMessage={copy.bookings.noServiceMatch}
+              onChange={(option) =>
+                setField('services', [...fields.services, chosenService(option.value)])
               }
             />
           </div>
