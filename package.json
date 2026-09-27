@@ -23,6 +23,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@alwaysmeticulous/recorder-plugin": "^2.338.0",
     "@biomejs/biome": "^2.5.13",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.4",

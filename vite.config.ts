@@ -1,10 +1,17 @@
 import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import meticulous from "@alwaysmeticulous/recorder-plugin/vite";
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    meticulous({
+      recordingToken: "orw7RzmAeleIjG5oNHUSu4BJasdTEHO01jc58UY8",
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
