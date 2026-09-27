@@ -73,7 +73,11 @@ export function PublicBookingSettings() {
       slug: slug || undefined,
       bookingLeadTimeHours: Number(leadTime),
       bookingHorizonDays: Number(horizon),
-      depositPercent: Number(deposit),
+      // Zero on `none`, because the input is hidden there and its state is whatever it held
+      // before the mode changed. Sending that stale number is how a percentage comes to be
+      // stored against a mode that ignores it — the server refuses the pair, and the provider
+      // would see a validation error about a field they cannot see.
+      depositPercent: mode === 'none' ? 0 : Number(deposit),
       paymentMode: mode,
       cancellationNoticeHours: Number(notice),
     });
@@ -202,8 +206,11 @@ export function PublicBookingSettings() {
                 />
               ) : null}
 
+              {/* The mode decides this, not the percentage. Reading the percentage alone
+                  described a deposit policy to a business that takes no payment, because the
+                  hidden input still held its old value. */}
               <p className="mt-2 text-xs text-ink-muted">
-                {Number(deposit) > 0
+                {mode !== 'none' && Number(deposit) > 0
                   ? copy.bookingPage.depositPolicy
                   : copy.bookingPage.noDepositPolicy}
               </p>
