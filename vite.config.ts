@@ -7,15 +7,16 @@ import { defineConfig } from 'vite';
 /**
  * The one deployment that must never record.
  *
- * Keyed the same way as `assertKeysMatchTheEnvironment` in the API, and for the same reason:
- * `VERCEL_ENV` is `production` for the sandbox project too, because a project's production
- * branch is whatever it was told — `sandbox` there and `main` here. So the commit ref is what
- * separates them, and `NODE_ENV` cannot: Vercel sets it to `production` for every build.
+ * Keyed the same way as `assertKeysMatchTheEnvironment` in the API, and deliberately on
+ * `VERCEL_ENV` alone. Not `NODE_ENV`, which Vercel sets to `production` for every build
+ * including a preview one; and **not the branch name**, which says nothing `VERCEL_ENV` does
+ * not now that previews are the non-production environment. Pinning it to a branch would mean
+ * that the day production moves to a release branch, this reads "not production" and starts
+ * recording real clients' sessions — the failure being silent in the direction that matters.
  *
  * Absent locally, where the answer is "not production" and recording is the entire point.
  */
-const isLiveProduction =
-  process.env.VERCEL_ENV === 'production' && process.env.VERCEL_GIT_COMMIT_REF === 'main';
+const isLiveProduction = process.env.VERCEL_ENV === 'production';
 
 export default defineConfig({
   plugins: [
