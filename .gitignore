@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets. These lived in the repository-root .gitignore until this app got its own
+# repository; a root file does not survive a subtree split, so the rule moves here or it
+# stops existing. Backups of .env carry the same secrets the original does.
+.env
+.env.*
+!.env.example
