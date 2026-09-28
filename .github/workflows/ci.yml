@@ -1,0 +1,26 @@
+name: CI
+
+# See the api repository for why these four patterns: feature/* arrives by pull request,
+# integration/* is the preview environment, release/* is a version being stabilised, main is
+# production.
+on:
+  push:
+    branches:
+      - main
+      - 'integration/**'
+      - 'release/**'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # `build` runs `tsc -b` before vite, so this is the type check as well as the bundle.
+      - run: npm run build

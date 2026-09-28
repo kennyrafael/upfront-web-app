@@ -1,0 +1,11 @@
+# Check every text file out with LF, whatever the platform.
+#
+# Without this, git's core.autocrlf=true gives a Windows working tree CRLF line endings while
+# the blobs stay LF — so `npm run lint` fails locally on files that are perfectly formatted,
+# and passes in CI, which checks out on Linux. A lint you cannot run is a lint nobody runs.
+#
+# The stored blobs are already LF, so this changes what lands on disk, not what is committed.
+* text=auto eol=lf
+
+# Lockfiles are generated; keep them out of diffs and out of review.
+package-lock.json -diff linguist-generated
