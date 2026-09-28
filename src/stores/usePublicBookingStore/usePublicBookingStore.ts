@@ -41,6 +41,14 @@ interface PublicBookingState {
   day: Date;
   /** Each start, with everybody who could take it — so the page can grey out the rest. */
   slots: PublicSlot[];
+  /**
+   * `YYYY-MM-DD` of the first day that has anything, when the one being browsed has nothing.
+   *
+   * Null covers three different things on purpose — not asked, nothing within the horizon, and
+   * the lookup failed — because the page does the same thing in all three: shows the plain
+   * "nothing free" message it always did.
+   */
+  nextAvailableDate: string | null;
   selectedSlot: string | null;
   result: BookingResult | null;
   /** Kept so the waiting screen can say which phone the MB WAY request went to. */
@@ -56,6 +64,8 @@ interface PublicBookingState {
   choosePerson: (employeeId: string | null) => Promise<void>;
   setDay: (day: Date) => Promise<void>;
   loadSlots: () => Promise<void>;
+  /** Only called when a day came back empty; see the note on the implementation. */
+  loadNextAvailableDate: () => Promise<void>;
   selectSlot: (slot: string) => void;
   back: () => void;
   book: (details: Omit<CreatePublicBookingPayload, 'serviceIds' | 'startsAt'>) => Promise<boolean>;
@@ -73,6 +83,19 @@ function startOfLocalDay(date: Date): Date {
   const copy = new Date(date);
   copy.setHours(0, 0, 0, 0);
   return copy;
+}
+
+/**
+ * The browsing cursor as `YYYY-MM-DD`, to compare against the date the server answers with.
+ *
+ * Built from the local parts rather than `toISOString().slice(0, 10)`, which is UTC — west of
+ * Greenwich that is yesterday for most of the evening, so the comparison would fail exactly
+ * when it matters and the page would offer to jump to the day it is already showing.
+ */
+function localDayKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
 }
 
 /**
@@ -99,6 +122,7 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
   employeeId: null,
   day: startOfLocalDay(new Date()),
   slots: [],
+  nextAvailableDate: null,
   selectedSlot: null,
   result: null,
   clientPhone: '',
@@ -159,25 +183,59 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
     const { slug, serviceIds, day, employeeId } = get();
     if (!slug || serviceIds.length === 0) return;
 
-    set({ status: 'loadingSlots', error: null });
+    set({ status: 'loadingSlots', error: null, nextAvailableDate: null });
     try {
       const from = new Date(day);
       const to = new Date(day);
       to.setDate(to.getDate() + 1);
 
-      set({
-        slots: await publicApi.availability(
-          slug,
-          serviceIds,
-          from.toISOString(),
-          to.toISOString(),
-          undefined,
-          employeeId ?? undefined,
-        ),
-        status: 'idle',
-      });
+      const slots = await publicApi.availability(
+        slug,
+        serviceIds,
+        from.toISOString(),
+        to.toISOString(),
+        undefined,
+        employeeId ?? undefined,
+      );
+      set({ slots, status: 'idle' });
+
+      // Only when this day has nothing. An empty day is otherwise a dead end: the page can
+      // say "nothing free" and no more, so the only move is clicking forward a day at a time
+      // through a week that may be fully booked, with nothing to say whether the next one is
+      // any better. Asked after the slots are already on screen, so it never delays them.
+      if (slots.length === 0) await get().loadNextAvailableDate();
     } catch (error) {
       set({ status: 'idle', slots: [], error: toMessage(error) });
+    }
+  },
+
+  /**
+   * Deliberately swallows its own failure.
+   *
+   * This is a hint, not the booking flow — if the endpoint is missing or slow, the page should
+   * look exactly as it did before the hint existed rather than show a client an error about a
+   * feature they did not ask for. That is not hypothetical: a preview of this app talks to the
+   * production API, which will not have the route until this is merged, and a 404 there must
+   * not read as "this shop is broken".
+   */
+  loadNextAvailableDate: async () => {
+    const { slug, serviceIds, day, employeeId } = get();
+    if (!slug || serviceIds.length === 0) return;
+
+    try {
+      const { date } = await publicApi.nextAvailableDate(
+        slug,
+        serviceIds,
+        new Date(day).toISOString(),
+        undefined,
+        employeeId ?? undefined,
+      );
+      // Not the day being looked at: the server counts from the start of it, so a day whose
+      // remaining slots are all inside the lead time answers with itself, and offering to jump
+      // to where you already are is worse than saying nothing.
+      set({ nextAvailableDate: date === localDayKey(get().day) ? null : date });
+    } catch {
+      set({ nextAvailableDate: null });
     }
   },
 
@@ -262,6 +320,7 @@ export const usePublicBookingStore = create<PublicBookingState>((set, get) => ({
       employeeId: null,
       day: startOfLocalDay(new Date()),
       slots: [],
+      nextAvailableDate: null,
       selectedSlot: null,
       result: null,
       clientPhone: '',

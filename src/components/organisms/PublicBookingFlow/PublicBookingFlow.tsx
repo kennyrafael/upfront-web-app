@@ -20,6 +20,23 @@ export interface PublicBookingFlowProps {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * `YYYY-MM-DD` to a local Date on that calendar day.
+ *
+ * Two traps, and the construction dodges both. `new Date('2026-10-03')` is parsed as **UTC**
+ * midnight, so for a visitor west of Greenwich the label and the day jumped to would both land
+ * a day early — hence building it from the parts. And **noon rather than midnight**, because
+ * the label renders this in the *provider's* timezone: a local midnight in Tokyo is still the
+ * previous afternoon in Lisbon, so a midnight Date would print the day before for anyone far
+ * enough east. Noon survives every real offset.
+ *
+ * `setDay` normalises to the start of the day anyway, so the hour never reaches the store.
+ */
+function dayFromKey(key: string): Date {
+  const [year, month, day] = key.split('-').map(Number);
+  return new Date(year, month - 1, day, 12);
+}
+
 export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
   const t = useCopy();
   const copy = t.publicBooking;
@@ -27,6 +44,7 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
   const serviceIds = usePublicBookingStore((state) => state.serviceIds);
   const day = usePublicBookingStore((state) => state.day);
   const slots = usePublicBookingStore((state) => state.slots);
+  const nextAvailableDate = usePublicBookingStore((state) => state.nextAvailableDate);
   const selectedSlot = usePublicBookingStore((state) => state.selectedSlot);
   const status = usePublicBookingStore((state) => state.status);
   const error = usePublicBookingStore((state) => state.error);
@@ -319,9 +337,35 @@ export function PublicBookingFlow({ provider }: PublicBookingFlowProps) {
             <Spinner className="size-4 text-brand-ink" /> {copy.findingTimes}
           </p>
         ) : slots.length === 0 ? (
-          <p className="rounded-lg bg-brand-900/4 px-3 py-6 text-center text-sm text-ink-muted">
-            {copy.nothingFree}
-          </p>
+          /*
+            An empty day used to end here, with "try another" and no way to know which. The
+            server names the next day that has anything, so the dead end becomes one sentence
+            and one button.
+
+            **It offers rather than jumps.** Moving the date under somebody who is mid-decision
+            is the kind of helpfulness that reads as a bug — and the page would then be showing
+            a different day from the one they picked, with nothing saying why.
+
+            Falls back to the old line whenever the date is unknown, which covers nothing
+            within the horizon and the lookup having failed. Both mean the same thing here.
+          */
+          <div className="rounded-lg bg-brand-900/4 px-3 py-6 text-center">
+            <p className="text-sm text-ink-muted">
+              {nextAvailableDate
+                ? copy.nextFreeDay(zonedDate(dayFromKey(nextAvailableDate), provider.timezone))
+                : copy.nothingFree}
+            </p>
+            {nextAvailableDate ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="mt-3"
+                onClick={() => void setDay(dayFromKey(nextAvailableDate))}
+              >
+                {copy.goToNextFreeDay}
+              </Button>
+            ) : null}
+          </div>
         ) : (
           <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {slots.map((slot) => (

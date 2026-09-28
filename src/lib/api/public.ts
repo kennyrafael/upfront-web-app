@@ -170,6 +170,26 @@ export const publicApi = {
       }${employeeId ? `&employeeId=${employeeId}` : ''}`,
     ),
 
+  /**
+   * The first date from `from` with anything free, or null — asked only when a day came back
+   * empty, so the extra round trip is paid exactly when the client is already stuck.
+   *
+   * `YYYY-MM-DD` in the provider's own timezone, not an instant: it names a square on their
+   * calendar, and converting it through the visitor's zone could move it a day.
+   */
+  nextAvailableDate: (
+    slug: string,
+    serviceIds: string[],
+    from: string,
+    durationMinutes?: number,
+    employeeId?: string,
+  ) =>
+    publicRequest<{ date: string | null }>(
+      `/providers/${encodeURIComponent(slug)}/availability/next?serviceIds=${serviceIds.join(',')}&from=${encodeURIComponent(from)}${
+        durationMinutes ? `&durationMinutes=${durationMinutes}` : ''
+      }${employeeId ? `&employeeId=${employeeId}` : ''}`,
+    ),
+
   book: (slug: string, payload: CreatePublicBookingPayload) =>
     publicRequest<CreatePublicBookingResult>(`/providers/${encodeURIComponent(slug)}/bookings`, {
       method: 'POST',

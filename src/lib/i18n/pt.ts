@@ -887,6 +887,9 @@ export const pt = {
     backToTimes: '← Horas',
     findingTimes: 'A procurar horas livres…',
     nothingFree: 'Nada livre neste dia. Experimente outro.',
+    /** Shown instead of the line above once we know where the next opening actually is. */
+    nextFreeDay: (date: string) => `Nada livre neste dia. O próximo com vagas é ${date}.`,
+    goToNextFreeDay: 'Ir para esse dia',
     zoneWarning: (timezone: string) =>
       `As horas são apresentadas em ${timezone}, que não é o fuso do seu dispositivo.`,
     zoneNote: (timezone: string) => `Horas apresentadas em ${timezone}.`,

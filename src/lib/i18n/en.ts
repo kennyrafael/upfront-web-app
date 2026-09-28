@@ -841,6 +841,9 @@ export const en: Dictionary = {
     backToTimes: '← Times',
     findingTimes: 'Finding free times…',
     nothingFree: 'Nothing free on this day. Try another.',
+    nextFreeDay: (date: string) =>
+      `Nothing free on this day. The next one with openings is ${date}.`,
+    goToNextFreeDay: 'Go to that day',
     zoneWarning: (timezone: string) =>
       `Times are shown in ${timezone}, which is not your device's timezone.`,
     zoneNote: (timezone: string) => `Times shown in ${timezone}.`,
