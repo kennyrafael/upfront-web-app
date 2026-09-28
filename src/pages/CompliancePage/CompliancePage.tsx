@@ -14,6 +14,7 @@ import { useCopy } from '@/lib';
 import type { Invoice } from '@/lib/api';
 import { formatDate } from '@/lib/utils';
 import { useBusinessStore, useComplianceStore } from '@/stores';
+import { exportPeriodOptions, exportPeriodValue, parseExportPeriod } from './exportPeriod';
 
 /** The current year and the four before it — enough for any open fiscal question. */
 function yearOptions(): { value: string; label: string }[] {
@@ -196,43 +197,4 @@ export function CompliancePage() {
       ) : null}
     </DashboardLayout>
   );
-}
-
-/**
- * The export period as one select, rather than a quarter picker and a month picker that can
- * contradict each other.
- *
- * Encoded into the value — `''`, `q3`, `m9` — because a Select holds one string and the
- * alternative is two controls with a rule about which wins.
- */
-// 'year' rather than an empty string: a Select treats empty as nothing-chosen and shows its
-// placeholder, so the default period read as an unanswered question instead of "the whole
-// year", which is what it is.
-function exportPeriodValue(quarter?: number, month?: number): string {
-  // Both interpolations were lost in an edit once, and the loss is silent: a bare 'q' matches
-  // no option, so the Select falls back to its placeholder and the period you just picked
-  // reads as unanswered. Worth a glance whenever this file is edited by anything but a human.
-  if (month) return `m${month}`;
-  if (quarter) return `q${quarter}`;
-  return 'year';
-}
-
-function parseExportPeriod(value: string): { quarter?: number; month?: number } {
-  if (value.startsWith('q')) return { quarter: Number(value.slice(1)) };
-  if (value.startsWith('m')) return { month: Number(value.slice(1)) };
-  return {};
-}
-
-function exportPeriodOptions(copy: ReturnType<typeof useCopy>): { value: string; label: string }[] {
-  return [
-    { value: 'year', label: copy.compliance.wholeYear },
-    ...[1, 2, 3, 4].map((quarter) => ({
-      value: `q${quarter}`,
-      label: copy.compliance.quarterLabel(quarter),
-    })),
-    ...Array.from({ length: 12 }, (_, index) => ({
-      value: `m${index + 1}`,
-      label: copy.compliance.monthLabel(index + 1),
-    })),
-  ];
 }

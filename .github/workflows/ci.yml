@@ -24,3 +24,6 @@ jobs:
       - run: npm run lint
       # `build` runs `tsc -b` before vite, so this is the type check as well as the bundle.
       - run: npm run build
+      # Vitest in jsdom. Added with the first tests rather than ahead of them, so the step
+      # has never been green-by-vacuousness.
+      - run: npm test

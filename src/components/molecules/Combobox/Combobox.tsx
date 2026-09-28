@@ -282,7 +282,27 @@ export function Combobox({
                 setOpen(true);
               }}
               onFocus={() => setOpen(true)}
-              onClick={() => setOpen(true)}
+              /**
+               * **The Trigger anchors the list; it must not also toggle it**, and preventing
+               * the default here is what stops it.
+               *
+               * Radix composes its own `onOpenToggle` onto the Trigger child's click, and its
+               * compose helper skips that handler when the event has already had its default
+               * prevented. This click bubbles to that child, so one `preventDefault` on the way
+               * past suppresses the toggle without the wrapper needing a handler of its own —
+               * which would be a click handler on a plain div, and rightly refused by the
+               * accessibility lint.
+               *
+               * Without it a second click on the field — to move the caret, which is an
+               * ordinary thing to do mid-search — closed the list, and closing runs `close()`,
+               * which puts the query back to null. Typing "cor" then clicking left it empty.
+               * A text input has no click default worth keeping; the caret is placed on
+               * mousedown.
+               */
+              onClick={(event) => {
+                event.preventDefault();
+                setOpen(true);
+              }}
               onKeyDown={onKeyDown}
             />
           </div>
