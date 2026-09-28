@@ -1,13 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://upfront-api.vercel.app/api/:path*"
+      "src": "/api/(.*)",
+      "dest": "${API_ORIGIN}/api/$1",
+      "env": ["API_ORIGIN"]
     },
+    { "handle": "filesystem" },
     {
-      "source": "/:path*",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
