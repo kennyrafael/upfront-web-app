@@ -3,19 +3,6 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "has": [
-        {
-          "type": "header",
-          "key": "host",
-          "value": {
-            "pre": "upfront-web-sandbox"
-          }
-        }
-      ],
-      "destination": "https://upfront-api-sandbox.vercel.app/api/:path*"
-    },
-    {
-      "source": "/api/:path*",
       "destination": "https://upfront-api.vercel.app/api/:path*"
     },
     {
