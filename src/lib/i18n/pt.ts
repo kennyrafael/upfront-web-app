@@ -406,6 +406,8 @@ export const pt = {
     /** Quarter labels. Short month names, so `Intl` would be more trouble than four strings. */
     quarters: ['Jan–Mar', 'Abr–Jun', 'Jul–Set', 'Out–Dez'],
     exportPack: 'Descarregar pacote',
+    /** Gross to net: what the bank received against what the recibos say. */
+    exportReconciliation: 'Descarregar reconciliação',
     exportPeriod: 'Período a exportar',
     wholeYear: 'Ano inteiro',
     quarterLabel: (quarter: number) =>

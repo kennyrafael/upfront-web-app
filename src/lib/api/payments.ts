@@ -85,6 +85,22 @@ function range({ from, to }: PaymentRange): string {
 }
 
 export const paymentsApi = {
+  /**
+   * Gross to net for a period, as a file for the accountant.
+   *
+   * A blob rather than text, unlike the recibo CSV: that one is shown inline because the
+   * preview sandbox blocks script-driven downloads and pasting it into a sheet works
+   * everywhere. This one is handed over rather than read, and its point is the total row.
+   */
+  reconciliationCsv: (period: { year: number; quarter?: number; month?: number }) => {
+    const params = new URLSearchParams({ year: String(period.year) });
+    // Month wins over quarter when both are set, matching the API — the narrower reading is
+    // the safer one, and the UI never sends both anyway.
+    if (period.month) params.set('month', String(period.month));
+    else if (period.quarter) params.set('quarter', String(period.quarter));
+
+    return api.blob(`/payments/reconciliation.csv?${params.toString()}`);
+  },
   ledger: (period: PaymentRange = {}) => api.get<LedgerEntry[]>(`/payments/ledger${range(period)}`),
   summary: (period: PaymentRange = {}) =>
     api.get<PaymentsSummary>(`/payments/summary${range(period)}`),

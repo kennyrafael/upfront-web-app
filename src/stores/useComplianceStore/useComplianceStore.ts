@@ -8,6 +8,7 @@ import {
   type Invoice,
   invoicesApi,
   MAX_PAGE_SIZE,
+  paymentsApi,
   type UpdateInvoicePayload,
 } from '@/lib/api';
 
@@ -38,6 +39,8 @@ interface ComplianceState {
   setExportPeriod: (period: { quarter?: number; month?: number }) => void;
   exportCsv: () => Promise<string | null>;
   exportZip: () => Promise<{ blob: Blob; filename: string } | null>;
+  /** Gross to net for the chosen period — the half of the hand-off the recibos cannot show. */
+  exportReconciliation: () => Promise<{ blob: Blob; filename: string } | null>;
   clearError: () => void;
   reset: () => void;
 }
@@ -104,6 +107,19 @@ export const useComplianceStore = create<ComplianceState>((set, get) => ({
     }
   },
 
+  exportReconciliation: async () => {
+    try {
+      const period = periodOf(get());
+      return {
+        blob: await paymentsApi.reconciliationCsv(period),
+        filename: reconciliationNameFor(period),
+      };
+    } catch (error) {
+      set({ error: toMessage(error) });
+      return null;
+    }
+  },
+
   clearError: () => set({ error: null }),
 
   reset: () =>
@@ -157,4 +173,11 @@ function zipNameFor({ year, quarter, month }: ExportPeriod): string {
   if (month) return `recibos-emitidos-${year}-${String(month).padStart(2, '0')}.zip`;
   if (quarter) return `recibos-emitidos-${year}-T${quarter}.zip`;
   return `recibos-emitidos-${year}.zip`;
+}
+
+/** The same shape, named for what it reconciles rather than for what it lists. */
+function reconciliationNameFor({ year, quarter, month }: ExportPeriod): string {
+  if (month) return `reconciliacao-${year}-${String(month).padStart(2, '0')}.csv`;
+  if (quarter) return `reconciliacao-${year}-T${quarter}.csv`;
+  return `reconciliacao-${year}.csv`;
 }

@@ -374,6 +374,8 @@ export const en: Dictionary = {
     waitingToInvoice: (total: string) => `${total} waiting to be invoiced.`,
     quarters: ['Jan–Mar', 'Apr–Jun', 'Jul–Sep', 'Oct–Dec'],
     exportPack: 'Download pack',
+    /** Gross to net: what the bank received against what the recibos say. */
+    exportReconciliation: 'Download reconciliation',
     exportPeriod: 'Period to export',
     wholeYear: 'The whole year',
     quarterLabel: (quarter: number) =>

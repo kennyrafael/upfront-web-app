@@ -35,6 +35,7 @@ export function CompliancePage() {
   const error = useComplianceStore((state) => state.error);
   const exportCsv = useComplianceStore((state) => state.exportCsv);
   const exportZip = useComplianceStore((state) => state.exportZip);
+  const exportReconciliation = useComplianceStore((state) => state.exportReconciliation);
   const exportQuarter = useComplianceStore((state) => state.exportQuarter);
   const exportMonth = useComplianceStore((state) => state.exportMonth);
   const setExportPeriod = useComplianceStore((state) => state.setExportPeriod);
@@ -52,14 +53,16 @@ export function CompliancePage() {
    * and a plain `<a href>` cannot send one. The URL is revoked straight after — it pins the
    * blob in memory until it is, and a quarter of PDFs is not nothing.
    */
-  async function downloadPack(): Promise<void> {
-    const pack = await exportZip();
-    if (!pack) return;
+  async function download(
+    fetching: () => Promise<{ blob: Blob; filename: string } | null>,
+  ): Promise<void> {
+    const file = await fetching();
+    if (!file) return;
 
-    const url = URL.createObjectURL(pack.blob);
+    const url = URL.createObjectURL(file.blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = pack.filename;
+    link.download = file.filename;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -86,8 +89,16 @@ export function CompliancePage() {
             The pack: the CSV and every recibo of the period as a PDF. Downloaded rather
             than shown, because unlike the CSV there is nothing to read inline.
           */}
-          <Button variant="secondary" onClick={() => void downloadPack()}>
+          <Button variant="secondary" onClick={() => void download(exportZip)}>
             {copy.compliance.exportPack}
+          </Button>
+          {/*
+            The other half of the hand-off. The recibos say what was charged; this says what
+            reached the bank, and the gap between them is our commission — which no document
+            an accountant already has will explain.
+          */}
+          <Button variant="secondary" onClick={() => void download(exportReconciliation)}>
+            {copy.compliance.exportReconciliation}
           </Button>
           <Button
             onClick={() => {
