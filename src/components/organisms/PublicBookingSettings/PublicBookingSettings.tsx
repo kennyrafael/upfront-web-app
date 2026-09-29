@@ -11,14 +11,15 @@ import {
 } from '@/components/atoms';
 import { FormField, SelectField } from '@/components/molecules';
 import { useCopy } from '@/lib';
-import { businessesApi } from '@/lib/api';
-import { useBusinessStore } from '@/stores';
+import { ApiError, businessesApi } from '@/lib/api';
+import { useAuthStore, useBusinessStore } from '@/stores';
 
 /** Mirrors the API's own rule, so an invalid slug is caught before the round trip. */
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])$/;
 
 export function PublicBookingSettings() {
   const copy = useCopy();
+  const user = useAuthStore((state) => state.user);
   const profile = useBusinessStore((state) => state.profile);
   const update = useBusinessStore((state) => state.update);
   const load = useBusinessStore((state) => state.load);
@@ -32,6 +33,7 @@ export function PublicBookingSettings() {
   const [notice, setNotice] = useState(String(profile?.cancellationNoticeHours ?? 24));
   const [slugError, setSlugError] = useState<string>();
   const [enabling, setEnabling] = useState(false);
+  const [toggleError, setToggleError] = useState<string>();
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -46,20 +48,47 @@ export function PublicBookingSettings() {
   const enabled = profile?.publicBookingEnabled ?? false;
   const bookingUrl = slug ? `${window.location.origin}/book/${slug}` : '';
 
-  /** First enable mints a slug server-side, so the provider never invents a URL. */
+  /**
+   * First enable mints a slug server-side, so the provider never invents a URL.
+   *
+   * **This used to fail in silence.** There was no `catch`, and it was called as
+   * `void toggle(next)` — so the one rejection the API actually issues here escaped as an
+   * unhandled promise, `load()` never ran, and the switch snapped back to off with nothing on
+   * screen. A control that refuses to stay on and will not say why.
+   *
+   * Confirming the address is the **only** thing publishing is gated on — not payments, not a
+   * NIF, not a service. So the check is made here too, before the request: the web already
+   * knows the answer, and asking lets us say it in the provider's own language. API errors are
+   * still English, which is the one place this product speaks it.
+   */
   async function toggle(next: boolean) {
     setSaved(false);
+    setToggleError(undefined);
+
+    if (next && !user?.emailVerified) {
+      setToggleError(copy.bookingPage.verifyFirst);
+      return;
+    }
+
     if (next && !profile?.slug) {
       setEnabling(true);
       try {
         await businessesApi.enablePublicBooking();
         await load();
+      } catch (error) {
+        setToggleError(error instanceof ApiError ? error.message : copy.bookingPage.enableFailed);
       } finally {
         setEnabling(false);
       }
       return;
     }
-    await update({ publicBookingEnabled: next });
+
+    // `update` swallows its own failure and records the message on the store rather than
+    // throwing, so this reads the result instead of catching. The store's message is the
+    // server's, which is the one worth showing.
+    if (!(await update({ publicBookingEnabled: next }))) {
+      setToggleError(useBusinessStore.getState().error ?? copy.bookingPage.enableFailed);
+    }
   }
 
   async function save() {
@@ -115,6 +144,12 @@ export function PublicBookingSettings() {
             onCheckedChange={(next) => void toggle(next)}
           />
         </div>
+
+        {toggleError ? (
+          <p className="rounded-lg bg-danger/12 px-3 py-2 text-danger-ink text-sm" role="alert">
+            {toggleError}
+          </p>
+        ) : null}
 
         {enabled ? (
           <>

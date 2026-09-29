@@ -32,6 +32,9 @@ const PATHS = {
   moon: 'M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z',
   display: 'M4 5h16a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1zM9 20h6M12 16v4',
   close: 'M6 6l12 12M18 6L6 18',
+  // The circle is what makes it read as a control rather than as decoration, which matters
+  // where it is the only thing in its column and has no label beside it.
+  'close-circle': 'M12 21a9 9 0 100-18 9 9 0 000 18zM9.5 9.5l5 5M14.5 9.5l-5 5',
   // Up and down as well as left and right: reordering a list and opening an accordion
   // section both point along the axis the content moves in.
   'chevron-up': 'M6 15l6-6 6 6',

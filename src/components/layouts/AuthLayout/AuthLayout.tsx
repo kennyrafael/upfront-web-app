@@ -1,3 +1,4 @@
+import { Theme } from '@radix-ui/themes';
 import type { ReactNode } from 'react';
 
 export interface AuthLayoutProps {
@@ -9,9 +10,29 @@ export interface AuthLayoutProps {
   size?: 'md' | 'lg';
 }
 
+/**
+ * The signed-out shell: sign in, sign up, the password pages and the onboarding wizard.
+ *
+ * **Pinned to jade and to light, and that is the whole reason this nests a `Theme`.** The
+ * accent and the light/dark choice live in `localStorage` under `upfront.theme` and
+ * `upfront.accent` — they are a *viewer's* preference on a *device*, not a property of any
+ * business. `App.tsx` wraps every route in them, so a stranger signing up on a machine where
+ * somebody once picked purple and dark met a purple, dark sign-in page belonging to a
+ * business they have never heard of.
+ *
+ * Same fix, and the same reasoning, as `PublicLayout`: a nested `Theme` with no accent of its
+ * own would inherit the root's, so the accent is named rather than merely reset.
+ */
 export function AuthLayout({ title, subtitle, children, footer, size = 'md' }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-dvh flex-col items-center justify-center px-4 py-12">
+    <Theme
+      appearance="light"
+      accentColor="jade"
+      grayColor="sage"
+      radius="large"
+      hasBackground={false}
+      className="relative flex min-h-dvh flex-col items-center justify-center px-4 py-12"
+    >
       {/* Deep green field behind the frosted card. Fixed so it does not scroll away
           on short viewports where the form overflows. */}
       <div
@@ -48,6 +69,6 @@ export function AuthLayout({ title, subtitle, children, footer, size = 'md' }: A
 
         {footer ? <div className="mt-6 text-center text-sm text-onbackdrop">{footer}</div> : null}
       </div>
-    </div>
+    </Theme>
   );
 }

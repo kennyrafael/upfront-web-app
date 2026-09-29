@@ -21,8 +21,10 @@ export function OnboardingPage() {
     }
   }, [profile, navigate]);
 
+  // The wide shell, which is what `size` exists for — the wizard carries a schedule editor,
+  // not a login form, and at `md` its rows had 360px of space for 416px of controls.
   return (
-    <AuthLayout title={copy.onboarding.title} subtitle={copy.onboarding.subtitle}>
+    <AuthLayout size="lg" title={copy.onboarding.title} subtitle={copy.onboarding.subtitle}>
       <BusinessOnboardingForm onDone={() => navigate('/', { replace: true })} />
     </AuthLayout>
   );

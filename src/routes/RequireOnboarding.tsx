@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Spinner } from '@/components/atoms';
 import { useBusinessStore } from '@/stores';
@@ -17,16 +17,25 @@ export function RequireOnboarding({ children }: RequireOnboardingProps) {
   const error = useBusinessStore((state) => state.error);
   const load = useBusinessStore((state) => state.load);
 
+  /** How many times we have asked. Two is the ceiling — this is a guard, not a retry loop. */
+  const attempts = useRef(0);
+
   useEffect(() => {
-    if (!profile && status === 'idle' && !error) {
-      void load();
-    }
+    if (profile || status !== 'idle') return;
+    // Retry once past an error, then stop and let the app render.
+    if (error && attempts.current > 1) return;
+
+    attempts.current += 1;
+    void load();
   }, [profile, status, error, load]);
 
   if (!profile) {
-    // A failed load falls through to the app rather than trapping the provider on a
-    // spinner; the page itself will surface the error.
-    return error ? (
+    // A failed load still falls through to the app rather than trapping the provider on a
+    // spinner; the page itself will surface the error. **But only after one retry.** This
+    // guard is the only thing standing between a brand-new account and the dashboard, and a
+    // single flaky request used to be enough to skip the wizard permanently — the profile is
+    // then loaded, `onboardedAt` is absent, and nothing looks at it again.
+    return error && attempts.current > 1 ? (
       children
     ) : (
       <div className="flex min-h-dvh items-center justify-center">

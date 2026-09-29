@@ -11,7 +11,8 @@ const DEFAULT_COLOR = '#144e36';
 /** A few that carry a booking page well, for providers who would rather not fiddle. */
 const SUGGESTIONS = ['#144e36', '#0f5c7a', '#7a2f4e', '#b4551f', '#2d3a8c', '#3f3f46'];
 
-const MAX_LOGO_KB = 200;
+/** Mirrors MAX_LOGO_BYTES in the API. The two must move together. */
+const MAX_LOGO_KB = 1024;
 
 export function BrandingSettings() {
   const copy = useCopy();

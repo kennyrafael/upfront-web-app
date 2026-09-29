@@ -19,7 +19,11 @@ export function SignupPage() {
         </>
       }
     >
-      <SignupForm onSuccess={() => navigate('/', { replace: true })} />
+      {/* Straight to the wizard, not through `/`. An account created a second ago cannot be
+          onboarded, so bouncing off the app shell only bought a "Loading your workspace"
+          spinner on the way — and, when the profile request failed, `RequireOnboarding` fell
+          through to the dashboard and the wizard was skipped entirely. */}
+      <SignupForm onSuccess={() => navigate('/onboarding', { replace: true })} />
     </AuthLayout>
   );
 }

@@ -696,6 +696,9 @@ export const pt = {
     off: 'Desligada',
     accept: 'Aceitar marcações de clientes',
     acceptHint: 'Desligada por omissão — a sua agenda é privada até a publicar.',
+    enableFailed: 'Não foi possível publicar a sua página. Tente novamente.',
+    verifyFirst:
+      'Confirme o seu endereço de email antes de publicar a sua página — enviámos-lhe um link.',
     address: 'O endereço da sua página',
     addressHint: (url: string) => `Os clientes visitam ${url}`,
     slugError: 'Use 3 a 40 letras minúsculas, números ou hífenes',

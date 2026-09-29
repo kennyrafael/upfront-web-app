@@ -654,6 +654,9 @@ export const en: Dictionary = {
     off: 'Off',
     accept: 'Accept bookings from clients',
     acceptHint: 'Off by default — your calendar is private until you publish it.',
+    enableFailed: 'We could not publish your page. Please try again.',
+    verifyFirst:
+      'Confirm your email address before publishing your page — we have sent you a link.',
     address: 'Your booking address',
     addressHint: (url: string) => `Clients visit ${url}`,
     slugError: 'Use 3–40 lowercase letters, numbers or hyphens',
