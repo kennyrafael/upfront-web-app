@@ -13,4 +13,5 @@ export * from './pagination';
 export * from './payments';
 export * from './public';
 export * from './services';
+export * from './subscriptions';
 export * from './waitlist';

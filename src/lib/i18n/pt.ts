@@ -818,6 +818,16 @@ export const pt = {
     skip: 'Saltar por agora',
     finish: 'Concluir',
     continue: 'Continuar',
+    /**
+     * What a provider sees on the way back from Stripe.
+     *
+     * The cancelled one has to say **what still happened** rather than what did not: they have
+     * an account and a shop to set up either way, and a message that reads like a failure in
+     * front of a wizard that is working is how somebody closes the tab.
+     */
+    subscriptionOk: 'Assinatura confirmada. Vamos preparar o seu espaço.',
+    subscriptionCancelled:
+      'Não concluiu o pagamento — a sua conta está criada e a funcionar no plano grátis. Pode escolher um plano quando quiser nas Definições.',
   },
 
   auth: {

@@ -774,6 +774,9 @@ export const en: Dictionary = {
     skip: 'Skip for now',
     finish: 'Finish setup',
     continue: 'Continue',
+    subscriptionOk: 'Subscription confirmed. Let us get your shop set up.',
+    subscriptionCancelled:
+      'You did not finish paying — your account is created and working on the free plan. You can pick a plan whenever you like in Settings.',
   },
 
   auth: {
