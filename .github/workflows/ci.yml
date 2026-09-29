@@ -7,8 +7,10 @@ on:
   push:
     branches:
       - main
+      # The branch a release is tested on before it reaches main, so it is the one place
+      # CI failing silently would matter most.
+      - staging
       - 'integration/**'
-      - 'release/**'
   pull_request:
 
 jobs:

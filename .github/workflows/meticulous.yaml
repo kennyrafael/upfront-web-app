@@ -12,8 +12,8 @@ on:
       # Not just main. A pull request is compared against the results from its *base* commit,
       # and in this project's flow a feature branch's base is an integration branch, not main —
       # so without these there would be nothing to compare the ones that matter against.
+      - staging
       - 'integration/**'
-      - 'release/**'
   pull_request: {}
   # Important: We need the workflow to be triggered on workflow_dispatch events,
   # so that Meticulous can run the workflow on the base commit to compare

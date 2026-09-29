@@ -47,8 +47,21 @@ before calling it. Delete it when the typings catch up.
 
 ## Tests
 
-There are none yet, and that is the largest known gap in this repository — two bugs shipped in
-one week that a test would have caught. Meticulous records sessions in every environment except
+`npm test` — Vitest in jsdom, with Testing Library for the component ones. Started 2026-09-28
+after two bugs shipped in one week that a test would have caught, and **the first run found a
+third**: clicking the Combobox field wiped what you had typed, because Radix's `Popover.Trigger`
+composes `onOpenToggle` onto its child.
+
+Covered so far, chosen as the places where a failure is *silent* rather than by counting files:
+the Combobox, the compliance export period, the contrast helpers that keep a provider's booking
+page readable in their own brand colour, the calendar grid, and the public page's timezone
+maths. Everything else is uncovered — the stores and the organisms especially.
+
+**`src/lib/utils/grid.ts` is duplicated from the API** and its test file is paired with
+`api/test/grid-step.test.ts` on purpose: the failure being guarded against is the two copies
+drifting, and a test on one side only would not see it.
+
+Meticulous records sessions in every environment except
 production; see `vite.config.ts`, where the gate keys on `VERCEL_ENV` alone. **Do not pin that
 to a branch name**: the day production moves branches, a branch-pinned gate reads "not
 production" and starts recording real clients' sessions.
