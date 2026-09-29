@@ -63,6 +63,20 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+    /**
+     * One copy of React, and one of Radix Themes.
+     *
+     * **`@upfront/ui` is linked from disk while the apps sit side by side**, so anything it
+     * imports resolves inside its own `node_modules` first — and two Reacts means every hook
+     * called from inside an atom reads a null dispatcher. It surfaced as
+     * `Cannot read properties of null (reading 'useCallback')` from `react-compose-refs`,
+     * which names neither React nor the package and sounds like a Radix bug.
+     *
+     * Themes is here for the same reason and a worse failure: two copies would be two
+     * `Theme` contexts, so an atom would read the default palette while the app read the
+     * business's chosen accent, and nothing would throw.
+     */
+    dedupe: ['react', 'react-dom', '@radix-ui/themes'],
   },
   server: {
     port: 5173,

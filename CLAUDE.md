@@ -11,9 +11,20 @@ This file covers only what is true about *this* codebase.
 Atomic design, and **every folder has an `index.ts`** — no exceptions, down to each component
 folder. That is what makes `import { Button, Input, FormField } from '@/components'` work.
 
-- **atoms** — Radix Themes components behind the house prop API. The app says
-  `variant="danger"`, not `variant="solid" color="red"`, so the house style lives in one file
-  per component rather than at sixty call sites.
+- **atoms** — ⚠ **these moved to `@upfront/ui` on 2026-09-30.** `src/components/atoms/index.ts`
+  is now one line re-exporting the package, so every existing import keeps working and the move
+  cost no call-site churn. **Editing an atom means editing the package**, which the marketing
+  site and the admin app also use — that is the point, and it is also the trap: there is no
+  longer such a thing as changing a button here only.
+  - Its `secondary` means Themes' `soft`. The bordered look the marketing site wanted is
+    `outline`, a variant that exists because the two apps disagreed about the word.
+  - `index.css` imports `@upfront/ui/tokens.css` for the token bridge, and **needs the
+    `@source` line above it** or the utility classes used inside the atoms are never generated.
+  - `vite.config.ts` *and* `vitest.config.ts` both need `resolve.dedupe` for react and Themes.
+    Adding it to one fixed the dev server and left thirteen tests failing with
+    `Cannot read properties of null (reading 'useCallback')`.
+  - ⚠ The dependency is `file:../ui`, which works on this disk and **not on Vercel**. See
+    Deployment.
 - **molecules** — two or more atoms composed: `FormField`, `ConfirmDialog`, `Combobox`.
 - **organisms** — whole features: `BookingCalendar`, `ComplianceOverview`.
 - **layouts** — page shells.
@@ -75,3 +86,14 @@ failure than a 404, because it looks intermittent.
 
 `vercel.json` rewrites that prefix in deployments and the Vite proxy does it in development.
 **The two must not disagree.**
+
+## `@upfront/ui` and deployment
+
+⚠ **`package.json` depends on `file:../ui`, and a Vercel build cannot resolve it.** Each app
+builds from its own repository, where `../ui` does not exist. Local development and CI on this
+machine work; a deployment will fail at install.
+
+Fixing it is one line here and a decision about where the package lives: push `ui/` to its own
+repository and depend on a git tag, or publish it to a registry and depend on a version. Until
+then this repository is deployable only by reverting to its own copy of the atoms, which is the
+thing the extraction exists to prevent — so treat it as a release blocker rather than a chore.

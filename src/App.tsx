@@ -1,7 +1,29 @@
 import { Theme } from '@radix-ui/themes';
-import { LocaleProvider } from '@/lib';
+import { UiStringsProvider } from '@upfront/ui';
+import type { ReactNode } from 'react';
+import { LocaleProvider, useCopy } from '@/lib';
 import { AppRoutes } from '@/routes';
 import { useThemeStore } from '@/stores';
+
+/**
+ * Feeds `@upfront/ui` the two strings its atoms say on their own behalf.
+ *
+ * The package holds no dictionary — words belong to an app, which is why a shared component
+ * layer and a shared dictionary are different decisions and only one of them was taken. A
+ * standing spinner still has to announce that a wait is in progress, and a `Select` with no
+ * placeholder has to say something, so the package asks and this answers in Portuguese.
+ *
+ * Its own component because it has to sit *inside* `LocaleProvider` to read the dictionary.
+ */
+function HouseStrings({ children }: { children: ReactNode }) {
+  const copy = useCopy();
+
+  return (
+    <UiStringsProvider strings={{ loading: copy.common.loading, select: copy.common.select }}>
+      {children}
+    </UiStringsProvider>
+  );
+}
 
 /**
  * Radix Themes owns the palette now.
@@ -26,15 +48,17 @@ export function App() {
 
   return (
     <LocaleProvider>
-      <Theme
-        accentColor={accent}
-        grayColor="sage"
-        radius="large"
-        panelBackground="translucent"
-        appearance={theme === 'system' ? 'inherit' : theme}
-      >
-        <AppRoutes />
-      </Theme>
+      <HouseStrings>
+        <Theme
+          accentColor={accent}
+          grayColor="sage"
+          radius="large"
+          panelBackground="translucent"
+          appearance={theme === 'system' ? 'inherit' : theme}
+        >
+          <AppRoutes />
+        </Theme>
+      </HouseStrings>
     </LocaleProvider>
   );
 }
