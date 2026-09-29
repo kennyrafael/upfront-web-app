@@ -54,6 +54,8 @@ export interface Address {
 export interface BusinessProfile {
   id: string;
   name: string;
+  /** The registered entity name, when the shop trades under a different one. */
+  legalName?: string;
   phone?: string;
   nif?: string;
   entityType: EntityType;
@@ -87,6 +89,7 @@ export interface BusinessProfile {
 
 export interface UpdateBusinessPayload {
   name?: string;
+  legalName?: string;
   phone?: string;
   nif?: string;
   entityType?: EntityType;

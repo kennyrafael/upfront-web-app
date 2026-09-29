@@ -501,6 +501,9 @@ export const en: Dictionary = {
     businessDetailsLede: 'The NIF is what recibos verdes are issued against.',
     businessName: 'Business name',
     businessNameHint: 'What clients see on your booking page.',
+    entityName: 'Registered name',
+    entityNameHint:
+      'The legal entity’s name, if it differs from the trading name — for example “Ana Silva Unipessoal, Lda”. Invoices are addressed to this name. Leave it blank if they are the same.',
     nif: 'NIF',
     nifHint: '9 digits.',
     nifError: 'A Portuguese NIF is exactly 9 digits',

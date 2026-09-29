@@ -7,6 +7,7 @@ import { useBusinessStore } from '@/stores';
 
 interface Fields {
   name: string;
+  legalName: string;
   phone: string;
   entityType: string;
   businessCategory: string;
@@ -25,6 +26,7 @@ interface Fields {
 function toFields(profile: BusinessProfile | null): Fields {
   return {
     name: profile?.name ?? '',
+    legalName: profile?.legalName ?? '',
     phone: profile?.phone ?? '',
     entityType: profile?.entityType ?? 'individual',
     businessCategory: profile?.businessCategory ?? '',
@@ -100,6 +102,7 @@ export function PayoutDetailsForm() {
 
     const ok = await update({
       name: fields.name,
+      legalName: fields.legalName || undefined,
       phone: fields.phone || undefined,
       // All or nothing: the API rejects a partial address, because a city with no street
       // satisfies neither the recibo nor the gateway that wanted it.
@@ -152,6 +155,16 @@ export function PayoutDetailsForm() {
               hint={copy.settings.businessNameHint}
               value={fields.name}
               onChange={(event) => setField('name', event.target.value)}
+            />
+            {/* Beside the trading name, because the pair only makes sense together: this is the
+                entity that owes the IVA, and an invoice addressed to the shop sign names
+                somebody the Autoridade Tributária has never heard of. Blank means they are the
+                same, which is true for most sole traders. */}
+            <FormField
+              label={copy.settings.entityName}
+              hint={copy.settings.entityNameHint}
+              value={fields.legalName}
+              onChange={(event) => setField('legalName', event.target.value)}
             />
             <FormField
               label={copy.common.phone}

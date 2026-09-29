@@ -535,6 +535,9 @@ export const pt = {
     businessDetailsLede: 'O NIF é aquele em nome do qual os recibos verdes são emitidos.',
     businessName: 'Nome do negócio',
     businessNameHint: 'O que os clientes veem na sua página de marcações.',
+    entityName: 'Nome fiscal',
+    entityNameHint:
+      'O nome da entidade, se for diferente do nome comercial — por exemplo «Ana Silva Unipessoal, Lda». É para este nome que as faturas são emitidas. Deixe em branco se forem o mesmo.',
     nif: 'NIF',
     nifHint: '9 dígitos.',
     nifError: 'Um NIF português tem exatamente 9 dígitos',
