@@ -73,7 +73,11 @@ export function VerifyEmailPage() {
     <AuthLayout title={copy.auth.emailConfirmed}>
       <div className="flex flex-col gap-3">
         <p className="text-sm text-ink-muted">{copy.auth.thanks}</p>
-        <Link to={signedIn ? '/settings' : '/login'}>
+        {/* `#page` because this button says "publish your page", and plain `/settings` opens the
+            profile tab — so the one moment a provider is told to go and publish handed them a
+            form about their own name instead. The failure path above keeps the bare path: it
+            only offers to take them to settings. */}
+        <Link to={signedIn ? '/settings#page' : '/login'}>
           <Button fullWidth>{signedIn ? copy.auth.publishPage : copy.auth.signIn}</Button>
         </Link>
       </div>
