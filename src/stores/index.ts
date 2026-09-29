@@ -12,3 +12,4 @@ export * from './usePaymentStore';
 export * from './usePublicBookingStore';
 export * from './useServiceStore';
 export * from './useThemeStore';
+export * from './useWaitlistStore';

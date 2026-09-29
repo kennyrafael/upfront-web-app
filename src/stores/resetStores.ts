@@ -8,6 +8,7 @@ import { useEmployeeStore } from './useEmployeeStore';
 import { useEntitlementsStore } from './useEntitlementsStore';
 import { usePaymentStore } from './usePaymentStore';
 import { useServiceStore } from './useServiceStore';
+import { useWaitlistStore } from './useWaitlistStore';
 
 /**
  * Clears every domain store. Called on sign-out so the next account never sees
@@ -24,4 +25,5 @@ export function resetDomainStores(): void {
   useAlertStore.getState().reset();
   useEmployeeStore.getState().reset();
   useEntitlementsStore.getState().reset();
+  useWaitlistStore.getState().reset();
 }

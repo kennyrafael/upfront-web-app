@@ -8,6 +8,7 @@ import {
   DashboardLayout,
   MonthCalendar,
   Select,
+  WaitlistPanel,
 } from '@/components';
 import { useCopy } from '@/lib';
 import type { Booking } from '@/lib/api';
@@ -56,6 +57,7 @@ export function BookingsPage() {
   const me = useAuthStore((state) => state.user);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
   const [editing, setEditing] = useState<Booking>();
   const [initialStart, setInitialStart] = useState<Date>();
   const [initialEmployeeId, setInitialEmployeeId] = useState<string>();
@@ -155,7 +157,17 @@ export function BookingsPage() {
     <DashboardLayout
       title={copy.bookings.title}
       description={`${periodLabel}${timezone ? ` · ${timezone}` : ''}`}
-      actions={<Button onClick={() => openCreate()}>{copy.bookings.newBooking}</Button>}
+      actions={
+        <div className="actions-row flex items-center gap-2">
+          {/* Beside "new booking" because it is the same moment seen from the other side:
+              the provider looks for a gap, finds none, and puts the client on the list
+              without leaving the calendar they were already reading. */}
+          <Button variant="secondary" onClick={() => setWaitlistOpen(true)}>
+            {copy.waitlist.title}
+          </Button>
+          <Button onClick={() => openCreate()}>{copy.bookings.newBooking}</Button>
+        </div>
+      }
     >
       <div className="mb-4 flex flex-wrap items-center gap-2">
         {/* Three shapes because no one grid answers everything: who is doing what today,
@@ -285,6 +297,8 @@ export function BookingsPage() {
             ? copy.bookings.monthHint
             : copy.bookings.weekHint}
       </p>
+
+      <WaitlistPanel open={waitlistOpen} onOpenChange={setWaitlistOpen} />
 
       <BookingFormDialog
         open={dialogOpen}

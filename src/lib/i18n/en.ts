@@ -191,6 +191,29 @@ export const en: Dictionary = {
     addButton: 'Add client',
   },
 
+  waitlist: {
+    title: 'Waitlist',
+    description:
+      'Who is waiting for a slot. When a booking is cancelled we tell everyone who matches — first to book gets it.',
+    add: 'Add someone',
+    save: 'Add to list',
+    client: 'Client',
+    services: 'What they want',
+    employee: 'With whom',
+    anyone: 'Anyone',
+    anyService: 'Any service',
+    from: 'From',
+    to: 'Until',
+    empty: 'Nobody is waiting right now.',
+    notOnYourPlan: 'The waitlist is not part of your plan.',
+    gapNeeded: (duration: string) =>
+      `We will tell them when a gap of ${duration} or more opens up.`,
+    between: (from: string, to: string) => `${from} to ${to}`,
+    removeLabel: (name: string) => `Take ${name} off the list`,
+    errorClient: 'Choose a client.',
+    errorService: 'Choose at least one service.',
+    errorWindow: 'The end date is before the start date.',
+  },
   bookings: {
     title: 'Bookings',
     newBooking: 'New booking',

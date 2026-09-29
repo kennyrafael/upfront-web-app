@@ -30,4 +30,5 @@ export * from './ServiceFormDialog';
 export * from './SignInSettings';
 export * from './SignupForm';
 export * from './VerifyEmailNotice';
+export * from './WaitlistPanel';
 export * from './WorkingHoursEditor';

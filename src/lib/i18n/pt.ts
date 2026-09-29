@@ -208,6 +208,28 @@ export const pt = {
     addButton: 'Adicionar cliente',
   },
 
+  waitlist: {
+    title: 'Lista de espera',
+    description:
+      'Quem fica à espera de uma vaga. Quando uma marcação é cancelada, avisamos toda a gente que encaixa — a primeira a marcar fica com ela.',
+    add: 'Juntar alguém',
+    save: 'Juntar à lista',
+    client: 'Cliente',
+    services: 'O que querem fazer',
+    employee: 'Com quem',
+    anyone: 'Qualquer pessoa',
+    anyService: 'Qualquer serviço',
+    from: 'A partir de',
+    to: 'Até',
+    empty: 'Ninguém está à espera de momento.',
+    notOnYourPlan: 'A lista de espera não faz parte do seu plano.',
+    gapNeeded: (duration: string) => `Avisamos quando abrir uma vaga de ${duration} ou mais.`,
+    between: (from: string, to: string) => `${from} a ${to}`,
+    removeLabel: (name: string) => `Retirar ${name} da lista`,
+    errorClient: 'Escolha um cliente.',
+    errorService: 'Escolha pelo menos um serviço.',
+    errorWindow: 'A data final é anterior à inicial.',
+  },
   bookings: {
     title: 'Marcações',
     newBooking: 'Nova marcação',
