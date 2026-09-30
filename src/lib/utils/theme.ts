@@ -1,7 +1,7 @@
-import type { Accent } from '@upfront/ui';
+import type { Accent } from '@kennycorrea/ui';
 
 /**
- * The theme and accent machinery now lives in `@upfront/ui`.
+ * The theme and accent machinery now lives in `@kennycorrea/ui`.
  *
  * Re-exported here so `import { ACCENTS } from '@/lib/utils'` keeps working across the app, and
  * because the storage keys — `upfront.theme`, `upfront.accent` — are the same browser's
@@ -17,7 +17,7 @@ export {
   storeTheme,
   type Theme,
   THEMES,
-} from '@upfront/ui';
+} from '@kennycorrea/ui';
 
 /**
  * What each accent is called.

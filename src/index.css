@@ -5,14 +5,14 @@
  * atoms — `w-full`, `inline-flex` — is absent from the generated CSS and the components come
  * out subtly unstyled with nothing in the console.
  */
-@source '../node_modules/@upfront/ui/dist';
+@source '../node_modules/@kennycorrea/ui/dist';
 
 /**
- * The token bridge, which moved to `@upfront/ui` so three apps cannot disagree about what
+ * The token bridge, which moved to `@kennycorrea/ui` so three apps cannot disagree about what
  * `ink-muted` means. They already had: this app said `--color-ink: #1d3b31` and the marketing
  * site said `#1a211f`, and nobody chose that.
  */
-@import '@upfront/ui/tokens.css';
+@import '@kennycorrea/ui/tokens.css';
 
 
 /**

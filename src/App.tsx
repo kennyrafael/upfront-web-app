@@ -1,12 +1,12 @@
 import { Theme } from '@radix-ui/themes';
-import { UiStringsProvider } from '@upfront/ui';
+import { UiStringsProvider } from '@kennycorrea/ui';
 import type { ReactNode } from 'react';
 import { LocaleProvider, useCopy } from '@/lib';
 import { AppRoutes } from '@/routes';
 import { useThemeStore } from '@/stores';
 
 /**
- * Feeds `@upfront/ui` the two strings its atoms say on their own behalf.
+ * Feeds `@kennycorrea/ui` the two strings its atoms say on their own behalf.
  *
  * The package holds no dictionary — words belong to an app, which is why a shared component
  * layer and a shared dictionary are different decisions and only one of them was taken. A

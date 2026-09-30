@@ -13,7 +13,7 @@ import { defineConfig } from 'vitest/config';
  * ⚠ **And now the dedupe, which is the part that bites.** Adding it to `vite.config.ts` alone
  * fixed the dev server and left every Combobox test failing with
  * `Cannot read properties of null (reading 'useCallback')` — two Reacts, because
- * `@upfront/ui` is linked from disk and resolves its own. Anything about module resolution has
+ * `@kennycorrea/ui` is linked from disk and resolves its own. Anything about module resolution has
  * to be written in both files or it is only half true.
  */
 export default defineConfig({

@@ -66,7 +66,7 @@ export default defineConfig({
     /**
      * One copy of React, and one of Radix Themes.
      *
-     * **`@upfront/ui` is linked from disk while the apps sit side by side**, so anything it
+     * **`@kennycorrea/ui` is linked from disk while the apps sit side by side**, so anything it
      * imports resolves inside its own `node_modules` first — and two Reacts means every hook
      * called from inside an atom reads a null dispatcher. It surfaced as
      * `Cannot read properties of null (reading 'useCallback')` from `react-compose-refs`,

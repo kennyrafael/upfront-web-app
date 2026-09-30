@@ -11,14 +11,14 @@ This file covers only what is true about *this* codebase.
 Atomic design, and **every folder has an `index.ts`** — no exceptions, down to each component
 folder. That is what makes `import { Button, Input, FormField } from '@/components'` work.
 
-- **atoms** — ⚠ **these moved to `@upfront/ui` on 2026-09-30.** `src/components/atoms/index.ts`
+- **atoms** — ⚠ **these moved to `@kennycorrea/ui` on 2026-09-30.** `src/components/atoms/index.ts`
   is now one line re-exporting the package, so every existing import keeps working and the move
   cost no call-site churn. **Editing an atom means editing the package**, which the marketing
   site and the admin app also use — that is the point, and it is also the trap: there is no
   longer such a thing as changing a button here only.
   - Its `secondary` means Themes' `soft`. The bordered look the marketing site wanted is
     `outline`, a variant that exists because the two apps disagreed about the word.
-  - `index.css` imports `@upfront/ui/tokens.css` for the token bridge, and **needs the
+  - `index.css` imports `@kennycorrea/ui/tokens.css` for the token bridge, and **needs the
     `@source` line above it** or the utility classes used inside the atoms are never generated.
   - `vite.config.ts` *and* `vitest.config.ts` both need `resolve.dedupe` for react and Themes.
     Adding it to one fixed the dev server and left thirteen tests failing with
@@ -87,7 +87,7 @@ failure than a 404, because it looks intermittent.
 `vercel.json` rewrites that prefix in deployments and the Vite proxy does it in development.
 **The two must not disagree.**
 
-## `@upfront/ui` and deployment
+## `@kennycorrea/ui` and deployment
 
 ⚠ **`package.json` depends on `file:../ui`, and a Vercel build cannot resolve it.** Each app
 builds from its own repository, where `../ui` does not exist. Local development and CI on this

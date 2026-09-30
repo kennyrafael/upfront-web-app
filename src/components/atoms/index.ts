@@ -1,5 +1,5 @@
 /**
- * The atoms, which now live in `@upfront/ui`.
+ * The atoms, which now live in `@kennycorrea/ui`.
  *
  * **Re-exported rather than removed**, so every `import { Button } from '@/components'` in the
  * app keeps working and the move is one commit instead of one per call site. The folder that
@@ -8,7 +8,7 @@
  * things in two apps before this.
  *
  * Anything genuinely specific to the dashboard belongs in `molecules/` or in its own file here,
- * not back in the package. Moving a component into `@upfront/ui` should be a response to a
+ * not back in the package. Moving a component into `@kennycorrea/ui` should be a response to a
  * second consumer, not an anticipation of one.
  */
-export * from '@upfront/ui';
+export * from '@kennycorrea/ui';
