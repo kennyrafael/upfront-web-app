@@ -23,8 +23,8 @@ folder. That is what makes `import { Button, Input, FormField } from '@/componen
   - `vite.config.ts` *and* `vitest.config.ts` both need `resolve.dedupe` for react and Themes.
     Adding it to one fixed the dev server and left thirteen tests failing with
     `Cannot read properties of null (reading 'useCallback')`.
-  - ⚠ The dependency is `file:../ui`, which works on this disk and **not on Vercel**. See
-    Deployment.
+  - The dependency is a published version, `^0.1.1`. ⚠ **Not 0.1.0** — see Deployment for why
+    that one built everywhere and could not be imported by Node.
 - **molecules** — two or more atoms composed: `FormField`, `ConfirmDialog`, `Combobox`.
 - **organisms** — whole features: `BookingCalendar`, `ComplianceOverview`.
 - **layouts** — page shells.
@@ -89,11 +89,21 @@ failure than a 404, because it looks intermittent.
 
 ## `@kennycorrea/ui` and deployment
 
-⚠ **`package.json` depends on `file:../ui`, and a Vercel build cannot resolve it.** Each app
-builds from its own repository, where `../ui` does not exist. Local development and CI on this
-machine work; a deployment will fail at install.
+✅ **Published, and depended on by version** (`^0.1.1`), so this repository builds on Vercel from
+its own clone. The `file:../ui` path dependency is gone.
 
-Fixing it is one line here and a decision about where the package lives: push `ui/` to its own
-repository and depend on a git tag, or publish it to a registry and depend on a version. Until
-then this repository is deployable only by reverting to its own copy of the atoms, which is the
-thing the extraction exists to prevent — so treat it as a release blocker rather than a chore.
+⚠ **0.1.0 was published broken, and this repository is the only place that could tell.** It
+compiled with `moduleResolution: bundler`, so its own output said `export * from './atoms'` —
+which Vite resolves and **Node does not**, because Node has no directory imports. Every build in
+every app passed. What failed was `npm test` here: Vitest resolves dependencies with Node
+semantics, and thirteen Combobox tests died on
+`Cannot read properties of null (reading 'useCallback')`.
+
+**The lesson is about what a green build is worth.** Three apps, 46 tests and a browser check all
+agreed the package was fine, and all three went through the same bundler. Keep that in mind before
+trusting this app's suite as the package's only gate — it happens to be the strictest consumer
+today, and it is strict by accident rather than by design.
+
+⚠ **A `file:` install is a symlink and a version install is a copy.** Editing `../ui` no longer
+shows up here. To try an unreleased change, `npm link` it or add a temporary `file:` override —
+never copy the files in.
