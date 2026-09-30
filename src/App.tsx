@@ -1,5 +1,5 @@
-import { Theme } from '@radix-ui/themes';
 import { UiStringsProvider } from '@kennycorrea/ui';
+import { Theme } from '@radix-ui/themes';
 import type { ReactNode } from 'react';
 import { LocaleProvider, useCopy } from '@/lib';
 import { AppRoutes } from '@/routes';

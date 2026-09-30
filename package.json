@@ -14,7 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@kennycorrea/ui": "file:../ui",
+    "@kennycorrea/ui": "^0.1.0",
     "@radix-ui/themes": "^3.3.0",
     "@stripe/connect-js": "^3.4.6",
     "@stripe/stripe-js": "^9.17.0",

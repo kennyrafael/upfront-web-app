@@ -15,8 +15,8 @@ export {
   readTheme,
   storeAccent,
   storeTheme,
-  type Theme,
   THEMES,
+  type Theme,
 } from '@kennycorrea/ui';
 
 /**
